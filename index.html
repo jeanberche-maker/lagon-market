@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lagon Market — Lot 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lagon:#0FA3A3; --lagon-dark:#0B7E7E; --lagon-soft:#E3F4F4;
+  --corail:#FF6F61; --corail-soft:#FFEDEB;
+  --ambre:#E8A13D; --ambre-soft:#FCF3E3;
+  --vert:#2E9E5B;
+  --ink:#1E2B2B; --ink-2:#5B6B6B; --ink-3:#93A0A0;
+  --bg:#FAF7F2; --card:#FFFFFF; --line:#EDE7DE;
+  --radius:16px; --shadow:0 2px 10px rgba(30,43,43,.06);
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Manrope', -apple-system, 'Segoe UI', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--sans);color:var(--ink);background:#E9E4DB;display:flex;align-items:center;justify-content:center;min-height:100vh}
+h1,h2,h3,.serif{font-family:var(--serif)}
+button{font-family:var(--sans);border:none;background:none;cursor:pointer;color:inherit}
+input{font-family:var(--sans)}
+a{text-decoration:none;color:inherit}
+
+/* ---- Cadre téléphone ---- */
+.phone{position:relative;width:402px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.28),0 0 0 10px #14201F}
+@media (max-width:460px){body{background:var(--bg)}.phone{width:100vw;height:100vh;border-radius:0;box-shadow:none}}
+
+/* ---- Écrans ---- */
+.screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg)}
+.screen.active{display:flex}
+.body{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.pad-b-nav{padding-bottom:104px}
+.pad-b-bar{padding-bottom:190px}
+
+/* ---- En-tête ---- */
+.top{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--bg)}
+.logo{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--lagon-dark);letter-spacing:.2px}
+.logo span{color:var(--corail)}
+.addr{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 12px;min-height:44px;font-weight:700;font-size:13.5px;box-shadow:var(--shadow)}
+.addr svg{flex:none}
+.icon-btn{width:44px;height:44px;border-radius:14px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);flex:none}
+.badge{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;border-radius:999px;background:var(--corail);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg)}
+
+/* ---- Composants ---- */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;font-weight:800;font-size:15px;width:100%}
+.btn-primary{background:var(--lagon);color:#fff;box-shadow:0 6px 16px rgba(15,163,163,.35)}
+.btn-primary:active{background:var(--lagon-dark)}
+.btn-secondary{background:var(--lagon-soft);color:var(--lagon-dark)}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn-amber{background:var(--ambre);color:#fff}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;min-height:40px;white-space:nowrap;color:var(--ink-2)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;padding:20px 16px 12px}
+.sec-h h2{font-size:19px}
+.sec-h .link{font-size:13px;font-weight:800;color:var(--lagon-dark)}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;font-size:10.5px;font-weight:800;letter-spacing:.2px}
+.tag.frais{background:var(--lagon-soft);color:var(--lagon-dark)}
+.tag.bio{background:#E9F5E9;color:var(--vert)}
+.tag.import{background:var(--corail-soft);color:#C4483B}
+.tag.sg{background:var(--ambre-soft);color:#A86A12}
+.link{font-weight:800;color:var(--lagon-dark)}
+
+/* Rangées horizontales */
+.hrow{display:flex;gap:12px;overflow-x:auto;padding:2px 16px 8px;scrollbar-width:none;scroll-snap-type:x proximity}
+.hrow::-webkit-scrollbar{display:none}
+.hrow>*{scroll-snap-align:start;flex:none}
+
+/* BasketCard */
+.basket{width:150px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;text-align:left}
+.basket .ph{height:104px;display:flex;align-items:center;justify-content:center;font-size:42px}
+.basket .in{padding:10px 12px 12px}
+.basket .n{font-family:var(--serif);font-weight:600;font-size:15px}
+.basket .d{font-size:11.5px;color:var(--ink-2);margin-top:2px}
+.basket .p{font-weight:800;font-size:14px;margin-top:6px;color:var(--lagon-dark)}
+.basket .p small{color:var(--ink-3);font-weight:600}
+
+/* ProductCard */
+.pcard{width:164px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;position:relative;text-align:left;cursor:pointer}
+.pcard.rupture .ph{filter:grayscale(1) opacity(.45)}
+.pcard .ph{height:120px;display:flex;align-items:center;justify-content:center;font-size:46px;position:relative}
+.pcard .tags{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;z-index:2}
+.pcard .in{padding:10px 12px 12px}
+.pcard .n{font-weight:800;font-size:13.5px;line-height:1.25}
+.pcard .f{font-size:11px;color:var(--ink-3);margin-top:2px}
+.pcard .row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:6px}
+.pcard .p{font-weight:800;font-size:14.5px}
+.pcard .u{font-size:10.5px;color:var(--ink-3);font-weight:600}
+.plus{width:40px;height:40px;border-radius:13px;background:var(--lagon);color:#fff;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(15,163,163,.35);flex:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 16px 8px}
+.grid .pcard{width:auto}
+
+/* Stepper */
+.stepper{display:flex;align-items:center;background:var(--lagon);border-radius:13px;color:#fff;height:40px;overflow:hidden}
+.stepper button{width:38px;height:40px;color:#fff;font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.stepper .q{min-width:20px;text-align:center;font-weight:800;font-size:14px}
+
+/* Barre nav bas */
+.navbar{position:absolute;left:0;right:0;bottom:0;display:flex;background:#fff;border-top:1px solid var(--line);padding:6px 8px calc(10px + env(safe-area-inset-bottom));z-index:20}
+.nav-it{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:10.5px;font-weight:800;color:var(--ink-3);min-height:44px;justify-content:center;position:relative}
+.nav-it.on{color:var(--lagon-dark)}
+.nav-it .nb{position:absolute;top:2px;right:calc(50% - 22px);min-width:17px;height:17px;border-radius:999px;background:var(--corail);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px}
+
+/* Bandeaux d'état */
+.banner{display:none;align-items:center;gap:10px;padding:10px 16px;font-size:13px;font-weight:700;z-index:15;position:relative}
+.banner.show{display:flex}
+.banner.err{background:var(--corail-soft);color:#C4483B}
+.banner.zone{background:var(--ambre-soft);color:#A86A12}
+.banner button{font-weight:800;text-decoration:underline;flex:none;margin-left:auto}
+
+/* Skeletons */
+.sk{position:relative;overflow:hidden;background:#ECE6DC;border-radius:12px}
+.sk::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);animation:sh 1.3s infinite}
+@keyframes sh{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+
+/* Feuilles du bas */
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:40;background:#fff;border-radius:28px 28px 0 0;transform:translateY(105%);transition:transform .32s cubic-bezier(.32,.72,.32,1);max-height:86%;display:flex;flex-direction:column;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
+.sheet.open{transform:translateY(0)}
+.sheet .grab{width:40px;height:4px;border-radius:99px;background:var(--line);margin:10px auto 4px;flex:none}
+.sheet .sh-h{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 6px}
+.sheet .sh-h h3{font-size:19px}
+.sheet .x{width:34px;height:34px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ink-2)}
+.sheet .sh-in{overflow-y:auto;padding:8px 20px 12px;scrollbar-width:none}
+.sheet .sh-in::-webkit-scrollbar{display:none}
+.sheet .sh-f{padding:12px 20px calc(20px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.scrim{position:absolute;inset:0;z-index:35;background:rgba(20,32,31,.42);opacity:0;pointer-events:none;transition:opacity .3s}
+.scrim.show{opacity:1;pointer-events:auto}
+
+/* Options de feuille */
+.opt{display:flex;align-items:center;gap:12px;padding:13px 2px;min-height:44px;width:100%;text-align:left;font-weight:700;font-size:14.5px;border-bottom:1px solid var(--line)}
+.opt:last-child{border-bottom:none}
+.opt .addr-ic{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none;font-size:18px}
+.opt .sub{font-size:12px;color:var(--ink-3);font-weight:600;margin-top:1px}
+.opt .ck{margin-left:auto;width:22px;height:22px;border-radius:99px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#fff;flex:none;font-size:12px}
+.opt.sel .ck{background:var(--lagon);border-color:var(--lagon)}
+.opt.sel{color:var(--lagon-dark)}
+.fgroup{padding:12px 0}
+.fgroup h4{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-3);margin-bottom:10px}
+.sw{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;min-height:40px;color:var(--ink-2)}
+.sw.on{background:var(--lagon-soft);border-color:var(--lagon);color:var(--lagon-dark)}
+.fav{position:absolute;top:10px;right:10px;z-index:2;width:40px;height:40px;border-radius:999px;border:none;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.14);font-size:19px;line-height:1;color:var(--ink-3);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.fav.on{color:var(--corail)}
+.check{display:flex;align-items:center;gap:12px;padding:12px 2px;min-height:44px;width:100%;text-align:left;font-weight:700;font-size:14.5px;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:none}
+.box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex:none}
+.check.on .box{background:var(--lagon);border-color:var(--lagon)}
+
+/* Toast */
+.toast{position:absolute;left:16px;right:16px;bottom:106px;z-index:60;background:var(--ink);color:#fff;border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);transform:translateY(20px);opacity:0;pointer-events:none;transition:.28s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast button{margin-left:auto;background:var(--lagon);color:#fff;font-weight:800;font-size:12.5px;padding:7px 12px;border-radius:10px;flex:none}
+
+/* Fiche produit */
+.big{height:300px;display:flex;align-items:center;justify-content:center;position:relative}
+.dotsw{position:absolute;bottom:14px;left:0;right:0;display:flex;gap:6px;justify-content:center}
+.dot{width:7px;height:7px;border-radius:99px;background:#D8D2C6;transition:.2s}
+.dot.on{background:var(--lagon);width:18px}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.stock{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800}
+.stock::before{content:"";width:8px;height:8px;border-radius:99px}
+.stock.ok{color:var(--vert)}.stock.ok::before{background:var(--vert)}
+.stock.low{color:var(--ambre)}.stock.low::before{background:var(--ambre)}
+.stock.out{color:var(--corail)}.stock.out::before{background:var(--corail)}
+.pbar{position:absolute;left:0;right:0;bottom:60px;z-index:30;background:#fff;border-top:1px solid var(--line);padding:12px 16px 14px;display:flex;gap:10px;align-items:center}
+.pbar .stepper{height:48px;flex:none}
+.pbar .stepper button{height:48px;width:44px;font-size:20px}
+.pbar .btn{flex:1;min-height:48px}
+.pbar .total{font-weight:800;font-size:15px;flex:none}
+
+/* Recherche */
+.search{margin:4px 16px 12px;display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:0 14px;min-height:48px}
+.search input{border:none;outline:none;flex:1;font-size:14.5px;background:none;color:var(--ink);min-width:0}
+.search input::placeholder{color:var(--ink-3)}
+.empty{text-align:center;padding:36px 28px}
+.empty .e{font-size:44px}
+.empty h3{font-size:18px;margin:10px 0 6px}
+.empty p{font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.sug{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.divider{height:1px;background:var(--line);margin:14px 0}
+
+/* Pilote d'états (démo) */
+.demo{position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:6px}
+.demo>button{width:34px;height:34px;border-radius:12px;background:var(--ink);color:#fff;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.demo .dd{display:none;flex-direction:column;gap:5px;background:#fff;border-radius:16px;padding:8px;box-shadow:0 12px 34px rgba(0,0,0,.25);width:172px}
+.demo.open .dd{display:flex}
+.demo .dd button{text-align:left;font-size:12px;font-weight:800;padding:9px 10px;border-radius:10px;color:var(--ink-2);min-height:36px}
+.demo .dd button:hover{background:var(--bg);color:var(--ink)}
+.demo .dd .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-3);padding:4px 10px 2px}
+.fade-in{animation:fi .35s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="demo" id="demo">
+    <button onclick="document.getElementById('demo').classList.toggle('open')" aria-label="États de démo">⚙</button>
+    <div class="dd">
+      <div class="lbl">Accueil &amp; catalogue</div>
+      <button onclick="setDemo('normal')">Par défaut</button>
+      <button onclick="setDemo('error')">Erreur réseau</button>
+      <button onclick="setDemo('zone')">Hors zone de livraison</button>
+      <button onclick="setDemo('caterror')">Erreur catalogue</button>
+      <div class="lbl">Fiche produit</div>
+      <button onclick="setDemo('rupture')">Produit en rupture</button>
+      <button onclick="setDemo('gone')">Produit retiré</button>
+    </div>
+  </div>
+
+  <!-- ================= ACCUEIL ================= -->
+  <section class="screen active" id="s-home">
+    <div class="banner err" id="b-err">⚠ Connexion interrompue <button onclick="retryHome()">Réessayer</button></div>
+    <div class="banner zone" id="b-zone">🛟 Nous ne livrons pas encore à cette adresse <button onclick="closeSheets();goZones()">Voir les zones</button></div>
+    <div class="top">
+      <div class="logo">Lagon<span>·</span>Market</div>
+      <button class="addr" onclick="openSheet('sheet-addr')" style="margin-left:auto">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B7E7E" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 1 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        <span id="addr-label">Villa Azur, Orient Bay</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#93A0A0" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="icon-btn" style="position:relative" onclick="goCart()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="1.8"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+        <span class="badge" id="cart-badge">0</span>
+      </button>
+    </div>
+    <div class="body pad-b-nav" id="home-body"></div>
+    <nav class="navbar">
+      <button class="nav-it on"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
+      <button class="nav-it" onclick="go('catalog')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge2">0</span></button>
+      <button class="nav-it" onclick="goAccount()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
+    </nav>
+  </section>
+
+  <!-- ================= CATALOGUE ================= -->
+  <section class="screen" id="s-catalog">
+    <div class="top" style="padding-bottom:8px">
+      <button class="icon-btn" onclick="go('home')" aria-label="Retour"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 id="cat-title" style="font-size:20px">Fruits &amp; Légumes</h1>
+    </div>
+    <div class="hrow" id="chips-row" style="padding-bottom:4px"></div>
+    <div id="cat-err-banner" class="banner err">⚠ Impossible de charger les produits <button onclick="retryCatalog()">Réessayer</button></div>
+    <div id="active-tags" style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px 0"></div>
+    <div class="body" id="catalog-body" style="padding-bottom:110px">
+      <div style="display:flex;align-items:center;gap:8px;padding:12px 16px 10px;position:sticky;top:0;background:var(--bg);z-index:5">
+        <button class="chip" onclick="openSheet('sheet-filter')">⚙ Filtrer</button>
+        <button class="chip" onclick="openSheet('sheet-sort')">⇅ <span id="sort-label">Trier : pertinence</span></button>
+        <span style="font-size:12.5px;font-weight:800;color:var(--ink-3);margin-left:auto" id="count-label"></span>
+      </div>
+      <div class="grid" id="catalog-grid" style="margin-top:2px"></div>
+    </div>
+    <nav class="navbar">
+      <button class="nav-it" onclick="go('home')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
+      <button class="nav-it on"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge3">0</span></button>
+      <button class="nav-it" onclick="goAccount()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
+    </nav>
+  </section>
+
+  <!-- ================= FICHE PRODUIT ================= -->
+  <section class="screen" id="s-product">
+    <div class="body pad-b-bar" id="product-body"></div>
+    <div id="pbar-wrap"></div>
+    <nav class="navbar">
+      <button class="nav-it" onclick="go('home')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
+      <button class="nav-it on" onclick="go('catalog')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge4">0</span></button>
+      <button class="nav-it" onclick="goAccount()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
+    </nav>
+  </section>
+
+  <!-- ================= PANIER (LOT 2) ================= -->
+  <section class="screen" id="s-cart">
+    <div class="top" style="padding-bottom:8px">
+      <button class="icon-btn" onclick="go('home')" aria-label="Retour"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 style="font-size:20px">Panier</h1>
+      <button class="icon-btn" style="position:relative;margin-left:auto" onclick="go('home')" aria-label="Fermer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#93A0A0" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        <span class="badge" id="cart-badge5">0</span>
+      </button>
+    </div>
+    <div class="body pad-b-nav" id="cart-body"></div>
+    <nav class="navbar">
+      <button class="nav-it" onclick="go('home')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
+      <button class="nav-it" onclick="go('catalog')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it on" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge6">0</span></button>
+      <button class="nav-it" onclick="goAccount()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
+    </nav>
+  </section>
+
+  <!-- ================= LIVRAISON (LOT 2) ================= -->
+  <section class="screen" id="s-delivery">
+    <div class="top" style="padding-bottom:8px">
+      <button class="icon-btn" onclick="go('cart')" aria-label="Retour"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 style="font-size:20px">Livraison</h1>
+    </div>
+    <div class="banner zone" id="b-zone-del" style="display:flex">🛟 Nous ne livrons pas encore à cette adresse <button onclick="openSheet('sheet-addr')">Changer</button></div>
+    <div class="body pad-b-bar" id="delivery-body"></div>
+    <div id="del-bar-wrap"></div>
+  </section>
+
+  <!-- ================= PAIEMENT (LOT 2) ================= -->
+  <section class="screen" id="s-pay">
+    <div class="top" style="padding-bottom:8px" id="pay-top">
+      <button class="icon-btn" onclick="go('delivery')" aria-label="Retour"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 style="font-size:20px">Paiement</h1>
+    </div>
+    <div class="body pad-b-bar" id="pay-body"></div>
+    <div id="pay-bar-wrap"></div>
+  </section>
+
+  <!-- ================= SUIVI (LOT 3) ================= -->
+  <section class="screen" id="s-track">
+    <div class="top" style="padding-bottom:8px">
+      <button class="icon-btn" onclick="goAccount()" aria-label="Retour"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 style="font-size:20px">Suivi de livraison</h1>
+    </div>
+    <div class="body pad-b-bar" id="track-body"></div>
+  </section>
+
+  <!-- ================= COMPTE (LOT 3) ================= -->
+  <section class="screen" id="s-account">
+    <div class="top" style="padding-bottom:8px">
+      <h1 style="font-size:20px">Compte</h1>
+      <button class="icon-btn" style="position:relative;margin-left:auto" onclick="goSettings()" aria-label="Paramétrage">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.5V6m0 12v2.5M4.9 7.5l2.2 1.3m9.8 5.7 2.1 1.3M4.9 16.5l2.1-1.3m9.8-5.7 2.2-1.3"/></svg>
+      </button>
+    </div>
+    <div class="body pad-b-nav" id="account-body"></div>
+    <nav class="navbar">
+      <button class="nav-it" onclick="go('home')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
+      <button class="nav-it" onclick="go('catalog')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge7">0</span></button>
+      <button class="nav-it on"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
+    </nav>
+  </section>
+
+  <!-- ================= PARAMÉTRAGE (LOT 3) ================= -->
+  <section class="screen" id="s-settings">
+    <div class="top" style="padding-bottom:8px">
+      <button class="icon-btn" onclick="goAccount()" aria-label="Retour"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 style="font-size:20px">Paramétrage</h1>
+    </div>
+    <div class="body pad-b-nav" id="settings-body"></div>
+  </section>
+
+  <!-- ================= ZONES COUVERTES (LOT 7) ================= -->
+  <section class="screen" id="s-zones">
+    <div class="top" style="padding-bottom:8px">
+      <button class="icon-btn" onclick="exitZones()" aria-label="Retour"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B2B" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 style="font-size:20px">Zones couvertes</h1>
+    </div>
+    <div class="body pad-b-nav" id="zones-body"></div>
+  </section>
+
+  <div class="scrim" id="scrim" onclick="closeSheets()"></div>
+
+  <!-- ================= FEUILLES ================= -->
+  <div class="sheet" id="sheet-addr">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Adresse de livraison</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" id="addr-list"></div>
+    <div class="sh-f"><button class="btn btn-secondary" onclick="closeSheets();goZones()">Voir les zones couvertes</button></div>
+  </div>
+
+  <div class="sheet" id="sheet-basket">
+    <div class="grab"></div>
+    <div class="sh-h"><h3 id="bk-title">Panier</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" id="bk-items"></div>
+    <div class="sh-f" id="bk-footer"></div>
+  </div>
+
+  <div class="sheet" id="sheet-filter">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Filtres</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" id="filter-body"></div>
+    <div class="sh-f">
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" style="flex:0 0 110px" onclick="resetFilters()">Effacer</button>
+        <button class="btn btn-primary" id="filter-apply" style="flex:1" onclick="applyFilters()">Voir 24 produits</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet-sort">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Trier par</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" id="sort-list"></div>
+    <div style="height:calc(18px + env(safe-area-inset-bottom))"></div>
+  </div>
+
+  <div class="sheet" id="sheet-zone">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Livraison indisponible</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" style="text-align:center;padding:10px 24px 20px">
+      <div style="font-size:52px">🛟</div>
+      <p style="font-size:14.5px;color:var(--ink-2);line-height:1.55;margin-top:10px">Nous ne livrons pas encore à <b id="zone-addr">Cul de Sac Bay</b>. Changez d'adresse pour continuer vos achats.</p>
+    </div>
+    <div class="sh-f">
+      <button class="btn btn-primary" onclick="closeSheets();openSheet('sheet-addr')">Changer d'adresse</button>
+      <button class="btn btn-secondary" style="margin-top:10px" onclick="closeSheets();goZones()">Voir les zones couvertes</button>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet-profile">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Modifier le profil</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in">
+      <div class="fgroup">
+        <h4>Nom</h4>
+        <div class="search" style="margin:0"><input id="pf-name" placeholder="Nom complet"></div>
+      </div>
+      <div class="fgroup">
+        <h4>E-mail</h4>
+        <div class="search" style="margin:0"><input id="pf-email" placeholder="vous@exemple.com" inputmode="email"></div>
+      </div>
+      <div class="fgroup">
+        <h4>Téléphone</h4>
+        <div class="search" style="margin:0"><input id="pf-phone" placeholder="+590 …" inputmode="tel"></div>
+      </div>
+    </div>
+    <div class="sh-f">
+      <button class="btn btn-primary" onclick="saveProfile()">Enregistrer le profil</button>
+      <button class="btn btn-secondary" style="margin-top:10px" onclick="closeSheets()">Annuler</button>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet-assist">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Assistance</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" id="assist-body"></div>
+    <div class="sh-f">
+      <button class="btn btn-primary" onclick="sendAssist()">Envoyer le signalement</button>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <a class="btn btn-ghost" style="flex:1;text-decoration:none" id="assist-wa" href="#" target="_blank">💬 WhatsApp</a>
+        <button class="btn btn-secondary" style="flex:1" onclick="toast('Appel du support… 📞')">📞 Appeler</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet-logout">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Se déconnecter ?</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" style="text-align:center;padding:10px 24px 8px">
+      <div style="font-size:48px">👋</div>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.55;margin-top:8px">Votre panier et vos commandes restent enregistrés sur cet appareil. Vous pourrez vous reconnecter à tout moment.</p>
+    </div>
+    <div class="sh-f">
+      <button class="btn btn-primary" onclick="doLogout()">Se déconnecter</button>
+      <button class="btn btn-secondary" style="margin-top:10px" onclick="closeSheets()">Rester connecté</button>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet-review">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Votre avis</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" id="review-body"></div>
+    <div class="sh-f">
+      <button class="btn btn-primary" onclick="submitReview()">Publier mon avis</button>
+      <button class="btn btn-secondary" style="margin-top:10px" onclick="closeSheets()">Annuler</button>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet-notifs">
+    <div class="grab"></div>
+    <div class="sh-h"><h3>Notifications</h3><button class="x" onclick="closeSheets()">✕</button></div>
+    <div class="sh-in" id="notifs-body"></div>
+  </div>
+
+  <div id="onboard" style="display:none;position:absolute;inset:0;z-index:60;background:linear-gradient(165deg,#0B7E7E,#0FA3A3 55%,#F0B77E);flex-direction:column;color:#fff"></div>
+
+  <div class="toast" id="toast"><span id="toast-msg"></span><button id="toast-act" style="display:none"></button></div>
+</div>
+
+<script>
+/* ================= DONNÉES ================= */
+const P = [
+  {id:'ananas', n:'Ananas Victoria', b:'Verger du Sud', f:'pièce ~1,2 kg', pr:4.5, u:'6,80 €/kg', e:'🍍', g:['#FDF0DC','#F7C86B'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour','Bio'], st:12, d:"Plein soleil de Saint-Martin, sucré et parfumé. Cocktail, jus ou nature au bord de la piscine — la découpe est offerte sur demande."},
+  {id:'corossol', n:'Corossol', b:'Ferme Colombier', f:'pièce ~700 g', pr:6.9, u:'9,40 €/kg', e:'🍈', g:['#E8F6E8','#9FD9A5'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour'], st:5, d:"Chair crémeuse à la saveur acidulée, parfait en sorbet ou en smoothie du matin."},
+  {id:'tomate', n:'Tomates grappe', b:'La Savanne', f:'botte 500 g', pr:3.4, u:'6,80 €/kg', e:'🍅', g:['#FBE4E1','#F0917F'], cat:'fruits', sub:'Légumes', bd:['Frais du jour'], st:24, d:"Cultivées sur l'île, goût de tomate retrouvé. Parfaites en salade ou confites au four."},
+  {id:'avocat', n:'Avocats mi-noir', b:'Verger du Sud', f:'sachet 2 pièces', pr:5.2, u:'', e:'🥑', g:['#EDF5E0','#B7CE86'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour'], st:0, d:"Fondants à souhait : toasts croustillants, salades, guacamole du vendredi."},
+  {id:'citron', n:'Citrons verts', b:'Ferme Colombier', f:'sachet 500 g', pr:2.9, u:'', e:'🍋', g:['#F2F8D8','#CFE07A'], cat:'fruits', sub:'Agrumes', bd:['Frais du jour','Bio'], st:18, d:"Indispensables pour le ti-punch, le poisson grillé et les vinaigrettes."},
+  {id:'mahimahi', n:'Filet de mahi-mahi', b:'Pêche de Marigot', f:'2 filets ~400 g', pr:16.9, u:'42,20 €/kg', e:'🐟', g:['#E3F2F6','#8FC3D4'], cat:'mer', sub:'Poissons', bd:['Frais du jour','Importé'], st:3, d:"Pêche du jour du détaquant du Galion. Chair ferme, idéale au grill ou en ceviche."},
+  {id:'crevettes', n:'Crevettes bouquet', b:'Pêche de Marigot', f:'case 500 g', pr:12.5, u:'25 €/kg', e:'🦐', g:['#FBE7DE','#F2A98A'], cat:'mer', sub:'Fruits de mer', bd:['Frais du jour'], st:9, d:"Cuites à l'eau d'ail, servies très fraîches avec une sauce cocktail maison."},
+  {id:'baguette', n:'Baguette tradition', b:"Boulangerie de l'Ours", f:'250 g', pr:1.6, u:'6,40 €/kg', e:'🥖', g:['#FBF0D9','#ECC276'], cat:'boulangerie', sub:'Pains', bd:['Frais du jour'], st:40, d:"Croustillante, cuite sur pierre deux fois par jour. Commandée avant 18 h, livrée au petit-déjeuner."},
+  {id:'brie', n:'Brie de Meaux AOP', b:'Fromagerie du Lagon', f:'tranche 250 g', pr:5.9, u:'23,60 €/kg', e:'🧀', g:['#FBF3E2','#E7C97F'], cat:'cremerie', sub:'Fromages', bd:['Importé'], st:14, d:"AOP, affiné quatre semaines. Pâte souple, goût franc, parfait en fin de repas."},
+  {id:'beurre', n:'Beurre doux AOP', b:'Fromagerie du Lagon', f:'plaquette 250 g', pr:3.8, u:'', e:'🧈', g:['#FBF3E2','#EFD894'], cat:'cremerie', sub:'Produits laitiers', bd:['Importé'], st:26, d:"Beurre de baratte d'Isigny, doux et crémeux."},
+  {id:'oeufs', n:'Œufs plein air x6', b:'Ferme Colombier', f:'boîte 6', pr:3.6, u:'12 €/kg', e:'🥚', g:['#FDF1DC','#F0D290'], cat:'cremerie', sub:'Produits laitiers', bd:['Bio'], st:22, d:"Poules élevées en plein air à la Ferme Colombier, œufs du jour."},
+  {id:'jambon', n:'Jambon blanc supérieur', b:'Fleury Michon', f:'tranches 4 x 60 g', pr:4.2, u:'', e:'🥓', g:['#FBE7DE','#EFA488'], cat:'boucherie', sub:'Charcuterie', bd:['Importé'], st:30, d:"Tendre et moelleux, sans couenne. Le classique des lunchs de plage."},
+  {id:'entrecote', n:'Entrecôte origine France', b:'Boucherie Grand-Case', f:'tranche ~300 g', pr:11.8, u:'39,30 €/kg', e:'🥩', g:['#FBE1DC','#E88A76'], cat:'boucherie', sub:'Bœuf', bd:['Frais du jour'], st:6, d:"Persillée, maturée 15 jours, née, élevée et transformée en France."},
+  {id:'poulet', n:'Poulet fermier', b:'Boucherie Grand-Case', f:'~1,4 kg', pr:9.9, u:'7,10 €/kg', e:'🍗', g:['#FBE7DE','#F0AB8C'], cat:'boucherie', sub:'Volailles', bd:[], st:0, d:"Parfait pour un poulet boucané du dimanche, au feu de bois."},
+  {id:'rose', n:'Rosé de Provence bio', b:'Château Minuty M', f:'bouteille 75 cl', pr:14.9, u:'', e:'🍷', g:['#FBE4EC','#F0A3BE'], cat:'boissons', sub:'Vin', bd:['Bio','Importé'], st:16, d:"Sec, fruité, la référence de l'apéro à Orient Bay. Millésime 2024."},
+  {id:'water', n:'Eau de source', b:'Cristaline', f:'bidon 5 L', pr:2.4, u:'', e:'💧', g:['#E3F2F6','#9CCFE0'], cat:'epicerie', sub:'Boissons', bd:[], st:48, d:"", promo:true},
+  {id:'farine', n:'Farine de riz sans gluten', b:'Schär', f:'paquet 1 kg', pr:4.8, u:'4,80 €/kg', e:'🌾', g:['#FDF1DC','#EED89E'], cat:'epicerie', sub:'Farines', bd:['Sans gluten'], st:11, d:"Pour pancakes, cakes et gâteaux légers.", promo:true},
+  {id:'noix', n:'Mélange de noix bio', b:'Bio Solo', f:'sachet 250 g', pr:5.4, u:'21,60 €/kg', e:'🥜', g:['#F2EBDD','#D2B986'], cat:'epicerie', sub:'Farines', bd:['Bio','Sans gluten'], st:0, d:"Noix de cajou, amandes et noisettes grillées à sec."},
+  {id:'mangue', n:'Mangue Judy', b:'Verger du Sud', f:'pièce ~450 g', pr:3.2, u:'7,10 €/kg', e:'🥭', g:['#FDF0DC','#F5BE6B'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour','Nouveau'], st:15, d:"Sucrée, peu fibreuse, à la chair fondante — la préférée de l'île."},
+];
+const BASKETS = [
+  {id:'apero', t:'Apéro', s:'Rosé, antipasti, noix', pr:34, e:'🥂', g:['#FBE4EC','#F0A3BE'], it:['rose','brie','crevettes','citron']},
+  {id:'bbq', t:'BBQ', s:'Pour 4 personnes', pr:52, e:'🔥', g:['#FBE7DE','#F2A98A'], it:['entrecote','citron','tomate','avocat']},
+  {id:'bateau', t:'Bateau', s:'La journée en mer', pr:45, e:'⛵', g:['#E3F2F6','#8FC3D4'], it:['mahimahi','citron','water','rose']},
+  {id:'pdj', t:'Petit-déjeuner', s:'Douceur du matin', pr:28, e:'🥐', g:['#FDF1DC','#F0D290'], it:['baguette','oeufs','mangue','beurre']},
+  {id:'famille', t:'Famille', s:'Pour la semaine', pr:68, e:'👨‍👩‍👧‍👦', g:['#EDF5E0','#B7CE86'], it:['poulet','tomate','oeufs','water','brie']},
+  {id:'sansgluten', t:'Sans gluten', s:'Sélection dédiée', pr:41, e:'🌾', g:['#F2EFD9','#D7CC92'], it:['farine','avocat','citron','tomate']},
+];
+const CATS = [
+  {id:'fruits', t:'Fruits & Légumes', e:'🥦', g:['#EDF5E0','#B7CE86']},
+  {id:'boulangerie', t:'Boulangerie', e:'🥖', g:['#FDF1DC','#F0D290']},
+  {id:'cremerie', t:'Crèmerie', e:'🧀', g:['#FBF3E2','#E7C97F']},
+  {id:'mer', t:'Poissonnerie', e:'🐟', g:['#E3F2F6','#8FC3D4']},
+  {id:'boucherie', t:'Boucherie', e:'🥩', g:['#FBE7DE','#F2A98A']},
+  {id:'boissons', t:'Cave & Boissons', e:'🍷', g:['#FBE4EC','#F0A3BE']},
+  {id:'epicerie', t:'Épicerie', e:'🧂', g:['#F2EBDD','#D2B986']},
+  {id:'surgeles', t:'Surgelés', e:'❄️', g:['#E8F1F7','#AFC6E0']},
+];
+const SUBS = {
+  fruits:['Tout','Exotiques','Légumes','Agrumes'],
+  boulangerie:['Tout','Pains','Viennoiseries','Pâtisseries'],
+  cremerie:['Tout','Fromages','Produits laitiers'],
+  mer:['Tout','Poissons','Fruits de mer'],
+  boucherie:['Tout','Bœuf','Volailles','Charcuterie'],
+  boissons:['Tout','Vin','Sans alcool'],
+  epicerie:['Tout','Farines','Boissons','Conserves'],
+  surgeles:['Tout','Glaces','Légumes','Poissons'],
+};
+const ADDRESSES = [
+  {id:'azur', t:'Villa Azur', s:'Orient Bay', ok:true},
+  {id:'pinel', t:'Résidence Pinel', s:'Cul de Sac', ok:true},
+  {id:'cul', t:'Studio Corniche', s:'Cul de Sac Bay — zone non couverte', ok:false},
+];
+
+/* ================= ÉTAT ================= */
+const cart = {};
+let activeCat='fruits', activeSub='Tout', activeAddr=ADDRESSES[0], openPid=null, lastScreen='home';
+let filters={price:new Set(), dispo:false, marques:new Set(), bio:false, sg:false, veg:false, promo:false};
+let sort='pert';
+let demo={home:'normal', catalog:'normal', product:'normal'};
+
+/* ================= AIDES ================= */
+const $=s=>document.querySelector(s);
+const eur=n=>n.toFixed(2).replace('.',',')+' €';
+const prod=id=>P.find(p=>p.id===id);
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+id).classList.add('active');$('#s-'+id+' .body')&&($('#s-'+id+' .body').scrollTop=0);if(id==='home')lastScreen='home';}
+function openSheet(id){closeSheets(true);$('#'+id).classList.add('open');$('#scrim').classList.add('show');}
+function closeSheets(keepScrim){document.querySelectorAll('.sheet.open').forEach(s=>s.classList.remove('open'));if(!keepScrim)$('#scrim').classList.remove('show');}
+let toastT;
+function toast(msg, act){
+  const t=$('#toast');$('#toast-msg').textContent=msg;const b=$('#toast-act');
+  if(act){b.style.display='';b.textContent=act.label;b.onclick=()=>{t.classList.remove('show');act.fn();};}
+  else b.style.display='none';
+  t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function cartCount(){return Object.values(cart).reduce((a,b)=>a+b,0);}
+function refreshBadges(){const n=String(cartCount());['cart-badge','cart-badge2','cart-badge3','cart-badge4','cart-badge5','cart-badge6','cart-badge7'].forEach(i=>{const el=document.getElementById(i);if(el)el.textContent=n;});}
+function badgesHtml(p){return (p.bd||[]).map(b=>{const c={'Frais du jour':'frais','Bio':'bio','Importé':'import','Sans gluten':'sg','Nouveau':'sg'}[b]||'frais';return `<span class="tag ${c}">${b}</span>`}).join('');}
+function ph(p){return `<div class="ph" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">${p.e}</div>`;}
+function esc(s){return String(s).replace(/'/g,"\\'");}
+function stockLimit(p){toast('Stock maximum atteint : ' + p.st + ' exemplaires');}
+
+/* ================= ACCUEIL ================= */
+function homeSkeleton(){return `
+  <div style="padding:16px"><div class="sk" style="height:172px;border-radius:22px"></div></div>` +
+  [1,2,3].map(()=>
+    `<div class="sec-h"><div class="sk" style="width:150px;height:18px"></div></div>
+     <div class="hrow">${'<div style="width:164px"><div class="sk" style="height:120px;border-radius:18px"></div><div class="sk sk-line" style="margin-top:10px"></div><div class="sk sk-line" style="width:60%"></div></div>'.repeat(4)}</div>`
+  ).join('') + '<div style="height:40px"></div>';}
+
+function isOutZone(){return demo.home==='zone' || !activeAddr.ok;}
+
+function renderHome(){
+  const z=isOutZone();
+  $('#b-err').classList.toggle('show', demo.home==='error');
+  $('#b-zone').classList.toggle('show', z);
+  const hh=`
+    ${pushBanner()}
+    <div style="margin:0 16px;position:relative">
+      <div class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#93A0A0" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Rechercher un produit, une marque…"></div>
+      <div id="sugg" style="display:none;position:absolute;left:0;right:0;top:100%;margin-top:6px;background:#fff;border-radius:16px;box-shadow:var(--shadow);z-index:30;overflow:hidden"></div>
+    </div>
+    <div style="margin:0 16px;position:relative;border-radius:22px;overflow:hidden;box-shadow:var(--shadow)">
+      <div style="height:172px;background:linear-gradient(115deg,#0B7E7E,#0FA3A3 55%,#F0B77E);position:relative;display:flex">
+        <div style="position:absolute;right:-24px;bottom:-40px;font-size:150px;opacity:.25;transform:rotate(-10deg)">🌴 </div>
+        <div style="position:relative;padding:24px 22px;display:flex;flex-direction:column;justify-content:center;max-width:75%">
+          <div class="tag" style="background:rgba(255,255,255,.22);color:#fff;align-self:flex-start">Spécial arrivée</div>
+          <h2 style="color:#fff;font-size:27px;margin-top:10px;line-height:1.1">Arrivée<br>Villa</h2>
+          <p style="color:rgba(255,255,255,.85);font-size:12.5px;margin-top:6px">Votre villa est vide ? On remplit le frigo.</p>
+          <button class="btn" style="background:#fff;color:var(--lagon-dark);max-width:190px;margin-top:14px;min-height:44px" onclick="go('catalog')">Voir les paniers</button>
+        </div>
+      </div>
+    </div>
+    <div class="sec-h"><h2>Paniers prêts à livrer</h2><span style="font-size:12px;font-weight:700;color:var(--ink-3)">Livraison dès demain</span></div>
+    <div class="hrow">${BASKETS.map(k=>`
+      <button class="basket" onclick='openBasket("${k.id}")'>
+        <div class="ph" style="background:linear-gradient(135deg,${k.g[0]},${k.g[1]})">${k.e}</div>
+        <div class="in"><div class="n">${k.t}</div><div class="d">${k.s}</div><div class="p">${eur(k.pr)} <small>· ${k.it.length} articles</small></div></div>
+      </button>`).join('')}</div>
+    ${favSection()}
+    ${z?'':`
+      <div class="sec-h"><h2>Sélection du moment</h2><button class="link" style="font-size:13px" onclick="go('catalog')">Tout voir</button></div>
+      <div class="hrow">${['mangue','mahimahi','rose','brie'].map(id=>pcard(prod(id))).join('')}</div>
+      <div class="sec-h"><h2>Produits frais</h2><button class="link" style="font-size:13px" onclick="go('catalog')">Tout voir</button></div>
+      <div class="hrow">${['ananas','tomate','oeufs','baguette'].map(id=>pcard(prod(id))).join('')}</div>
+      <div class="sec-h"><h2>Nouveautés</h2><span style="font-size:12px;font-weight:700;color:var(--ink-3)">Cette semaine</span></div>
+      <div class="hrow">${['mangue','rose','farine'].map(id=>pcard(prod(id))).join('')}</div>`}
+    <div class="sec-h"><h2>Catégories</h2></div>
+    <div class="grid" style="padding-top:0">${CATS.map(c=>`
+      <button class="card" style="display:flex;align-items:center;gap:12px;padding:12px;min-height:68px;text-align:left" onclick="openCat('${c.id}')">
+        <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,${c.g[0]},${c.g[1]});display:flex;align-items:center;justify-content:center;font-size:23px;flex:none">${c.e}</div>
+        <div style="font-weight:800;font-size:13.5px">${c.t}</div></button>`).join('')}
+    </div>
+    <div style="padding:16px"><button class="btn btn-ghost" onclick="go('catalog')">Toutes les catégories</button></div>`;
+  const b=$('#home-body');
+  b.innerHTML=`<div class="fade-in">${hh}</div>`;
+  initSearch();
+}
+function retryHome(){const b=$('#home-body');b.innerHTML=homeSkeleton();setTimeout(()=>{demo.home='normal';renderHome();},800);}
+
+/* Recherche (accueil) */
+function initSearch(){
+  const q=document.getElementById('q');if(!q)return;
+  q.value=query;
+  q.addEventListener('input',()=>{query=q.value;renderSugg();});
+  q.addEventListener('keydown',e=>{if(e.key==='Enter')goSearchCatalog();});
+  renderSugg();
+}
+function openSearchResult(id){
+  query='';searchMode=false;
+  const q=document.getElementById('q');if(q)q.value='';
+  openProduct(id);
+}
+function goSearchCatalog(){
+  if(!query.trim()){toast('Saisissez d\\\'abord un mot-clé — ex. « brie »');return;}
+  searchMode=true;activeCat='search';activeSub='Tout';
+  renderCatalog();go('catalog');
+}
+function clearSearch(){
+  query='';searchMode=false;
+  const q=document.getElementById('q');if(q)q.value='';
+  activeCat='fruits';activeSub='Tout';renderCatalog();
+}
+
+/* ================= PRODUCTCARD ================= */
+function cardAction(p){
+  const q=cart[p.id]||0;
+  if(p.st===0) return `<button class="chip" style="min-height:36px;padding:6px 10px;font-size:12px" onclick="event.stopPropagation();toast('Nous vous préviendrons du retour de ${esc(p.n)}')">Me prévenir</button>`;
+  if(q>0) return `<span class="stepper" onclick="event.stopPropagation()">
+      <button class="${q===1?'':''}" onclick="uCard('${p.id}',-1,event)" aria-label="Retirer un">${q===1?'🗑':'−'}</button>
+      <span class="q">${q}</span>
+      <button onclick="uCard('${p.id}',1,event)">+</button></span>`;
+  return `<span class="plus" role="button" aria-label="Ajouter" onclick="uCard('${p.id}',1,event)">+</span>`;
+}
+function pcard(p){
+  const ru=p.st===0;
+  return `<div class="pcard ${ru?'rupture':''}" onclick="openProduct('${p.id}')">
+    <button class="fav${isFav(p.id)?' on':''}" data-fid="${p.id}" onclick="event.stopPropagation();tFav('${p.id}')" aria-label="Favori">${isFav(p.id)?'♥':'♡'}</button>
+    ${ph(p)}<div class="tags">${ru?'<span class="tag import">Rupture</span>':''}${badgesHtml(p)}</div>
+    <div class="in"><div class="n">${p.n}</div><div class="f">${p.f}</div>
+    <div class="row">
+      <div><div class="p">${eur(p.pr)}</div>${p.u?`<div class="u">${p.u}</div>`:''}</div>
+      <span data-act="${p.id}">${cardAction(p)}</span>
+    </div></div></div>`;
+}
+function refreshCardAction(id){
+  const el=document.querySelector(`[data-act="${id}"]`);
+  if(el)el.innerHTML=cardAction(prod(id));
+}
+function uCard(id,d,ev){
+  ev&&ev.stopPropagation();
+  const p=prod(id), q=(cart[id]||0)+d;
+  if(q<=0) delete cart[id];
+  else if(q>p.st) return stockLimit(p);
+  else cart[id]=q;
+  refreshBadges();refreshCardAction(id);
+  if(q===1) toast(p.n+' ajouté au panier',{label:'Voir le panier',fn:()=>goCart()});
+}
+
+/* ================= PANIER DÉTAIL (feuille) ================= */
+function openBasket(id){
+  const k=BASKETS.find(x=>x.id===id);
+  $('#bk-title').textContent='Panier '+k.t;
+  $('#bk-items').innerHTML=k.it.map(pid=>{const p=prod(pid);return `
+    <div class="opt"><div class="addr-ic" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">${p.e}</div>
+    <div style="flex:1;min-width:0"><div>${p.n}</div><div class="sub">${p.f}</div></div>
+    <span style="font-weight:800;font-size:13.5px;flex:none">${eur(p.pr)}</span></div>`;}).join('');
+  const dispo=k.it.filter(pid=>prod(pid).st>0).length;
+  $('#bk-footer').innerHTML=`<button class="btn btn-primary">Ajouter tout au panier · ${eur(k.pr)}</button>
+    ${dispo<k.it.length?`<p style="font-size:12px;color:var(--ink-3);text-align:center;margin-top:8px">${k.it.length-dispo} article(s) en rupture seront ignorés</p>`:''}`;
+  $('#bk-footer').firstChild.onclick=()=>{
+    let added=0;
+    k.it.forEach(pid=>{if(prod(pid).st>0){cart[pid]=(cart[pid]||0)+1;added++;}});
+    refreshBadges();rerenderAllCardActions();closeSheets();
+    toast('Panier '+k.t+' ajouté — '+added+' articles',{label:'Voir le panier',fn:()=>goCart()});
+  };
+  openSheet('sheet-basket');
+}
+function rerenderAllCardActions(){P.forEach(p=>refreshCardAction(p.id));}
+
+/* ================= ADRESSES ================= */
+function renderAddr(){
+  $('#addr-list').innerHTML=ADDRESSES.map(a=>`
+    <button class="opt ${a.id===activeAddr.id?'sel':''}" onclick="pickAddr('${a.id}')">
+      <div class="addr-ic" style="background:${a.ok?'var(--lagon-soft)':'var(--ambre-soft)'}">📍</div>
+      <div style="flex:1;min-width:0"><div>${a.t}</div><div class="sub">${a.s}</div></div>
+      <span class="ck">${a.id===activeAddr.id?'✓':''}</span></button>`).join('')+
+    `<button class="opt" onclick="toast('L\\'ajout d\\'adresse arrive au Lot 3')">
+      <div class="addr-ic" style="background:var(--bg)">＋</div>
+      <div style="flex:1"><div>Ajouter une adresse</div><div class="sub">Villa, bateau, appartement…</div></div></button>`;
+}
+function pickAddr(id){
+  activeAddr=ADDRESSES.find(a=>a.id===id);
+  $('#addr-label').textContent=activeAddr.t+', '+activeAddr.s.split('—')[0].trim();
+  renderAddr();closeSheets();renderHome();
+  if(openPid)renderProduct(openPid);
+}
+
+/* ================= CATALOGUE ================= */
+function openCat(id){searchMode=false;activeCat=id;activeSub='Tout';renderCatalog();go('catalog');}
+function filtered(){
+  let list=activeCat==='search'?P.filter(matchesQuery):P.filter(p=>p.cat===activeCat);
+  if(activeSub!=='Tout')list=list.filter(p=>p.sub===activeSub);
+  if(filters.bio)list=list.filter(p=>(p.bd||[]).includes('Bio'));
+  if(filters.sg)list=list.filter(p=>(p.bd||[]).includes('Sans gluten'));
+  if(filters.veg)list=list.filter(p=>!['mer','boucherie'].includes(p.cat));
+  if(filters.dispo)list=list.filter(p=>p.st>0);
+  if(filters.promo)list=list.filter(p=>p.promo);
+  if(filters.marques.size)list=list.filter(p=>filters.marques.has(p.b));
+  if(filters.price.size)list=list.filter(p=>{const r=p.pr<5?'p1':p.pr<10?'p2':p.pr<20?'p3':'p4';return filters.price.has(r);});
+  const S={pert:null,'p-asc':(a,b)=>a.pr-b.pr,'p-desc':(a,b)=>b.pr-a.pr,'new':(a,b)=>(((b.bd||[]).includes('Nouveau'))?1:0)-(((a.bd||[]).includes('Nouveau'))?1:0)};
+  return S[sort]?[...list].sort(S[sort]):list;
+}
+function renderCatalog(){
+  const searching=searchMode&&activeCat==='search';
+  const cat=CATS.find(c=>c.id===activeCat);
+  $('#cat-title').textContent=searching?'Recherche : « '+(query||'…')+' »':(cat?cat.t:'Catalogue');
+  $('#chips-row').innerHTML=searching
+    ?`<button class="chip" onclick="clearSearch()" style="min-height:36px;color:var(--corail)">✕ Effacer la recherche</button>`
+    :(SUBS[activeCat]||['Tout']).map(s=>`<button class="chip ${s===activeSub?'on':''}" onclick="activeSub='${s}';renderCatalog()">${s}</button>`).join('');
+  renderTags();renderSortList();renderFilter();
+  if(demo.catalog==='error'){
+    $('#cat-err-banner').classList.add('show');
+    $('#catalog-grid').innerHTML='';$('#count-label').textContent='';
+    return;
+  }
+  $('#cat-err-banner').classList.remove('show');
+  renderGrid();
+}
+function retryCatalog(){demo.catalog='normal';renderCatalog();}
+function renderTags(){
+  const ts=[];
+  if(activeCat==='search')ts.push({k:'q',t:'« '+(query||'…')+' »'});
+  if(activeSub!=='Tout')ts.push({k:'sub',t:activeSub});
+  if(filters.bio)ts.push({k:'bio',t:'Bio'});
+  if(filters.sg)ts.push({k:'sg',t:'Sans gluten'});
+  if(filters.veg)ts.push({k:'veg',t:'Végétarien'});
+  if(filters.dispo)ts.push({k:'dispo',t:'Disponible'});
+  if(filters.promo)ts.push({k:'promo',t:'Promotion'});
+  filters.price.forEach(r=>ts.push({k:'price',t:{p1:'Moins de 5 €',p2:'5 – 10 €',p3:'10 – 20 €',p4:'Plus de 20 €'}[r],v:r}));
+  filters.marques.forEach(m=>ts.push({k:'marque',t:m}));
+  $('#active-tags').innerHTML=ts.map(t=>`<button class="chip on" data-tag="${t.k}" data-tv="${t.v!==undefined?t.v:esc(t.t)}" onclick="rmTag(this)" style="min-height:36px;font-size:12.5px">${t.t} ✕</button>`).join('')
+    + (ts.length?`<button class="chip" onclick="resetFilters()" style="min-height:36px;font-size:12.5px;color:var(--lagon-dark)">Tout effacer</button>`:'');
+}
+function rmTag(btn){
+  const k=btn.dataset.tag, v=btn.dataset.tv;
+  if(k==='q'){clearSearch();return;}
+  if(k==='sub')activeSub='Tout';
+  else if(k==='price')filters.price.delete(v);
+  else if(k==='marque')filters.marques.delete(v);
+  else filters[k]=false;
+  renderCatalog();
+}
+function renderGrid(){
+  const g=$('#catalog-grid');
+  const list=filtered();
+  $('#count-label').textContent=list.length+' produits';
+  $('#catalog-body').querySelectorAll('.empty').forEach(e=>e.remove());
+  if(list.length===0){
+    g.innerHTML='';
+    const div=document.createElement('div');div.className='empty';
+    div.innerHTML=`<div class="e">🧺</div><h3>${activeCat==='search'?'Aucun produit pour « '+query+' »':'Aucun produit ne correspond à ces filtres'}</h3><p>Essayez d'élargir votre recherche.</p>
+      <div class="sug">${['fruits','cremerie','boulangerie','mer'].map(cid=>`<button class="chip" onclick="openCat('${cid}')" style="min-height:36px">${CATS.find(c=>c.id===cid).e} ${CATS.find(c=>c.id===cid).t}</button>`).join('')}</div>
+      <button class="btn btn-primary" style="max-width:280px;margin:18px auto 0" onclick="resetFilters()">Réinitialiser les filtres</button>`;
+    $('#catalog-body').appendChild(div);return;
+  }
+  g.innerHTML=list.map(p=>pcard(p)).join('');
+}
+function resetFilters(){filters={price:new Set(),dispo:false,marques:new Set(),bio:false,sg:false,veg:false,promo:false};activeSub='Tout';renderCatalog();}
+function applyFilters(){closeSheets();renderGrid();renderTags();}
+function updFilterBtn(){document.getElementById('filter-apply').textContent='Voir '+filtered().length+' produits';}
+function renderFilter(){
+  const mk=(id,lab,on)=>`<button class="check ${on?'on':''}" data-fchk-row="${id}" onclick="toggleFilter('${id}',this)">
+    <span class="box" data-fchk="${id}" ${on?'style="background:var(--lagon);border-color:var(--lagon)"':''}>${on?'✓':''}</span>${lab}</button>`;
+  $('#filter-body').innerHTML=`
+    <div class="fgroup"><h4>Prix</h4><div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${[['p1','Moins de 5 €'],['p2','5 – 10 €'],['p3','10 – 20 €'],['p4','Plus de 20 €']].map(([r,l])=>`<button class="sw ${filters.price.has(r)?'on':''}" onclick="tPrice('${r}',this)">${l}</button>`).join('')}
+    </div></div>
+    <div class="fgroup"><h4>Préférences</h4>
+      ${mk('bio','Bio',filters.bio)}
+      ${mk('sg','Sans gluten',filters.sg)}
+      ${mk('veg','Végétarien',filters.veg)}
+      ${mk('dispo','Disponible aujourd’hui',filters.dispo)}
+      ${mk('promo','En promotion',filters.promo)}
+    </div>
+    <div class="fgroup"><h4>Marques</h4><div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${[...new Set(P.filter(p=>activeCat==='search'||p.cat===activeCat).map(p=>p.b))].map(m=>`<button class="sw ${filters.marques.has(m)?'on':''}" onclick="tBrand('${esc(m)}',this)">${m}</button>`).join('')}
+    </div></div>`;
+  updFilterBtn();
+}
+function toggleFilter(id,btn){filters[id]=!filters[id];btn.classList.toggle('on',filters[id]);const b=btn.querySelector('.box');b.textContent=filters[id]?'✓':'';b.style.background=filters[id]?'var(--lagon)':'';b.style.borderColor=filters[id]?'var(--lagon)':'';updFilterBtn();}
+function tPrice(r,btn){filters.price.has(r)?filters.price.delete(r):filters.price.add(r);btn.classList.toggle('on');updFilterBtn();}
+function tBrand(m,btn){filters.marques.has(m)?filters.marques.delete(m):filters.marques.add(m);btn.classList.toggle('on');updFilterBtn();}
+function renderSortList(){
+  const O=[['pert','Pertinence'],['p-asc','Prix croissant'],['p-desc','Prix décroissant'],['new','Nouveautés']];
+  $('#sort-list').innerHTML=O.map(([v,l])=>`<button class="opt ${sort===v?'sel':''}" onclick="pickSort('${v}','${l.toLowerCase()}')">
+    <span style="flex:1">${l}</span><span class="ck">${sort===v?'✓':''}</span></button>`).join('');
+}
+function pickSort(v,labelLower){sort=v;document.getElementById('sort-label').textContent='Trier : '+labelLower;closeSheets();renderGrid();renderSortList();}
+
+/* ================= FICHE PRODUIT ================= */
+let pSlide=0;
+function openProduct(id){lastScreen=document.querySelector('.screen.active').id.slice(2);pSlide=0;renderProduct(id);go('product');}
+function renderProduct(id){
+  openPid=id;pSlide=0;
+  const p=prod(id), body=$('#product-body'), bar=$('#pbar-wrap');
+  if(demo.product==='gone'){
+    body.innerHTML=`<div class="empty" style="padding-top:120px">
+      <div class="e">📦</div><h3>Ce produit n'est plus disponible</h3>
+      <p>Retrouvez nos nouveautés chaque semaine au catalogue.</p>
+      <button class="btn btn-primary" style="max-width:260px;margin:18px auto 0" onclick="demo.product='normal';renderProduct('ananas')">Retour au catalogue</button></div>`;
+    bar.innerHTML='';return;
+  }
+  const ru=(p.st===0)||(demo.product==='rupture'&&p.id===openPid);
+  body.innerHTML=`
+    <div class="big" style="background:linear-gradient(160deg,${p.g[0]},${p.g[1]})">
+      <div style="font-size:110px;transform:translateX(-10px)">${p.e}</div>
+      <button class="icon-btn" style="position:absolute;top:16px;left:16px;border:none" onclick="go('${lastScreen}')" aria-label="Retour">←</button>
+      <button class="fav${isFav(id)?' on':''}" style="top:16px;right:16px" data-fid="${id}" onclick="tFav('${id}')" aria-label="Favori">${isFav(id)?'♥':'♡'}</button>
+      <div class="dotsw">${[0,1,2].map(i=>`<span class="dot ${i===pSlide?'on':''}" onclick="pSlide=${i};document.querySelectorAll('#s-product .dot').forEach((d,j)=>d.classList.toggle('on',j===${i}))"></span>`).join('')}</div>
+    </div>
+    <div class="fade-in" style="padding:18px 20px 8px">
+      <div class="badges" style="margin-bottom:10px">${ru?'<span class="tag import">Rupture</span>':''}${badgesHtml(p)}</div>
+      <h1 style="font-size:24px;line-height:1.15">${p.n}</h1>
+      <div style="font-size:13px;color:var(--ink-2);font-weight:600;margin-top:5px">${p.b} · ${p.f}</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:14px">
+        <span style="font-weight:800;font-size:26px">${eur(p.pr)}</span>
+        ${p.u?`<span style="font-size:13px;color:var(--ink-3);font-weight:600">soit ${p.u}</span>`:''}
+      </div>
+      ${ru?`<div class="stock out" style="margin-top:12px">Rupture de stock</div>`
+        :p.st<=3?`<div class="stock low" style="margin-top:12px">Plus que ${p.st} en stock</div>`
+        :`<div class="stock ok" style="margin-top:12px">En stock</div>`}
+      <p id="desc" style="font-size:14px;line-height:1.6;color:var(--ink-2);margin-top:14px">
+        <span style="font-weight:800;color:var(--ink)">Origine : ${p.b}.</span>
+        <span id="d-1">${p.d.length>110?p.d.slice(0,110)+'… ':''}</span>${p.d.length>110?`<span id="d-2" style="display:none">${p.d} </span><button class="link" style="font-size:14px" onclick="document.getElementById('d-2').style.display='inline';this.remove()">Lire la suite</button>`:p.d}
+      </p>
+      ${reviewsSection(id)}
+      <div class="divider" style="margin:18px 0 0"></div>
+      <div class="sec-h" style="padding:16px 0 10px"><h2 style="font-size:17px">Complétez votre panier</h2></div>
+      <div class="hrow" style="padding:0">${[...P.filter(x=>x.cat===p.cat&&x.st>0&&x.id!==p.id),...P.filter(x=>x.cat!==p.cat&&x.st>0&&x.id!==p.id)].slice(0,5).map(x=>pcard(x)).join('')}</div>
+      <a class="wa" href="https://wa.me/${WA_NUM}" target="_blank" style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink-2);padding:12px 0">
+        <span style="font-size:17px">💬</span> Un conseil ? Écrire sur WhatsApp</a>
+    </div>`;
+  renderPbar(p,ru);
+}
+function renderPbar(p,ru){
+  const q=cart[p.id]||0, bar=$('#pbar-wrap');
+  if(ru){
+    bar.innerHTML=`<div class="pbar" style="flex-direction:column;align-items:stretch;gap:10px">
+      <div style="text-align:center;font-weight:800;font-size:15px">Rupture de stock</div>
+      <button class="btn btn-amber" onclick="toast('Nous vous préviendrons du retour de ${esc(p.n)}')">Me prévenir du retour</button>
+      <button class="link" style="font-size:13.5px;min-height:44px" onclick="openRemplacements('${p.id}')">Voir les remplacements suggérés</button></div>`;
+    return;
+  }
+  bar.innerHTML=`<div class="pbar">
+    <span class="stepper" id="pbar-step" style="${q>0?'':'display:none'}">
+      <button onclick="uBar('${p.id}',-1)" aria-label="Retirer un">${q<=1?'🗑':'−'}</button>
+      <span class="q" id="pbar-q">${q}</span>
+      <button onclick="uBar('${p.id}',1)">+</button></span>
+    <button class="btn btn-primary" id="pbar-add" style="${q>0?'display:none':''}" onclick="addToCart('${p.id}')">Ajouter au panier · ${eur(p.pr)}</button>
+    <span class="total" id="pbar-total" style="${q>0?'':'display:none'}">${eur(p.pr*(q||1))}</span></div>`;
+}
+function addToCart(id){
+  const p=prod(id);
+  if(!activeAddr.ok){document.getElementById('zone-addr').textContent=activeAddr.s.replace(' — zone non couverte','');openSheet('sheet-zone');return;}
+  const q=(cart[id]||0)+1;
+  if(q>p.st)return stockLimit(p);
+  cart[id]=q;refreshBadges();refreshCardAction(id);syncPbar(p);
+  toast(p.n+' ajouté au panier',{label:'Voir le panier',fn:()=>goCart()});
+}
+function uBar(id,d){
+  const p=prod(id), q=(cart[id]||0)+d;
+  if(q<=0)delete cart[id];
+  else if(q>p.st)return stockLimit(p);
+  else cart[id]=q;
+  refreshBadges();refreshCardAction(id);syncPbar(p);
+}
+function syncPbar(p){
+  const step=$('#pbar-step');if(!step)return;
+  const ru=(p.st===0)&&(p.id===openPid);
+  if(ru)return;
+  const q=cart[p.id]||0;
+  const add=$('#pbar-add'), tot=$('#pbar-total');
+  step.style.display=q>0?'':'none';
+  add.style.display=q>0?'none':'';
+  tot.style.display=q>0?'':'none';
+  if(q>0){$('#pbar-q').textContent=q;step.children[0].textContent=q<=1?'🗑':'−';tot.textContent=eur(p.pr*q);}
+}
+
+/* ================= REMPLACEMENTS (mixte : Auto ⋅ épinglage manuel) ================= */
+function openRemplacements(from){
+  const p=prod(from);
+  const r=[...P.filter(x=>x.cat===p.cat&&x.st>0&&x.id!==p.id),...P.filter(x=>x.cat!==p.cat&&x.st>0&&x.id!==p.id)].slice(0,4);
+  $('#bk-title').textContent='Remplacements suggérés';
+  $('#bk-items').innerHTML=`<p style="font-size:13px;color:var(--ink-2);line-height:1.5;margin:6px 0 10px">Suggérés automatiquement dans la même catégorie, affinés par l'équipe.</p>`+
+    r.map(x=>`<div class="opt"><div class="addr-ic" style="background:linear-gradient(135deg,${x.g[0]},${x.g[1]})">${x.e}</div>
+      <div style="flex:1;min-width:0"><div>${x.n}</div><div class="sub">${x.f} · en stock · ${eur(x.pr)}</div></div>
+      <button class="chip" style="min-height:36px;font-size:12px;color:var(--lagon-dark)" onclick="cart['${x.id}']=(cart['${x.id}']||0)+1;refreshBadges();rerenderAllCardActions();toast('${esc(x.n)} ajouté au panier');closeSheets();">Ajouter</button></div>`).join('');
+  $('#bk-footer').innerHTML=`<button class="btn btn-secondary" onclick="closeSheets()">Fermer</button>`;
+  openSheet('sheet-basket');
+}
+
+/* ================= PILOTE D'ÉTATS ================= */
+function setDemo(k){
+  $('#demo').classList.remove('open');
+  if(k==='normal')demo={home:'normal',catalog:'normal',product:'normal'};
+  else if(k==='error')demo.home='error';
+  else if(k==='zone')demo.home='zone';
+  else if(k==='caterror')demo.catalog='error';
+  else if(k==='rupture')demo.product='rupture';
+  else if(k==='gone')demo.product='gone';
+  if(k==='error'){}/* le contenu déjà chargé reste visible sous le bandeau */
+  renderHome();
+  if(openPid&&$('#s-product').classList.contains('active'))renderProduct(openPid);
+  if($('#s-catalog').classList.contains('active'))renderCatalog();
+  const msg={normal:'États par défaut',error:'État : erreur réseau — Retry pour recharger',zone:'État : hors zone de livraison',caterror:'État : erreur catalogue',rupture:'État : produit en rupture (appliqué à la fiche ouverte)',gone:'État : produit retiré (appliqué à la fiche ouverte)'}[k];
+  toast(msg);
+}
+
+/* ================= LOT 2 — PANIER ================= */
+let DELIV_FEE=4.9, FREE_FROM=60, WA_NUM='590690000000'; /* paramétrage (⚙ Paramétrage) */
+let slot=0, payMethod=0, note='';
+const SLOTS=[
+  {t:'Aujourd’hui, 17 h – 19 h', s:'Dernier créneau du jour', ok:true},
+  {t:'Demain, 8 h – 10 h', s:'Idéal pour le petit-déjeuner', ok:true},
+  {t:'Demain, 11 h – 13 h', s:'', ok:true},
+  {t:'Demain, 17 h – 19 h', s:'Le plus demandé', ok:true},
+  {t:'Samedi, 9 h – 11 h', s:'', ok:true},
+];
+const PAYS=[
+  {t:'Carte enregistrée', s:'Visa •• 4444 — expire 08/27', e:'💳'},
+  {t:'Apple Pay', s:'Face ID en un tap', e:'🅿️'},
+  {t:'Nouvelle carte', s:'Payer en ligne en toute sécurité', e:'➕'},
+];
+function cartTotal(){return Object.entries(cart).reduce((a,[id,q])=>a+prod(id).pr*q,0);}
+function fees(){const st=cartTotal();if(st===0||st>=FREE_FROM)return 0;return discount().ship?0:DELIV_FEE;}
+function goDelivery(){renderDelivery();go('delivery');}
+function goCart(){renderCart();go('cart');}
+function uCart(id,d){
+  const p=prod(id), q=(cart[id]||0)+d;
+  if(q<=0)delete cart[id];
+  else if(q>p.st)return stockLimit(p);
+  else cart[id]=q;
+  refreshBadges();rerenderAllCardActions();renderCart();syncPbar(p);
+}
+function renderCart(){
+  const b=$('#cart-body');const n=cartCount();
+  const entries=Object.entries(cart).filter(([,q])=>q>0);
+  if(n===0){
+    b.innerHTML=`<div class="empty" style="padding-top:80px">
+      <div class="e">🧺</div><h3>Votre panier est vide</h3>
+      <p>Ajoutez des produits au fil de votre visite, ou partez d'un panier prêt à livrer.</p>
+      <button class="btn btn-primary" style="max-width:280px;margin:18px auto 0" onclick="go('home')">Voir les paniers</button></div>`;
+    return;
+  }
+  const st=cartTotal(), fz=fees(), d=discount();
+  b.innerHTML=`
+    <div class="fade-in">
+      <div class="card" style="margin:4px 16px;padding:13px 16px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">🛵</span>
+        <div style="flex:1"><div style="font-weight:800;font-size:13.5px">${n} article${n>1?'s':''} · arrivée estimée demain matin</div>
+        <div style="font-size:12px;color:var(--ink-2)">Adresse : ${activeAddr.t}, ${activeAddr.s.split('—')[0].trim()}</div></div>
+        <button class="link" style="font-size:12.5px" onclick="goDelivery()">Modifier</button>
+      </div>
+      ${entries.map(([id,q])=>{const p=prod(id);return `
+        <div class="card" style="margin:10px 16px 0;padding:12px;display:flex;gap:12px;align-items:center">
+          <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,${p.g[0]},${p.g[1]});display:flex;align-items:center;justify-content:center;font-size:26px;flex:none">${p.e}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:13.5px">${p.n}</div>
+            <div style="font-size:11.5px;color:var(--ink-3)">${p.f}</div>
+            <div style="font-weight:800;font-size:14px;margin-top:4px">${eur(p.pr*q)}${q>1?` <span style="font-weight:600;color:var(--ink-3);font-size:11.5px">${eur(p.pr)} l'unité</span>`:''}</div>
+          </div>
+          <span class="stepper">
+            <button onclick="uCart('${id}',-1)" aria-label="Retirer un">${q<=1?'🗑':'−'}</button>
+            <span class="q">${q}</span>
+            <button onclick="uCart('${id}',1)">+</button></span>
+        </div>`}).join('')}
+      ${st<FREE_FROM&&st>0?`<div class="banner zone show" style="margin:14px 16px 0;border-radius:12px">🛵 Encore ${eur(FREE_FROM-st)} pour la livraison offerte</div>`:st>=FREE_FROM?`<div class="card" style="margin:14px 16px 0;padding:11px 14px;background:var(--lagon-soft);border-color:var(--lagon-soft);color:var(--lagon-dark);font-weight:800;font-size:13px">🎉 Livraison offerte</div>`:''}
+      <div class="card" style="margin:14px 16px 0;padding:14px 16px">
+        ${promoBlock()}
+      </div>
+      <div class="card" style="margin:14px 16px 0;padding:16px">
+        <div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;color:var(--ink-2);padding:3px 0"><span>Sous-total</span><span>${eur(st)}</span></div>
+        ${d.amt>0?`<div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--vert);padding:3px 0"><span>Remise ${promoCode}</span><span>−${eur(d.amt)}</span></div>`:''}
+        <div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;color:var(--ink-2);padding:3px 0"><span>Livraison</span><span>${fz===0?'Offerte':eur(fz)}</span></div>
+        <div class="divider" style="margin:10px 0"></div>
+        <div style="display:flex;justify-content:space-between;font-weight:800;font-size:17px;padding:2px 0"><span>Total</span><span>${eur(st-d.amt+fz)}</span></div>
+      </div>
+      <div style="padding:16px"><button class="btn btn-primary" onclick="goDelivery()">Choisir la livraison</button></div>
+    </div>`;
+}
+
+/* ================= LOT 2 — LIVRAISON ================= */
+function renderDelivery(){
+  const z=!activeAddr.ok;
+  const dlg=$('#delivery-body');
+  $('#b-zone-del').style.display=z?'flex':'none';
+  const st=cartTotal()+fees()-discount().amt;
+  dlg.innerHTML=`
+    <div class="fade-in">
+      <button class="opt" onclick="openSheet('sheet-addr')" style="padding:14px 0">
+        <div class="addr-ic" style="background:${z?'var(--ambre-soft)':'var(--lagon-soft)'}">📍</div>
+        <div style="flex:1;min-width:0"><div style="font-weight:800">${activeAddr.t}</div><div class="sub">${activeAddr.s}</div></div>
+        <span class="link" style="font-size:13px">Changer</span>
+      </button>
+      <div class="sec-h" style="padding:14px 16px 8px"><h2 style="font-size:17px">Créneau de livraison</h2></div>
+      <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
+        ${SLOTS.map((s,i)=>`<button class="opt ${i===slot?'sel':''}" onclick="pickSlot(${i})" style="border:1.5px solid ${i===slot?'var(--lagon)':'var(--line)'};border-radius:14px;padding:12px 14px">
+          <div style="flex:1"><div style="font-weight:800;font-size:14px">${s.t}</div>${s.s?`<div class="sub">${s.s}</div>`:''}</div>
+          <span class="ck" style="${i===slot?'border-color:var(--lagon)':''}">${i===slot?'✓':''}</span></button>`).join('')}
+      </div>
+      <div class="sec-h" style="padding:16px 16px 8px"><h2 style="font-size:17px">Note pour le livreur <span style="font-weight:600;color:var(--ink-3);font-size:12.5px;font-family:var(--sans)">(facultatif)</span></h2></div>
+      <div class="search" style="margin:0 16px"><input id="d-note" placeholder="Code portail, villa à gauche…" value=""></div>
+    </div>`;
+  const bar=$('#del-bar-wrap');
+  bar.innerHTML=z
+    ?`<div class="pbar" style="flex-direction:column;align-items:stretch;gap:10px">
+        <button class="btn btn-primary" onclick="closeSheets();openSheet('sheet-addr')">Changer d'adresse</button>
+        <p style="text-align:center;font-size:12px;color:var(--ink-3)">Le paiement sera disponible depuis une adresse livrable.</p></div>`
+    :`<div class="pbar" style="flex-direction:column;align-items:stretch;gap:10px">
+        <div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--ink-2)"><span>${SLOTS[slot].t}</span><span id="del-total">${eur(st)}</span></div>
+        <button class="btn btn-primary" onclick="goPay()">Continuer vers le paiement</button></div>`;
+  const noteInput=document.getElementById('d-note');
+  if(noteInput)noteInput.value=note;
+  if(noteInput)noteInput.addEventListener('input',e=>{note=e.target.value;});
+}
+function pickSlot(i){slot=i;renderDelivery();}
+function goPay(){renderPay();go('pay');}
+
+/* ================= LOT 2 — PAIEMENT ================= */
+function renderPay(done){
+  const b=$('#pay-body'), bar=$('#pay-bar-wrap'), top=$('#pay-top');
+  if(done){
+    top.style.display='none';bar.innerHTML='';$('#b-zone-del').style.display='none';
+    const order='#'+(1000+cartCount()+30);
+    b.innerHTML=`<div class="empty fade-in" style="padding-top:130px">
+      <div style="width:74px;height:74px;border-radius:999px;background:var(--lagon);margin:0 auto;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(15,163,163,.4)">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M4.5 12.5l5 5L19.5 7"/></svg></div>
+      <h3 style="font-size:21px;margin-top:16px">Commande confirmée</h3>
+      <p>Commande ${order} · livraison ${SLOTS[slot].t.toLowerCase()}<br>à ${activeAddr.t}, ${activeAddr.s.split('—')[0].trim()}</p>
+      <button class="btn btn-primary" style="max-width:280px;margin:22px auto 0" onclick="lastOrder?goTrack():backHome()">Suivre ma livraison</button>
+      <button class="btn btn-secondary" style="max-width:280px;margin:10px auto 0" onclick="backHome()">Retour à l'accueil</button></div>`;
+    return;
+  }
+  top.style.display='flex';
+  const st=cartTotal()+fees()-discount().amt;
+  const entries=Object.entries(cart).filter(([,q])=>q>0);
+  b.innerHTML=`
+    <div class="fade-in">
+      <div class="card" style="margin:4px 16px;padding:14px 16px">
+        <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px"><span>${entries.length} article${entries.length>1?'s':''}</span><span>${eur(st)}</span></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--ink-2)">📍 ${activeAddr.t}, ${activeAddr.s.split('—')[0].trim()}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12.5px;color:var(--ink-2)">🛵 ${SLOTS[slot].t}</div>
+        ${promoCode&&discount().amt>0?`<div style="display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12.5px;color:var(--vert);font-weight:700">🎟 ${promoCode} : −${eur(discount().amt)}</div>`:''}
+        ${note?`<div style="display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12.5px;color:var(--ink-2)">📝 ${note}</div>`:''}
+        <button class="link" style="font-size:12.5px;margin-top:10px" onclick="go('delivery')">Modifier</button>
+      </div>
+      <div class="sec-h" style="padding:16px 16px 8px"><h2 style="font-size:17px">Moyen de paiement</h2></div>
+      <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
+        ${PAYS.map((m,i)=>`<button class="opt ${i===payMethod?'sel':''}" onclick="pickPay(${i})" style="border:1.5px solid ${i===payMethod?'var(--lagon)':'var(--line)'};border-radius:14px;padding:12px 14px">
+          <div class="addr-ic" style="background:var(--bg)">${m.e}</div>
+          <div style="flex:1;min-width:0"><div style="font-weight:800">${m.t}</div><div class="sub">${m.s}</div></div>
+          <span class="ck" style="${i===payMethod?'border-color:var(--lagon)':''}">${i===payMethod?'✓':''}</span></button>`).join('')}
+      </div>
+      <p style="font-size:11.5px;color:var(--ink-3);text-align:center;margin:14px 28px 0;line-height:1.5">Paiement sécurisé. Votre règlement est conservé jusqu'à la livraison : impossible de payer une livraison ratée.</p>
+    </div>`;
+  bar.innerHTML=`<div class="pbar"><button class="btn btn-primary" onclick="payNow()">Payer ${eur(st)}</button></div>`;
+}
+function pickPay(i){payMethod=i;renderPay();}
+function payNow(){
+  if(!slotsOk()){openSheet('sheet-addr');return;}
+  const st=cartTotal()+fees()-discount().amt;
+  const entries=Object.entries(cart).filter(([,q])=>q>0);
+  lastOrder={id:'#'+(1030+orders.length), n:entries.length, total:st, slot:SLOTS[slot].t, addr:activeAddr.t, when:'Aujourd’hui', status:1, promo:promoCode||'', items:entries.map(([id,q])=>({id:id,q:q}))};
+  orders.unshift(lastOrder);
+  saveOrder();
+  const doneId=lastOrder.id, doneSlot=SLOTS[slot].t;
+  promoCode='';
+  homePushDismissed=false;
+  renderPay(true);
+  setTimeout(()=>pushNotif('🧾','Commande '+doneId+' confirmée','Nous la préparons — livraison '+doneSlot),1200);
+  setTimeout(()=>pushNotif('🛵','Livreur assigné','Votre livreur part dans quelques minutes.'),4200);
+  Object.keys(cart).forEach(k=>delete cart[k]);
+  refreshBadges();rerenderAllCardActions();
+}
+function slotsOk(){return activeAddr.ok;}
+function backHome(){renderCart();go('home');}
+
+/* ================= LOT 3 — COMMANDES / SUIVI / COMPTE / PARAMÉTRAGE ================= */
+let orders=[
+  {id:'#1030', n:5, total:62.1, slot:'Demain, 8 h – 10 h', addr:'Villa Azur', when:'Hier', status:0, items:[{id:'ananas',q:2},{id:'brie',q:1},{id:'baguette',q:2},{id:'tomate',q:2},{id:'water',q:1}]},
+  {id:'#1017', n:3, total:28.4, slot:'Samedi, 9 h – 11 h', addr:'Villa Azur', when:'17 novembre', status:4, items:[{id:'mangue',q:1},{id:'mahimahi',q:1},{id:'citron',q:1}]},
+];
+let lastOrder=null, trackStep=1;
+const DEFAULT_SLOTS=[
+  {t:'Aujourd’hui, 17 h – 19 h', s:'Dernier créneau du jour', ok:true},
+  {t:'Demain, 8 h – 10 h', s:'Idéal pour le petit-déjeuner', ok:true},
+  {t:'Demain, 11 h – 13 h', s:'', ok:true},
+  {t:'Demain, 17 h – 19 h', s:'Le plus demandé', ok:true},
+  {t:'Samedi, 9 h – 11 h', s:'', ok:true},
+];
+function trackOrderId(id){const f=orders.find(x=>x.id===id);if(f){lastOrder=f;goTrack();}}
+function advanceTrack(i){const was=trackStep;trackStep=i+1;if(lastOrder)lastOrder.status=i+1;renderTrack();toast('Aperçu : '+TRACK_STEPS[i].toLowerCase());if(i===2&&was<3)pushNotif('🛵','Votre livreur est en route','Il arrive dans environ 35 minutes.')}
+function goAccount(){renderAccount();go('account');}
+function goTrack(){trackStep=(lastOrder?lastOrder.status:trackStep)||1;renderTrack();go('track');}
+function goSettings(){renderSettings();go('settings');}
+const TRACK_STEPS=['Confirmée','Préparation','En livraison','Livrée'];
+function saveOrder(){
+  try{localStorage.setItem('lm-orders',JSON.stringify(orders.slice(0,8)));}catch(e){}
+}
+function renderAccount(){
+  const nc=NOTIFS.filter(n=>!n.read).length;
+  $('#account-body').innerHTML=`
+    <div class="fade-in">
+      <div class="card" style="margin:4px 16px;padding:16px;display:flex;align-items:center;gap:14px">
+        <div style="width:52px;height:52px;border-radius:999px;background:linear-gradient(135deg,#0FA3A3,#F0B77E);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:19px">${initialsOf(profile.name)}</div>
+        <div style="flex:1"><div style="font-weight:800;font-size:15px">${profile.name}</div><div style="font-size:12.5px;color:var(--ink-2)">${profile.email}</div></div>
+        <span class="chip" style="min-height:36px;font-size:12px" onclick="openProfile()">Modifier</span>
+      </div>
+      ${lastOrder&&lastOrder.status<4?`<button class="card" onclick="goTrack()" style="margin:12px 16px 0;padding:14px 16px;display:flex;align-items:center;gap:12px;width:calc(100% - 32px);text-align:left">
+        <span style="font-size:22px">🛵</span>
+        <div style="flex:1"><div style="font-weight:800;font-size:13.5px">Commande ${lastOrder.id} en cours</div><div style="font-size:12px;color:var(--ink-2)">${TRACK_STEPS[lastOrder.status]} · ${lastOrder.slot}</div></div>
+        <span class="link" style="font-size:13px">Suivre</span></button>`:''}
+      <button class="card" onclick="openNotifs()" style="margin:12px 16px 0;padding:14px 16px;display:flex;align-items:center;gap:12px;width:calc(100% - 32px);text-align:left">
+        <span style="font-size:22px">🔔</span>
+        <div style="flex:1"><div style="font-weight:800;font-size:13.5px">Notifications</div><div style="font-size:12px;color:${nc>0?'var(--corail)':'var(--ink-3)'}">${nc>0?nc+' nouvelle'+(nc>1?'s':''):'Rien de nouveau'}</div></div>
+        <span class="link" style="font-size:13px">Ouvrir</span></button>
+      <div class="sec-h" style="padding:16px 16px 8px"><h2 style="font-size:17px">Mes commandes</h2></div>
+      <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
+        ${orders.map(o=>`<div class="card" role="button" onclick="trackOrderId('${o.id}')" style="padding:13px 16px;display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer">
+          <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13.5px">${o.id} · ${eur(o.total)}</div>
+          <div style="font-size:12px;color:var(--ink-2)">${o.when} · ${o.n} article${o.n>1?'s':''} · ${o.slot}</div>
+          <button class="chip" style="margin-top:6px;min-height:36px;font-size:11.5px;color:var(--lagon-dark)" onclick="event.stopPropagation();reorder('${o.id}')">↻ Réordonner</button></div>
+          <span class="tag ${o.status>=4?'bio':'frais'}">${o.status>=4?'Livrée':TRACK_STEPS[o.status]}</span></div>`).join('')}
+      </div>
+      <div class="sec-h" style="padding:16px 16px 8px"><h2 style="font-size:17px">Mes adresses</h2></div>
+      <div style="padding:0 16px"><button class="btn btn-ghost" onclick="openSheet('sheet-addr')">Gérer les adresses</button></div>
+      <div class="divider" style="margin:18px 16px"></div>
+      <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
+        <a class="wa" href="https://wa.me/${WA_NUM}" target="_blank" style="display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;padding:12px 2px"><span style="font-size:17px">💬</span> Un conseil ? Écrire sur WhatsApp</a>
+        <button class="btn btn-secondary" onclick="goSettings()">⚙ Paramétrage (démonstration)</button>
+        <button class="btn btn-ghost" onclick="openSheet('sheet-logout')">Se déconnecter</button>
+      </div>
+    </div>`;
+}
+function renderTrack(){
+  const o=lastOrder||{...orders.find(x=>x.status<4)||orders[0]};
+  $('#track-body').innerHTML=`
+    <div class="fade-in">
+      <div style="height:210px;margin:4px 16px;border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(135deg,#DCEBE4,#BFD9CE 60%,#9CC3B0)">
+        <div style="position:absolute;left:0;right:0;top:0;bottom:0;opacity:.5;background-image:repeating-linear-gradient(0deg,transparent 0 26px,rgba(30,43,43,.08) 26px 27px),repeating-linear-gradient(90deg,transparent 0 26px,rgba(30,43,43,.08) 26px 27px)"></div>
+        <div style="position:absolute;left:${trackStep>=4?88:trackEta.pos}%;top:40%;transform:translate(-50%,-100%);font-size:44px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25));transition:left .6s">📍</div>
+        <div style="position:absolute;right:12px;bottom:12px;background:#fff;border-radius:12px;padding:8px 12px;box-shadow:var(--shadow);font-size:12px;font-weight:800">${trackStep>=4?'✅ Livré à '+activeAddr.t:trackStep>=3?'🛵 Livreur à '+trackEta.mins+' min':'🛵 Bientôt en route'}</div>
+      </div>
+      <div class="card" style="margin:12px 16px 0;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <h2 style="font-size:18px">${o.id}</h2><span style="font-weight:800;color:var(--lagon-dark)">${eur(o.total)}</span></div>
+        <div style="font-size:12.5px;color:var(--ink-2);margin-top:2px">${o.n} article${o.n>1?'s':''} · ${o.slot} · ${o.addr}</div>
+        <div class="divider" style="margin:14px 0"></div>
+        <div style="display:flex;align-items:flex-start">
+          ${TRACK_STEPS.map((s,i)=>`<button style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:44px" onclick="advanceTrack(${i})" aria-label="${s}">
+            <span style="width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:${trackStep>i?'var(--lagon)':'var(--bg)'};color:${trackStep>i?'#fff':'var(--ink-3)'};border:2px solid ${trackStep>i?'var(--lagon)':'var(--line)'}">${trackStep>i?'✓':i+1}</span>
+            <span style="font-size:10.5px;font-weight:800;color:${trackStep>i?'var(--lagon-dark)':'var(--ink-3)'}">${s}</span></button>`).join('')}        </div>
+        <div style="background:var(--lagon-soft);border-radius:12px;padding:10px 14px;margin-top:12px;font-size:13px;font-weight:800;color:var(--lagon-dark)">
+          ${trackStep>=4?'Commande livrée — bon appétit !':trackStep>=3?'Arrivée estimée : dans '+trackEta.mins+' min':'Arrivée estimée : '+(o.slot.includes('8 h')?'9 h 40':'17 h 45')}
+        </div>
+        <button class="btn btn-secondary" style="margin-top:12px;min-height:44px" onclick="refreshTrack()">↻ Actualiser la position du livreur</button>
+      </div>
+      <div class="card" style="margin:12px 16px 0;padding:4px 16px">
+        <button class="opt" onclick="toast('Appel du livreur… 📞')"><div class="addr-ic" style="background:var(--bg)">📞</div><div style="flex:1">Appeler le livreur</div></button>
+        <button class="opt" onclick="openAssist()"><div class="addr-ic" style="background:var(--bg)">💬</div><div style="flex:1">Écrire au support</div></button>
+        <button class="opt" onclick="openAssist()"><div class="addr-ic" style="background:var(--bg)">🛟</div><div style="flex:1">Signaler un problème</div></button>
+      </div>
+      <div style="padding:16px"><button class="btn btn-secondary" onclick="goAccount()">Retour au compte</button></div>
+      <p style="text-align:center;font-size:11px;color:var(--ink-3);padding-bottom:8px">Astuce prototype : tap sur une étape pour prévisualiser.</p>
+    </div>`;
+}
+function renderSettings(){
+  $('#settings-body').innerHTML=`
+    <div class="fade-in">
+      <p style="font-size:12.5px;color:var(--ink-2);line-height:1.55;margin:8px 16px 0">Les trois valeurs à valider du brief Lot 2 sont modifiables ici : le catalogue se recalcule en direct et le réglage persiste (localStorage).</p>
+      <div class="card" style="margin:12px 16px 0;padding:4px 16px">
+        <div class="opt"><div style="flex:1"><div>Frais de livraison</div><div class="sub">appliqués sous le seuil de gratuité</div></div>
+          <input id="set-fee" class="search" style="width:110px;margin:0;padding:8px 12px;min-height:44px" inputmode="decimal" value="${String(DELIV_FEE).replace('.',',')}"></div>
+        <div class="opt"><div style="flex:1"><div>Livraison offerte dès</div><div class="sub">seuil d'incitation au panier</div></div>
+          <input id="set-free" class="search" style="width:110px;margin:0;padding:8px 12px;min-height:44px" inputmode="decimal" value="${String(FREE_FROM).replace('.',',')}"></div>
+        <div class="opt"><div style="flex:1"><div>Numéro WhatsApp support</div><div class="sub">fiche produit, compte, suivi</div></div>
+          <input id="set-wa" class="search" style="width:140px;margin:0;padding:8px 12px;min-height:44px" value="${WA_NUM}"></div>
+      </div>
+      <div class="sec-h" style="padding:16px 16px 8px"><h2 style="font-size:17px">Créneaux de livraison</h2><span class="tag frais">editable</span></div>
+      <div class="card" style="margin:0 16px;padding:4px 16px">
+        ${SLOTS.map((s,i)=>`<div class="opt"><div style="flex:1"><div>${s.t}</div>${s.s?`<div class="sub">${s.s}</div>`:''}</div>
+          <button class="x" style="display:flex" onclick="delSlot(${i})" aria-label="Supprimer le créneau">🗑</button></div>`).join('')}
+        <div class="opt"><input id="set-slot" class="search" style="width:210px;margin:0;padding:8px 12px;min-height:44px" placeholder="Ex. Dimanche, 10 h – 12 h">
+          <button class="chip" style="min-height:44px;color:var(--lagon-dark)" onclick="addSlot()">＋ Ajouter</button></div>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-primary" onclick="saveSettings()">Enregistrer le paramétrage</button>
+        <button class="btn btn-ghost" onclick="resetConfig()">Restaurer les valeurs du brief</button>
+        <button class="btn btn-ghost" onclick="obStep=0;renderOnboard();document.getElementById('onboard').style.display='flex'">🎬 Revoir l'introduction</button>
+      </div>
+    </div>`;
+}
+function delSlot(i){if(SLOTS.length<=1){toast('Il faut au moins un créneau');return;}SLOTS.splice(i,1);renderSettings();}
+function addSlot(){const v=document.getElementById('set-slot').value.trim();if(!v){toast('Saisissez un créneau, ex. Dimanche, 10 h – 12 h');return;}SLOTS.push({t:v,s:'',ok:true});renderSettings();toast('Créneau ajouté — « Enregistrer » pour confirmer');}
+function num(id,fallback){const raw=document.getElementById(id)?document.getElementById(id).value.replace(',','.'):'';const v=parseFloat(raw);return isNaN(v)||v<0?fallback:v;}
+function saveSettings(){
+  DELIV_FEE=num('set-fee',DELIV_FEE);FREE_FROM=num('set-free',FREE_FROM);
+  const wa=document.getElementById('set-wa')?document.getElementById('set-wa').value.replace(/[^\d]/g,''):WA_NUM;
+  if(wa.length>=6)WA_NUM=wa;
+  try{localStorage.setItem('lm-config',JSON.stringify({fee:DELIV_FEE,free:FREE_FROM,wa:WA_NUM,slots:SLOTS}));}catch(e){}
+  toast('Paramètres enregistrés · livraison '+eur(DELIV_FEE)+' — offerte dès '+eur(FREE_FROM));
+  renderSettings();
+}
+function resetConfig(){
+  DELIV_FEE=4.9;FREE_FROM=60;WA_NUM='590690000000';
+  SLOTS.length=0;DEFAULT_SLOTS.forEach(s=>SLOTS.push({...s}));
+  try{localStorage.removeItem('lm-config');}catch(e){}
+  renderSettings();toast('Valeurs du brief restaurées');
+}
+function loadConfig(){
+  let c;try{c=JSON.parse(localStorage.getItem('lm-config'));}catch(e){}
+  if(c){if(typeof c.fee==='number')DELIV_FEE=c.fee;if(typeof c.free==='number')FREE_FROM=c.free;if(c.wa)WA_NUM=c.wa;if(c.slots&&c.slots.length){SLOTS.length=0;c.slots.forEach(s=>SLOTS.push(s));}}
+  let conf;try{conf=JSON.parse(localStorage.getItem('lm-orders'));}catch(e){}
+  if(conf&&conf.length){orders=conf;lastOrder=orders.find(o=>o.status<4)||null;}
+  let pf;try{pf=JSON.parse(localStorage.getItem('lm-profile'));}catch(e){}
+  if(pf&&pf.name)profile=pf;
+  saveOrder();
+  if(!NOTIFS.length)seedNotifs();
+}
+
+/* ================= LOT 4 — PROFIL / ETA / ASSISTANCE / DÉCONNEXION ================= */
+let profile={name:'Marie R.', email:'marie@villa-azur.example', phone:'+590 690 12 34 56'};
+const initialsOf=n=>n.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase()||'??';
+let trackEta={mins:35,pos:22};
+const FAQ=[
+  {q:'Quand vais-je être livré ?', a:'Votre créneau est confirmé au paiement. Le jour J, vous recevez notifié l\'arrivée du livreur 15 minutes avant.'},
+  {q:'Un article manque dans ma commande ?', a:'Un article en rupture au moment de la préparation vous est remboursé automatiquement, et le livreur l\'explique à la remise.'},
+  {q:'Comment sont contrôlés les produits frais ?', a:'Frais du jour = arrivés ce matin sur le dernier bateau ou ramassés sur le détaquant. Ils sont stockés en chambre froide jusqu\'à la livraison.'},
+  {q:'Puis-je payer à la livraison ?', a:'Non : le règlement est en ligne au moment de la commande, mais il n\'est encaissé qu\'après la livraison réussie.'},
+];
+function goTrack(){trackStep=(lastOrder?Math.max(lastOrder.status,1):1);trackEta={mins:35,pos:22};renderTrack();go('track');}
+function openProfile(){
+  document.getElementById('pf-name').value=profile.name;
+  document.getElementById('pf-email').value=profile.email;
+  document.getElementById('pf-phone').value=profile.phone;
+  openSheet('sheet-profile');
+}
+function saveProfile(){
+  const n=document.getElementById('pf-name').value.trim();
+  if(n)profile.name=n;
+  profile.email=document.getElementById('pf-email').value.trim()||profile.email;
+  profile.phone=document.getElementById('pf-phone').value.trim()||profile.phone;
+  try{localStorage.setItem('lm-profile',JSON.stringify(profile));}catch(e){}
+  closeSheets();toast('Profil mis à jour — à bientôt, '+profile.name.split(' ')[0]+' !');
+  renderAccount();
+}
+function refreshTrack(){
+  if(trackStep===3&&trackEta.mins>0){
+    trackEta.mins=Math.max(0,trackEta.mins-4-Math.floor(Math.random()*4));
+    trackEta.pos=Math.min(88,trackEta.pos+18);
+    if(trackEta.mins===0){trackStep=4;if(lastOrder)lastOrder.status=4;saveOrder();pushNotif('✅','Commande livrée !','Bon appétit — notez vos produits en un tap.');}
+    renderTrack();
+  } else if(trackStep===2){trackStep=3;trackEta={mins:35,pos:22};if(lastOrder)lastOrder.status=3;renderTrack();pushNotif('🛵','Votre livreur est en route','Il arrive dans environ 35 minutes.');}
+  else if(trackStep===1&&false){/* confirmée : rien */}
+}
+function openAssist(){
+  document.getElementById('assist-wa').href='https://wa.me/'+WA_NUM;
+  $('#assist-body').innerHTML=`
+    <div class="fgroup"><h4>Questions fréquentes</h4>
+      ${FAQ.map((f,i)=>`<button class="opt" onclick="document.getElementById('faq-${i}').style.display=document.getElementById('faq-${i}').style.display.includes('none')?'':'none';" style="display:block;padding:12px 2px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="flex:1;font-weight:800">${f.q}</span><span style="color:var(--ink-3)">⌄</span></div>
+        <div id="faq-${i}" style="display:none;font-size:13px;font-weight:600;color:var(--ink-2);line-height:1.55;padding-top:8px;text-align:left">${f.a}</div></button>`).join('')}
+    </div>
+    <div class="divider"></div>
+    <div class="fgroup"><h4>Un problème avec la commande ${lastOrder?lastOrder.id:''} ?</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${['Article manquant','Commande incomplète','Article abîmé','Retard de livraison','Autre'].map(s=>`<button class="sw" data-issue="${s}" onclick="this.classList.toggle('on');pickIssue('${s}',this)">${s}</button>`).join('')}
+      </div>
+    </div>
+    <div class="fgroup">
+      <div class="search" style="margin:12px 0 0"><input id="assist-msg" placeholder="Détaillez en quelques mots (facultatif)…"></div>
+    </div>`;
+  openSheet('sheet-assist');
+}
+let pickedIssue='';
+function pickIssue(s,btn){pickedIssue=btn.classList.contains('on')?s:'';}
+function sendAssist(){
+  const msg=document.getElementById('assist-msg');
+  const detail=msg?msg.value.trim():'';
+  closeSheets();
+  toast(pickedIssue?('Merci ! Signalement envoyé : '+pickedIssue+(detail?' — '+detail:'')):'Message envoyé — réponse sous 24 h');
+  pickedIssue='';
+}
+function doLogout(){
+  closeSheets();
+  Object.keys(cart).forEach(k=>delete cart[k]);
+  activeAddr=ADDRESSES[0];slot=0;payMethod=0;note='';
+  $('#addr-label').textContent=activeAddr.t+', '+activeAddr.s;
+  refreshBadges();renderHome();
+  go('home');
+  toast('À bientôt ! Vous êtes déconnecté·e — vos commandes restent enregistrées');
+  renderAccount();
+}
+
+/* ================= LOT 5 — AVIS PRODUITS / CODES PROMO / NOTIFICATIONS ================= */
+const SEED_REVIEWS={
+  ananas:[
+    {n:'Sophie L.', r:5, d:'12 novembre', t:'Parfaitement mûr, sucré comme on les aime à Orient Bay.'},
+    {n:'Karl M.', r:4, d:'5 novembre', t:'Un peu petits cette semaine, mais un goût excellent.'},
+    {n:'Nadia B.', r:5, d:'28 octobre', t:'La découpe offerte est un vrai plus pour l\'apéro piscine.'},
+  ],
+  mahimahi:[
+    {n:'Jean-Luc P.', r:5, d:'10 novembre', t:'Pêche du matin, texture parfaite en ceviche. Livré très frais.'},
+    {n:'Claire V.', r:4, d:'2 novembre', t:'Belle portion, un filet légèrement plus fin que l\'autre.'},
+  ],
+  baguette:[
+    {n:'Amélie R.', r:5, d:'3 novembre', t:'Croustillante comme à la boulangerie, arrivée encore tiède.'},
+  ],
+  brie:[
+    {n:'Marc D.', r:4, d:'16 novembre', t:'Bien affiné, servi à température c\'est un régal.'},
+  ],
+  rose:[
+    {n:'Claire V.', r:5, d:'8 novembre', t:'Le millésime 2024 est encore meilleur que l\'an dernier.'},
+  ],
+};
+let USER_REVIEWS={};
+try{const rv=JSON.parse(localStorage.getItem('lm-reviews'));if(rv&&typeof rv==='object')USER_REVIEWS=rv;}catch(e){}
+function reviewsOf(id){return (USER_REVIEWS[id]||[]).concat(SEED_REVIEWS[id]||[]);}
+function avgRating(id){const r=reviewsOf(id);return r.length?r.reduce((a,x)=>a+x.r,0)/r.length:0;}
+function starsHtml(r){const w=Math.max(0,Math.min(5,Math.round(r)));return '<span style="color:#F2B34C;letter-spacing:1.5px">'+'★'.repeat(w)+'</span><span style="color:var(--line);letter-spacing:1.5px">'+'☆'.repeat(5-w)+'</span>';}
+function reviewsSection(pid){
+  const rv=reviewsOf(pid);
+  const avg=avgRating(pid);
+  const headers=rv.length
+    ?`<span style="font-size:12.5px;color:var(--ink-2);font-weight:700">${starsHtml(avg)} ${avg.toFixed(1).replace('.',',')} · ${rv.length} avis</span>`
+    :`<span class="tag import">Pas encore d'avis</span>`;
+  return `
+      <div class="divider" style="margin:18px 0 0"></div>
+      <div class="sec-h" style="padding:16px 0 10px"><h2 style="font-size:17px">Avis clients</h2>${headers}</div>
+      ${rv.slice(0,2).map(r=>`
+        <div style="padding:10px 0;border-bottom:1px solid var(--line)">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-weight:800;font-size:13.5px">${r.n}</span><span>${starsHtml(r.r)}</span></div>
+          <div style="font-size:12px;color:var(--ink-3);margin-top:2px">${r.d}</div>
+          <p style="font-size:13.5px;line-height:1.55;color:var(--ink-2);margin:6px 0 0">${r.t}</p>
+        </div>`).join('')}
+      ${rv.length>2?`<button class="link" style="font-size:13px;min-height:44px" onclick="toast('Les autres avis arrivent dans la version finale')">Voir les ${rv.length} avis</button>`:''}
+      <button class="btn btn-ghost" style="margin:10px 0 4px;min-height:44px" onclick="openReview('${pid}')">✍ ${rv.length?'Donner mon avis':'Écrire le premier avis'}</button>`;
+}
+let reviewRating=5;
+function openReview(pid){
+  reviewRating=5;
+  $('#review-body').innerHTML=`
+    <div class="fgroup"><h4>${prod(pid).n}</h4>
+      <div id="rv-stars" style="display:flex;gap:6px;justify-content:center;padding:4px 0">
+        ${[1,2,3,4,5].map(i=>`<button onclick="setRv(${i})" style="background:none;border:none;font-size:34px;min-width:44px;min-height:44px;color:#F2B34C;cursor:pointer" aria-label="${i} étoiles">${i<=5?'★':'☆'}</button>`).join('')}
+      </div>
+    </div>
+    <div class="fgroup"><h4>Votre commentaire</h4>
+      <div class="search" style="margin:0"><input id="rv-txt" placeholder="Ce que vous avez aimé (ou pas)…"></div>
+    </div>`;
+  $('#review-body').dataset.pid=pid;
+  openSheet('sheet-review');
+}
+function setRv(i){reviewRating=i;document.querySelectorAll('#rv-stars button').forEach((b,j)=>{b.textContent=j+1<=i?'★':'☆';});}
+function submitReview(){
+  const pid=$('#review-body').dataset.pid;
+  const txt=document.getElementById('rv-txt')?document.getElementById('rv-txt').value.trim():'';
+  USER_REVIEWS[pid]=USER_REVIEWS[pid]||[];
+  USER_REVIEWS[pid].unshift({n:profile.name, r:reviewRating, d:'À l\\\'instant', t:txt||'Livraison rapide et produits conformes.'});
+  try{localStorage.setItem('lm-reviews',JSON.stringify(USER_REVIEWS));}catch(e){}
+  closeSheets();
+  toast('Merci pour votre avis ('+reviewRating+'★) !');
+  renderProduct(pid);
+}
+const PROMOS={
+  'BIENVENUE10':{type:'pct', v:10, label:'−10 % sur votre première commande'},
+  'LAGON5':{type:'eur', v:5, label:'5 € offerts sur le panier'},
+  'LIVRAISONOFFERTE':{type:'ship', label:'Livraison offerte'},
+};
+let promoCode='';
+function discount(){
+  const st=cartTotal(), p=PROMOS[promoCode];
+  if(!p||st===0)return {amt:0, ship:false};
+  if(p.type==='pct')return {amt:Math.round(st*p.v)/100, ship:false};
+  if(p.type==='eur')return {amt:Math.min(p.v,st), ship:false};
+  return {amt:0, ship:true};
+}
+function promoBlock(){
+  if(promoCode&&PROMOS[promoCode]){
+    return `<div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">🎟</span>
+      <div style="flex:1"><div style="font-weight:800;font-size:13.5px;color:var(--vert)">Code ${promoCode} appliqué</div><div style="font-size:12px;color:var(--ink-2)">${PROMOS[promoCode].label}</div></div>
+      <button class="x" style="display:flex" onclick="rmPromo()" aria-label="Retirer le code">✕</button></div>`;
+  }
+  return `<div style="display:flex;gap:10px;align-items:center">
+    <span style="font-size:20px">🎟</span>
+    <input id="promo-input" class="search" style="flex:1;margin:0;min-height:44px;padding:8px 12px" placeholder="Code promo (ex. BIENVENUE10)">
+    <button class="chip" style="min-height:44px;color:var(--lagon-dark)" onclick="applyPromo()">Appliquer</button></div>
+    <div style="font-size:11.5px;color:var(--ink-3);margin-top:8px">Codes de démonstration : BIENVENUE10, LAGON5, LIVRAISONOFFERTE</div>`;
+}
+function applyPromo(){
+  const el=document.getElementById('promo-input');
+  const code=(el?el.value:'').trim().toUpperCase();
+  if(!code){toast('Entrez d\'abord un code promo');return;}
+  if(!PROMOS[code]){toast('Code « '+code+' » invalide — essayez BIENVENUE10');return;}
+  if(cartTotal()===0){toast('Ajoutez des articles avant d\'appliquer un code');return;}
+  promoCode=code;
+  toast('Code '+code+' appliqué : '+PROMOS[code].label);
+  renderCart();
+}
+function rmPromo(){promoCode='';renderCart();toast('Code promo retiré');}
+let NOTIFS=[];
+function pushNotif(icon,title,body){
+  NOTIFS.unshift({i:icon,t:title,b:body,w:'À l\\\'instant',read:false});
+  if(NOTIFS.length>15)NOTIFS.length=15;
+  toast(title+' · '+body);
+}
+function seedNotifs(){
+  pushNotif('👋','Bienvenue sur Lagon Market','Première commande ? Le code BIENVENUE10 vous offre −10 %.');
+  pushNotif('🥭','Nouveauté chez votre primeur','La mangue Judy fait son retour cette semaine.');
+}
+function openNotifs(){
+  renderNotifs();
+  openSheet('sheet-notifs');
+  NOTIFS.forEach(n=>n.read=true);
+}
+function renderNotifs(){
+  $('#notifs-body').innerHTML=NOTIFS.length?NOTIFS.map(n=>`
+    <div style="padding:12px 2px;border-bottom:1px solid var(--line);opacity:${n.read?'.7':'1'}">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:20px">${n.i}</span>
+        <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px">
+          <span style="font-weight:800;font-size:13.5px">${n.t}</span>
+          <span style="font-size:11.5px;color:var(--ink-3);white-space:nowrap">${n.read?'':'<span style="color:var(--corail)">●</span> '}${n.w}</span></div>
+          <div style="font-size:12.5px;color:var(--ink-2);line-height:1.5;margin-top:2px">${n.b}</div></div>
+      </div>
+    </div>`).join('')
+    :'<p style="text-align:center;color:var(--ink-3);font-size:13.5px;padding:24px 0">Aucune notification pour le moment.</p>';
+}
+
+/* ================= LOT 6 — FAVORIS / RÉORDONNER / BANDEAU PUSH ================= */
+let FAVS=[];
+try{const f=JSON.parse(localStorage.getItem('lm-favs'));if(Array.isArray(f))FAVS=f;}catch(e){}
+function isFav(id){return FAVS.indexOf(id)>=0;}
+function tFav(id){
+  const before=FAVS.length;
+  const i=FAVS.indexOf(id);
+  if(i>=0){FAVS.splice(i,1);toast('Retiré des favoris');}else{FAVS.unshift(id);toast('Ajouté aux favoris ❤');}
+  try{localStorage.setItem('lm-favs',JSON.stringify(FAVS));}catch(e){}
+  if($('#s-home').classList.contains('active')&&(before===0||FAVS.length===0))renderHome();
+  document.querySelectorAll('.fav[data-fid="'+id+'"]').forEach(b=>{b.classList.toggle('on',isFav(id));b.textContent=isFav(id)?'♥':'♡';});
+}
+function favSection(){
+  const items=FAVS.map(id=>prod(id)).filter(Boolean);
+  if(!items.length)return '';
+  return `<div class="sec-h"><h2>Vos favoris</h2><span style="font-size:12px;font-weight:700;color:var(--corail)">${items.length} article${items.length>1?'s':''}</span></div>
+    <div class="hrow">${items.slice(0,6).map(p=>pcard(p)).join('')}</div>`;
+}
+let homePushDismissed=false;
+function pushBanner(){
+  if(homePushDismissed||!lastOrder||lastOrder.status>=4)return '';
+  const label={1:'Commande confirmée',2:'Préparation en cours',3:'Livreur à '+trackEta.mins+' min'}[lastOrder.status]||'Commande en cours';
+  return `<div class="card" style="margin:12px 16px 0;padding:12px 14px;display:flex;align-items:center;gap:10px;background:var(--lagon-soft);border-color:var(--lagon-soft)">
+    <span style="font-size:20px">${lastOrder.status>=3?'🛵':'🧾'}</span>
+    <div style="flex:1;min-width:0" onclick="goTrack()"><div style="font-weight:800;font-size:13px;color:var(--lagon-dark)">Commande ${lastOrder.id} — ${label}</div><div style="font-size:11.5px;color:var(--ink-2)">Toucher pour suivre la livraison</div></div>
+    <button class="x" style="display:flex" onclick="event.stopPropagation();homePushDismissed=true;renderHome()" aria-label="Fermer">✕</button></div>`;
+}
+function reorder(id){
+  const o=orders.find(x=>x.id===id);
+  if(!o||!o.items||!o.items.length){toast('Articles de cette commande indisponibles pour la réordonnance');return;}
+  let added=0, skipped=0;
+  o.items.forEach(it=>{
+    const p=prod(it.id);
+    if(!p||p.st===0){skipped++;return;}
+    cart[it.id]=Math.min((cart[it.id]||0)+(it.q||1),p.st);
+    if((it.q||1)>p.st)skipped++;
+    added++;
+  });
+  refreshBadges();rerenderAllCardActions();renderCart();
+  if(added===0){toast('Aucun article disponible — tout est en rupture');return;}
+  toast(added+' article'+(added>1?'s':'')+' réordonné'+(added>1?'s':'')+(skipped?' · '+skipped+' en rupture ignoré'+(skipped>1?'s':''):''),{label:'Voir le panier',fn:goCart});
+}
+
+/* ================= LOT 7 — RECHERCHE / ZONES COUVERTES / ONBOARDING ================= */
+const noAcc=s=>String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+let query='', searchMode=false;
+function matchesQuery(p){const qq=noAcc(query.trim());return !qq||noAcc(p.n+' '+p.b+' '+(p.sub||'')+' '+(p.f||'')).indexOf(qq)>=0;}
+function renderSugg(){
+  const box=document.getElementById('sugg');if(!box)return;
+  const res=query.trim()?P.filter(matchesQuery).slice(0,5):[];
+  box.innerHTML=res.length?res.map(p=>`<div role="button" onclick="openSearchResult('${p.id}')" style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer">
+      <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,${p.g[0]},${p.g[1]});display:flex;align-items:center;justify-content:center;font-size:17px;flex:none">${p.e}</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px">${p.n}</div><div style="font-size:11.5px;color:var(--ink-3)">${p.b} · ${p.f}</div></div>
+      <span style="font-weight:800;font-size:12.5px;color:var(--lagon-dark)">${eur(p.pr)}</span></div>`).join('')
+    :(query.trim()?`<div style="padding:14px;font-size:12.5px;color:var(--ink-3);text-align:center">Aucun produit ici — appuyez sur Entrée pour chercher « ${query} » dans tout le catalogue</div>`:'');
+  box.style.display=!!query.trim()?'block':'none';
+}
+const ZONES=[
+  {t:'Orient Bay', s:'Villas entre Pinel et la baie — votre secteur', ok:true, nfo:'Tous les jours · dès 8 h'},
+  {t:'Cul de Sac', s:'Résidences du littoral', ok:true, nfo:'Tous les jours · dès 8 h · livreur à ~45 min'},
+  {t:'Anse Marcel', s:'Villas du fond de baie', ok:true, nfo:'Sur créneau du matin'},
+  {t:'Grand-Case', s:'Village et environs', ok:false, when:'Prochain mois'},
+  {t:'Marigot', s:'Centre-ville et Marina', ok:false, when:'Prochain trimestre'},
+  {t:'Philipsburg', s:'Front de mer', ok:false, when:'2026'},
+];
+function goZones(){lastScreen=document.querySelector('.screen.active').id.slice(2);renderZones();go('zones');}
+function exitZones(){go(lastScreen&&lastScreen!=='zones'?lastScreen:'home');}
+function renderZones(){
+  $('#zones-body').innerHTML=`
+    <div class="fade-in">
+      <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:8px 16px 0">Lagon Market livre la baie d'Orient et se développe île par île. Votre adresse actuelle : <b>${activeAddr.t}</b>.</p>
+      <div class="card" style="margin:12px 16px 0;padding:4px 16px">
+        ${ZONES.map(z=>`
+        <div class="opt" style="align-items:flex-start">
+          <div class="addr-ic" style="background:${z.ok?'var(--lagon-soft)':'var(--ambre-soft)'}">${z.ok?'📍':'⏳'}</div>
+          <div style="flex:1;min-width:0"><div style="font-weight:800">${z.t}</div><div class="sub">${z.s||''}</div>
+            ${z.ok?`<div style="font-size:11.5px;color:var(--lagon-dark);font-weight:700;margin-top:2px">${z.nfo}</div>`
+              :`<div style="font-size:11.5px;color:var(--ink-3);font-weight:700;margin-top:2px">Ouverture : ${z.when}</div>`}</div>
+          <span class="tag ${z.ok?'bio':'frais'}" style="${z.ok?'':'background:var(--ambre-soft);color:#8a6d1a'}">${z.ok?'Couvert':'Bientôt'}</span>
+        </div>`).join('')}
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-primary" onclick="openSheet('sheet-addr')">Choisir mon adresse de livraison</button>
+        <p style="text-align:center;font-size:11.5px;color:var(--ink-3)">Une zone manque ? Écrivez-nous sur WhatsApp : elle priorise la liste.</p>
+      </div>
+    </div>`;
+}
+const OB=[
+  {e:'🛒', t:'Vos courses, livrées à la villa', d:'Produits frais du jour, paniers prêts à livrer, et la livraison à l\'heure à Orient Bay.'},
+  {e:'🧺', t:'Un panier prêt à livrer', d:'Apéro, BBQ, bateau ou petit-déjeuner : un tap sur « Ajouter tout », et la villa est approvisionnée.'},
+  {e:'🛵', t:'Suivez votre livreur', d:'Position en temps réel, créneau confirmé, et le règlement n\'est encaissé qu\'après la livraison réussie.'},
+];
+let obStep=0;
+function maybeOnboard(){
+  let seen;try{seen=localStorage.getItem('lm-onboarded');}catch(e){}
+  if(seen)return;
+  obStep=0;renderOnboard();
+  const o=document.getElementById('onboard');if(o)o.style.display='flex';
+}
+function renderOnboard(){
+  const s=OB[obStep];
+  $('#onboard').innerHTML=`
+    <button onclick="obFinish()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:800;font-size:12.5px;min-height:44px;cursor:pointer;font-family:inherit">Passer</button>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px">
+      <div style="font-size:88px">${s.e}</div>
+      <h2 style="font-size:26px;margin-top:18px;color:#fff;line-height:1.25">${s.t}</h2>
+      <p style="color:rgba(255,255,255,.85);font-size:14px;line-height:1.6;margin-top:12px">${s.d}</p>
+    </div>
+    <div style="padding:0 24px 30px">
+      <div style="display:flex;gap:7px;justify-content:center;margin-bottom:18px">${OB.map((_,i)=>`<span style="width:${i===obStep?20:7}px;height:7px;border-radius:99px;background:${i===obStep?'#fff':'rgba(255,255,255,.4)'};transition:width .25s"></span>`).join('')}</div>
+      <div style="display:flex;gap:10px">
+        ${obStep>0?`<button style="flex:1;min-height:48px;border:none;border-radius:14px;background:rgba(255,255,255,.18);color:#fff;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit" onclick="obNav(-1)">Retour</button>`:''}
+        <button style="flex:2;min-height:48px;border:none;border-radius:14px;background:#fff;color:var(--lagon-dark);font-weight:800;font-size:15px;cursor:pointer;font-family:inherit" onclick="${obStep<OB.length-1?'obNav(1)':'obFinish()'}">${obStep<OB.length-1?'Suivant':'Commencer'}</button>
+      </div>
+    </div>`;
+}
+function obNav(d){obStep=Math.max(0,Math.min(OB.length-1,obStep+(d||1)));renderOnboard();}
+function obFinish(){
+  try{localStorage.setItem('lm-onboarded','1');}catch(e){}
+  const o=document.getElementById('onboard');if(o)o.style.display='none';
+  toast('Bienvenue à bord 👋');
+}
+
+/* ================= DÉMARRAGE ================= */
+loadConfig();
+renderAddr();
+$('#home-body').innerHTML=homeSkeleton();
+setTimeout(renderHome,700);
+renderCatalog();
+maybeOnboard();
+</script>
+</body>
+</html>
