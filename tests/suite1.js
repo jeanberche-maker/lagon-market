@@ -1,0 +1,32 @@
+/* ---- Suite de tests ---- */
+var results=[];
+function T(name,fn){try{fn();results.push('PASS '+name);}catch(e){results.push('FAIL '+name+' -> '+(e&&e.message||e));}}
+T('startup implicite (data + aides)', function(){ if(!P.length||!BASKETS.length||!CATS.length) throw new Error('données vides'); });
+T('renderHome', function(){ renderHome(); });
+T('renderHome hors zone', function(){ demo.home='zone'; renderHome(); demo.home='normal'; });
+T('renderHome erreur réseau', function(){ demo.home='error'; renderHome(); demo.home='normal'; });
+T('renderCatalog', function(){ renderCatalog(); });
+T('renderCatalog erreur', function(){ demo.catalog='error'; renderCatalog(); demo.catalog='normal'; renderCatalog(); });
+T('filtre prix', function(){ tPrice('p1',el()); tPrice('p2',el()); if(filtered().some(p=>p.pr>=10)) throw new Error('filtre prix non appliqué'); tPrice('p1',el()); tPrice('p2',el()); });
+T('filtres booléens + tags + reset', function(){ toggleFilter('bio',el()); if(!filters.bio) throw new Error('toggle KO'); renderTags(); rmTag({dataset:{tag:'bio',tv:'Bio'}}); if(filters.bio) throw new Error('rmTag KO'); });
+T('filtre marque', function(){ tBrand('Verger du Sud',el()); if(!filters.marques.has('Verger du Sud')) throw new Error('marque KO'); tBrand('Verger du Sud',el()); });
+T('filtre végétarien', function(){ toggleFilter('veg',el()); if(filtered().some(p=>p.cat==='mer')) throw new Error('veg KO'); toggleFilter('veg',el()); });
+T('filtre dispo + promo + état vide', function(){ toggleFilter('dispo',el()); toggleFilter('promo',el()); tPrice('p4',el()); if(filtered().length!==0) throw new Error('attendu vide'); renderGrid(); resetFilters(); });
+T('tri prix croissant/décroissant', function(){ sort='p-asc'; var l=filtered(); for(var i=1;i<l.length;i++){ if(l[i-1].pr>l[i].pr) throw new Error('ordre asc KO'); } sort='p-desc'; var l2=filtered(); for(var j=1;j<l2.length;j++){ if(l2[j-1].pr<l2[j].pr) throw new Error('ordre desc KO'); } pickSort('pert','pertinence'); });
+T('openCat sous-catégorie', function(){ openCat('fruits'); activeSub='Exotiques'; renderCatalog(); activeSub='Tout'; });
+T('renderProduct (ananas)', function(){ renderProduct('ananas'); });
+T('openProduct depuis accueil', function(){ openProduct('mahimahi'); });
+T('addToCart panier courant', function(){ addToCart('ananas'); if(cart.ananas!==1) throw new Error('panier KO'); });
+T('toast avec action', function(){ toast('test',{label:'OK',fn:function(){}}); });
+T('uCard + / − / poubelle', function(){ uCard('brie',1,null); if(cart.brie!==1) throw new Error('+ KO'); uCard('brie',1,null); if(cart.brie!==2) throw new Error('+2 KO'); uCard('brie',-1,null); if(cart.brie!==1) throw new Error('- KO'); uCard('brie',-1,null); if(cart.brie) throw new Error('poubelle KO'); });
+T('plafond de stock', function(){ var st=prod('mahimahi').st; for(var i=0;i<st+2;i++)uCard('mahimahi',1,null); if(cart.mahimahi!==st) throw new Error('plafond KO'); delete cart.mahimahi; });
+T('rupture accueil : Me prévenir', function(){ var h=pcard(prod('avocat')); if(h.indexOf('Me prévenir')<0||h.indexOf('Rupture')<0) throw new Error('carte rupture KO'); });
+T('openBasket + ajout groupé', function(){ openBasket('apero'); });
+T('openRemplacements', function(){ openRemplacements('avocat'); });
+T('stock faible (mahi-mahi)', function(){ renderProduct('mahimahi'); });
+T('fiche rupture via démo', function(){ demo.product='rupture'; renderProduct('poulet'); demo.product='normal'; renderProduct('poulet'); });
+T('produit retiré via démo', function(){ demo.product='gone'; renderProduct('poulet'); demo.product='normal'; });
+T('hors zone : ajouter en fiche', function(){ pickAddr('cul'); renderProduct('ananas'); addToCart('ananas'); if(activeAddr.ok) throw new Error('flux zone KO'); pickAddr('azur'); });
+T('lire la suite : chaîne générée', function(){ renderProduct('baguette'); });
+T('skeleton accueil', function(){ homeSkeleton(); });
+console.log(results.join('\n'));

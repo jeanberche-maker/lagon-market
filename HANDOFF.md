@@ -11,9 +11,12 @@ Prototype cliquable d'une app mobile de livraison de courses à Orient Bay (Sain
 
 ```text
 untitled folder/
-├── index.html   ← tout le prototype (HTML + CSS + JS)
-├── README.md    ← documentation par lot + déploiement
-└── HANDOFF.md   ← ce document
+├── index.html              ← tout le prototype (HTML + CSS + JS)
+├── README.md               ← documentation par lot + déploiement
+├── HANDOFF.md              ← ce document
+├── manifest.json / sw.js / icons/  ← PWA installable
+├── .github/workflows/test.yml      ← CI (runner macOS, rejoue les tests)
+└── tests/                  ← stub DOM + suites (build.sh, run.sh)
 ```
 
 ## 3. Design system (figé, à respecter)
@@ -94,13 +97,12 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
 
 ## 7. Tests (harnais JavaScriptCore)
 
-76 tests PASS / 0 FAIL — reconstruits à chaque lot depuis le fichier live :
+76 tests PASS / 0 FAIL — reconstruits à chaque lot depuis le fichier live, rejouables par une seule commande macOS :
 
 ```bash
-awk '/<script>/{f=1;next}/<\/script>/{f=0}f' index.html | sed 's/const \$=.*$/const qs=s=>document.querySelector(s);/; s/\$(/qs(/g' > app.js
-# + stub DOM (Proxy) + suites → osascript -l JavaScript
+bash tests/run.sh        # reconstruit le harnais + exécute + exit 1 si FAIL
 ```
-Couverture : rendus d'écran, filtres/tris/recherche, plafonds de stock, remises promo, avis, notifications, favoris, réordonnance, push, zones, onboarding, flux complet de bout en bout.
+Après chaque évolution, étendre une suite dans `tests/suite*.js` (stub DOM + `renderX()` + asserts) puis relancer `tests/run.sh` — la CI GitHub rejoue le tout sur chaque push.
 ⚠ Toute évolution doit relancer cette suite (conserver les suites `/tmp/tests5.js`, `tests6.js`, `tests7.js`).
 ⚠ Réserve : exécution via JavaScriptCore + DOM simulé ≠ rendu navigateur réel ; vérification visuelle à faire à l'œil.
 

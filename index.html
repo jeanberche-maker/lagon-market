@@ -3,7 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lagon Market — Lot 1</title>
+<title>Lagon Market — Courses livrées à Orient Bay</title>
+<meta name="description" content="Prototype cliquable d'app mobile : paniers prêts à livrer, produits frais du jour, suivi du livreur en temps réel — Orient Bay, Saint-Martin.">
+<meta name="theme-color" content="#0FA3A3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lagon Market">
+<meta property="og:title" content="Lagon Market — prototype cliquable">
+<meta property="og:description" content="App de livraison de courses à Orient Bay — 7 lots, 76 tests JavaScriptCore.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icons/icon-512.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1592,6 +1604,7 @@ $('#home-body').innerHTML=homeSkeleton();
 setTimeout(renderHome,700);
 renderCatalog();
 maybeOnboard();
+if(typeof navigator!=='undefined'&&typeof location!=='undefined'&&location.protocol==='https:'&&'serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 </script>
 </body>
 </html>
