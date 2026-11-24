@@ -1,6 +1,6 @@
 # HANDOFF.md — Passation projet « Lagon Market » (à coller à un assistant IA)
 
-> Document d'handoff : l'état exact du prototype après 7 lots de développement.
+> Document d'handoff : l'état exact du prototype après 8 lots de développement.
 > À fournir tel quel à un assistant (Claude ou autre) pour poursuivre le travail.
 
 ## 1. Le projet en une phrase
@@ -94,10 +94,23 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
 3. **Paramètres modulation** : frais, seuil de gratuité, WhatsApp, créneaux — éditables et persistés.
 4. Notifs : fictives, simulation locale, plafond 15.
 5. Règlement encaissé seulement après livraison réussie (sémantique affichée).
+6. **Lot 8 — UX mobile** (`index.html`) :
+   - meta viewport `viewport-fit=cover` + `.top{padding-top:calc(14px + env(safe-area-inset-top))}` en mobile → contenu jamais sous l'encoche en PWA standalone (status bar `black-translucent`) ;
+   - `height:100dvh` (fallback `100vh`) sur `.phone` en mobile → plus de décalage avec la barre d'URL Safari ;
+   - inputs `.search` à **16px** → iOS ne zoome plus l'écran au focus ;
+   - cibles élargies : `.plus` et `.stepper` à 44px (règle des 44px respectée partout) ;
+   - `touch-action:manipulation` sur les éléments cliquables (pas de délai de 300 ms ni de double-tap zoom) ;
+   - `user-select:none` global (:text sur les champs) + `-webkit-touch-callout:none` (pas de menu long-press) ;
+   - feedback immédiat : `:active` avec `scale(.97)` sur cartes/boutons/chips, `opacity` sur icones/nav ;
+   - **haptique** : `haptic(ms)` (guard `typeof navigator`) vibre sur addToCart/uCard — silencieux si non supporté ;
+   - **feuilles fermer-par-glissement** : `sheetSwipe()` — glisser ≥ 90 px vers le bas sur l'en-tête ferme la feuille (le scroll interne `.sh-in` n'est pas intercepté) ;
+   - `overscroll-behavior:none` sur html/body → pas de pull-to-refresh parasite ;
+   - meta `mobile-web-app-capable` pour Chrome Android.
+   - Tests : `tests/suite8.js` (18 tests) + harnais enrichi — `build.sh` expose le HTML brut dans la variable globale `RAW_HTML` (assertions CSS/meta possibles) et le stub fournit un `navigator.vibrate` espion (`VIBES`).
 
 ## 7. Tests (harnais JavaScriptCore)
 
-76 tests PASS / 0 FAIL — reconstruits à chaque lot depuis le fichier live, rejouables par une seule commande macOS :
+94 tests PASS / 0 FAIL (suite8 = Lot 8 UX mobile : 18 tests CSS/meta + haptique + swipe) — reconstruits à chaque lot depuis le fichier live, rejouables par une seule commande macOS :
 
 ```bash
 bash tests/run.sh        # reconstruit le harnais + exécute + exit 1 si FAIL

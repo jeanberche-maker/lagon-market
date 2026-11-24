@@ -29,6 +29,8 @@ var document={
   body:el()
 };
 var localStorage={_s:{},getItem(k){return this._s[k]||null},setItem(k,v){this._s[k]=String(v)},removeItem(k){delete this._s[k]}};
+var VIBES=[]; // espion haptique (Lot 8)
+var navigator={vibrate:function(m){VIBES.push(m||0);return true;}};
 var setTimeout=(fn,ms)=>0;
 var clearTimeout=(t)=>{};
 

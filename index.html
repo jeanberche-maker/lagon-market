@@ -2,15 +2,16 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Lagon Market — Courses livrées à Orient Bay</title>
 <meta name="description" content="Prototype cliquable d'app mobile : paniers prêts à livrer, produits frais du jour, suivi du livreur en temps réel — Orient Bay, Saint-Martin.">
 <meta name="theme-color" content="#0FA3A3">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Lagon Market">
 <meta property="og:title" content="Lagon Market — prototype cliquable">
-<meta property="og:description" content="App de livraison de courses à Orient Bay — 7 lots, 76 tests JavaScriptCore.">
+<meta property="og:description" content="App de livraison de courses à Orient Bay — 8 lots, 94 tests JavaScriptCore.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icons/icon-512.png">
 <link rel="manifest" href="manifest.json">
@@ -32,16 +33,17 @@
   --sans:'Manrope', -apple-system, 'Segoe UI', sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+html,body{height:100%;overscroll-behavior:none}
 body{font-family:var(--sans);color:var(--ink);background:#E9E4DB;display:flex;align-items:center;justify-content:center;min-height:100vh}
 h1,h2,h3,.serif{font-family:var(--serif)}
 button{font-family:var(--sans);border:none;background:none;cursor:pointer;color:inherit}
 input{font-family:var(--sans)}
 a{text-decoration:none;color:inherit}
+[onclick]{touch-action:manipulation}
 
 /* ---- Cadre téléphone ---- */
 .phone{position:relative;width:402px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.28),0 0 0 10px #14201F}
-@media (max-width:460px){body{background:var(--bg)}.phone{width:100vw;height:100vh;border-radius:0;box-shadow:none}}
+@media (max-width:460px){body{background:var(--bg)}.phone{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none}.top{padding-top:calc(14px + env(safe-area-inset-top))}}
 
 /* ---- Écrans ---- */
 .screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg)}
@@ -105,13 +107,13 @@ a{text-decoration:none;color:inherit}
 .pcard .row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:6px}
 .pcard .p{font-weight:800;font-size:14.5px}
 .pcard .u{font-size:10.5px;color:var(--ink-3);font-weight:600}
-.plus{width:40px;height:40px;border-radius:13px;background:var(--lagon);color:#fff;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(15,163,163,.35);flex:none}
+.plus{width:44px;height:44px;border-radius:14px;background:var(--lagon);color:#fff;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(15,163,163,.35);flex:none}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 16px 8px}
 .grid .pcard{width:auto}
 
 /* Stepper */
-.stepper{display:flex;align-items:center;background:var(--lagon);border-radius:13px;color:#fff;height:40px;overflow:hidden}
-.stepper button{width:38px;height:40px;color:#fff;font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.stepper{display:flex;align-items:center;background:var(--lagon);border-radius:13px;color:#fff;height:44px;overflow:hidden}
+.stepper button{width:46px;height:44px;color:#fff;font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center}
 .stepper .q{min-width:20px;text-align:center;font-weight:800;font-size:14px}
 
 /* Barre nav bas */
@@ -188,7 +190,7 @@ a{text-decoration:none;color:inherit}
 
 /* Recherche */
 .search{margin:4px 16px 12px;display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:0 14px;min-height:48px}
-.search input{border:none;outline:none;flex:1;font-size:14.5px;background:none;color:var(--ink);min-width:0}
+.search input{border:none;outline:none;flex:1;font-size:16px;background:none;color:var(--ink);min-width:0}
 .search input::placeholder{color:var(--ink-3)}
 .empty{text-align:center;padding:36px 28px}
 .empty .e{font-size:44px}
@@ -207,6 +209,14 @@ a{text-decoration:none;color:inherit}
 .demo .dd .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-3);padding:4px 10px 2px}
 .fade-in{animation:fi .35s ease}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---- Lot 8 : confort mobile ---- */
+*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+.pcard,.basket{transition:transform .12s ease}
+.pcard:active,.basket:active,.btn:active,.chip:active{transform:scale(.97)}
+.icon-btn:active,.nav-it:active,.opt:active,.x:active,.addr:active{opacity:.6}
+.plus:active{filter:brightness(.85)}
 </style>
 </head>
 <body>
@@ -561,7 +571,32 @@ const prod=id=>P.find(p=>p.id===id);
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$('#s-'+id).classList.add('active');$('#s-'+id+' .body')&&($('#s-'+id+' .body').scrollTop=0);if(id==='home')lastScreen='home';}
 function openSheet(id){closeSheets(true);$('#'+id).classList.add('open');$('#scrim').classList.add('show');}
 function closeSheets(keepScrim){document.querySelectorAll('.sheet.open').forEach(s=>s.classList.remove('open'));if(!keepScrim)$('#scrim').classList.remove('show');}
+function sheetSwipe(sh){
+  if(typeof document.querySelectorAll!=='function')return;
+  let y0=null,dy=0;
+  sh.addEventListener('touchstart',e=>{
+    if(!sh.classList.contains('open'))return;
+    const t=e.target;
+    if(t&&t.closest&&t.closest('.sh-in'))return; // ne pas voler le scroll interne
+    y0=e.touches[0].clientY;sh.style.transition='none';
+  },{passive:true});
+  sh.addEventListener('touchmove',e=>{
+    if(y0===null)return;
+    dy=Math.max(0,e.touches[0].clientY-y0);
+    sh.style.transform='translateY('+dy+'px)';
+  },{passive:true});
+  sh.addEventListener('touchend',()=>{
+    if(y0===null)return;
+    sh.style.transition='';sh.style.transform='';
+    if(dy>90)closeSheets();
+    y0=null;dy=0;
+  },{passive:true});
+}
+if(typeof document.querySelectorAll==='function')document.querySelectorAll('.sheet').forEach(sheetSwipe);
 let toastT;
+function haptic(ms){
+  try{ if(typeof navigator!=='undefined'&&navigator.vibrate) navigator.vibrate(ms||10); }catch(e){}
+}
 function toast(msg, act){
   const t=$('#toast');$('#toast-msg').textContent=msg;const b=$('#toast-act');
   if(act){b.style.display='';b.textContent=act.label;b.onclick=()=>{t.classList.remove('show');act.fn();};}
@@ -688,6 +723,7 @@ function uCard(id,d,ev){
   if(q<=0) delete cart[id];
   else if(q>p.st) return stockLimit(p);
   else cart[id]=q;
+  haptic(8);
   refreshBadges();refreshCardAction(id);
   if(q===1) toast(p.n+' ajouté au panier',{label:'Voir le panier',fn:()=>goCart()});
 }
@@ -900,6 +936,7 @@ function addToCart(id){
   if(!activeAddr.ok){document.getElementById('zone-addr').textContent=activeAddr.s.replace(' — zone non couverte','');openSheet('sheet-zone');return;}
   const q=(cart[id]||0)+1;
   if(q>p.st)return stockLimit(p);
+  haptic(12);
   cart[id]=q;refreshBadges();refreshCardAction(id);syncPbar(p);
   toast(p.n+' ajouté au panier',{label:'Voir le panier',fn:()=>goCart()});
 }
