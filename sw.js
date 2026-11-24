@@ -1,5 +1,7 @@
-/* Lagon Market — service worker minimaliste (cache-first, offline friendly) */
-const CACHE = 'lagon-v1';
+/* Lagon Market — service worker (offline friendly, catalogue toujours frais)
+   Règle spéciale Lot 9 : products.json est network-first — la donnée produits
+   ne peut pas rester figée dans le cache ; le cache n'est qu'un secours hors-ligne. */
+const CACHE = 'lagon-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -14,7 +16,24 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (new URL(e.request.url).origin !== location.origin) return;
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+
+  /* products.json : réseau d'abord → cache en secours (données fraîches) */
+  if (url.pathname.endsWith('products.json')) {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, copy));
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  /* le reste : cache-first (app shell immuable) */
   e.respondWith(
     caches.match(e.request).then(
       (hit) =>

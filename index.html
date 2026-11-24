@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Lagon Market">
 <meta property="og:title" content="Lagon Market — prototype cliquable">
-<meta property="og:description" content="App de livraison de courses à Orient Bay — 8 lots, 94 tests JavaScriptCore.">
+<meta property="og:description" content="App de livraison de courses à Orient Bay — 9 lots, 163 tests JavaScriptCore, catalogue vivant (products.json).">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icons/icon-512.png">
 <link rel="manifest" href="manifest.json">
@@ -502,7 +502,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 
 <script>
 /* ================= DONNÉES ================= */
-const P = [
+let P = [
   {id:'ananas', n:'Ananas Victoria', b:'Verger du Sud', f:'pièce ~1,2 kg', pr:4.5, u:'6,80 €/kg', e:'🍍', g:['#FDF0DC','#F7C86B'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour','Bio'], st:12, d:"Plein soleil de Saint-Martin, sucré et parfumé. Cocktail, jus ou nature au bord de la piscine — la découpe est offerte sur demande."},
   {id:'corossol', n:'Corossol', b:'Ferme Colombier', f:'pièce ~700 g', pr:6.9, u:'9,40 €/kg', e:'🍈', g:['#E8F6E8','#9FD9A5'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour'], st:5, d:"Chair crémeuse à la saveur acidulée, parfait en sorbet ou en smoothie du matin."},
   {id:'tomate', n:'Tomates grappe', b:'La Savanne', f:'botte 500 g', pr:3.4, u:'6,80 €/kg', e:'🍅', g:['#FBE4E1','#F0917F'], cat:'fruits', sub:'Légumes', bd:['Frais du jour'], st:24, d:"Cultivées sur l'île, goût de tomate retrouvé. Parfaites en salade ou confites au four."},
@@ -1634,8 +1634,48 @@ function obFinish(){
   toast('Bienvenue à bord 👋');
 }
 
+/* ===== Lot 9 — catalogue vivant : products.json (remote → cache → embarqué) ===== */
+const CAT_URL='products.json', CAT_TTL=5*60*1000;
+let catalogFetcher=(typeof fetch==='function')?function(u){return fetch(u,{cache:'no-store'});}:null;
+function parseCatalog(txt){
+  const list=JSON.parse(txt);
+  if(!Array.isArray(list)||!list.length)throw new Error('catalogue vide ou invalide');
+  list.forEach(p=>{ if(!p||!p.id||!p.n||typeof p.pr!=='number') throw new Error('produit invalide : '+String(p&&p.id||'?')); });
+  return list;
+}
+function mergeCatalog(list){
+  const same=JSON.stringify(P)===JSON.stringify(list);
+  P=list;
+  try{ localStorage.setItem('lm-catalog',JSON.stringify(list)); localStorage.setItem('lm-catalog-ts',String(Date.now())); }catch(e){}
+  renderHome();renderCatalog();renderCart();refreshBadges();
+  if(openPid&&prod(openPid))renderProduct(openPid);
+  return same;
+}
+function catalogStale(){ try{ return Date.now()-(+localStorage.getItem('lm-catalog-ts')||0)>CAT_TTL; }catch(e){ return true; } }
+function refreshCatalog(force){
+  if(typeof catalogFetcher!=='function')return Promise.resolve(false);
+  if(!force&&!catalogStale())return Promise.resolve(false);
+  return catalogFetcher(CAT_URL+'?maj='+Date.now()).then(function(r){
+    if(!r||!r.ok)throw new Error('HTTP '+String(r&&r.status||'?'));
+    return r.text();
+  }).then(function(t){
+    const list=parseCatalog(t);
+    const same=mergeCatalog(list);
+    if(!same)toast('Catalogue mis à jour ('+list.length+' produits)');
+    return true;
+  }).catch(function(){ return false; });
+}
+function initCatalog(){
+  try{ const c=localStorage.getItem('lm-catalog'); if(c){ P=parseCatalog(c); } }catch(e){}
+  renderCatalog();
+  refreshCatalog(false);
+  if(typeof setInterval==='function')setInterval(function(){refreshCatalog(false);},CAT_TTL);
+  if(typeof document!=='undefined'&&document.addEventListener)document.addEventListener('visibilitychange',function(){ if(!document.hidden&&catalogStale())refreshCatalog(false); });
+}
+
 /* ================= DÉMARRAGE ================= */
 loadConfig();
+initCatalog();
 renderAddr();
 $('#home-body').innerHTML=homeSkeleton();
 setTimeout(renderHome,700);

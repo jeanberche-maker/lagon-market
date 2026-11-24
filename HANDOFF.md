@@ -1,6 +1,6 @@
 # HANDOFF.md — Passation projet « Lagon Market » (à coller à un assistant IA)
 
-> Document d'handoff : l'état exact du prototype après 8 lots de développement.
+> Document d'handoff : l'état exact du prototype après 9 lots de développement.
 > À fournir tel quel à un assistant (Claude ou autre) pour poursuivre le travail.
 
 ## 1. Le projet en une phrase
@@ -108,9 +108,18 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
    - meta `mobile-web-app-capable` pour Chrome Android.
    - Tests : `tests/suite8.js` (18 tests) + harnais enrichi — `build.sh` expose le HTML brut dans la variable globale `RAW_HTML` (assertions CSS/meta possibles) et le stub fournit un `navigator.vibrate` espion (`VIBES`).
 
+7. **Lot 9 — catalogue vivant** (`index.html` + `products.json` + `sw.js`) :
+   - `P` est passé en `let` : la liste produits est **remplaçable à chaud** ;
+   - `products.json` à la racine (19 produits, générés depuis les données embarquées) = source canonique, éditable sur github.com sans build ;
+   - chaînage de repli : **réseau → cache `lm-catalog` → données embarquées** ; jamais d'écran vide ;
+   - fonctions : `parseCatalog` (validation : array non vide, chaque produit requiert `id`, `n`, `pr` numérique), `mergeCatalog` (remplace `P`, persiste `lm-catalog` + `lm-catalog-ts`, rejoue renders : home/catalog/cart/badges + fiche ouverte via `openPid`, retourne `true` si contenu inchangé), `catalogStale` (TTL `CAT_TTL` = 5 min), `refreshCatalog(force)` (anti-rebond TTL, cache-buster `?maj=`, toast « Catalogue mis à jour » seulement si le contenu a changé), `initCatalog` (applique le cache au démarrage, tolère un cache corrompu) ;
+   - périodicité : timer `setInterval(CAT_TTL)` + `visibilitychange` (si périmé) ; `catalogFetcher` injectable (fallbacks : `typeof fetch` ; absent en JXA → no-op silencieux) ;
+   - `sw.js` v2 : **network-first pour `products.json`** (le catalogue ne reste jamais figé en cache), cache-first inchangé pour l'app shell ;
+   - Tests : `tests/suite9.js` (19 tests) ; `run.sh` affiche désormais `✓ TOTAL : N tests uniques PASS · 0 FAIL` (compte dédupliqué — les vieux résumés de suites étaient trompeurs : le vrai total est 163, pas 76/94).
+
 ## 7. Tests (harnais JavaScriptCore)
 
-94 tests PASS / 0 FAIL (suite8 = Lot 8 UX mobile : 18 tests CSS/meta + haptique + swipe) — reconstruits à chaque lot depuis le fichier live, rejouables par une seule commande macOS :
+163 tests uniques PASS / 0 FAIL (suite9 = Lot 9 catalogue vivant : 19 tests parse/merge/fraîcheur/cache) — reconstruits à chaque lot depuis le fichier live, `run.sh` affiche un total global dédupliqué :
 
 ```bash
 bash tests/run.sh        # reconstruit le harnais + exécute + exit 1 si FAIL

@@ -27,4 +27,4 @@ T8('sheetSwipe : glisser vers le bas ferme la feuille', function(){ if(typeof sh
 T8('pas de régression : rendus principaux OK', function(){ renderHome(); renderCatalog(); renderProduct('ananas'); renderCart(); });
 
 results.forEach(r=>console.log(r));
-console.log('--- RÉSUMÉ-L7 : '+results.filter(r=>r.indexOf('PASS')===0).length+' PASS · '+results.filter(r=>r.indexOf('FAIL')===0).length+' FAIL');
+console.log('--- RÉSUMÉ-L8 : '+results.filter(r=>r.indexOf('PASS')===0).length+' PASS · '+results.filter(r=>r.indexOf('FAIL')===0).length+' FAIL');

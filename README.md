@@ -1,10 +1,10 @@
-# Lagon Market — Prototypes Lot 1 → Lot 8
+# Lagon Market — Prototypes Lot 1 → Lot 9
 
-Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** : safe-areas (encoche), 100dvh, anti-zoom iOS, cibles ≥ 44px, feedback tactile, haptique, feuilles fermer-par-glissement (Lot 8).
+Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** : produits servis par [products.json](products.json), rafraîchis au démarrage / toutes les 5 min / au retour sur l'app, sans re-déployer (Lot 9).
 
 ## Qualité : exécution réelle vérifiée
 
-Le script est reconstruit à chaque lot depuis `index.html` et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **94 tests PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding (flag première visite), UX mobile du Lot 8 (safe-areas, anti-zoom, cibles tactiles, haptique, swipe des feuilles). Rejouable sans rien installer de plus (macOS) :
+Le script est reconstruit à chaque lot depuis `index.html` et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **163 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau). Rejouable sans rien installer de plus (macOS) :
 
 ```bash
 bash tests/run.sh
@@ -20,12 +20,12 @@ awk '/<script>/{f=1;next}/<\/script>/{f=0}f' index.html > /tmp/proto.js
 Le prototype est un fichier unique sans build — aucun pipeline nécessaire. Le dépôt embarque en plus :
 
 - **CI** : [.github/workflows/test.yml](.github/workflows/test.yml) rejoue la suite complète sur chaque push (**runner macOS**, `osascript`), via `tests/run.sh` → statut vert/rouge dans l'onglet *Actions* ;
-- **PWA** : [manifest.json](manifest.json) + icônes [icons/](icons) + [sw.js](sw.js) — installable sur l'écran d'accueil, fonctionne hors-ligne après la première visite ;
+- **PWA** : [manifest.json](manifest.json) + icônes [icons/](icons) + [sw.js](sw.js) — installable sur l'écran d'accueil, fonctionne hors-ligne après la première visite (`products.json` est en **network-first** : le catalogue ne reste jamais figé dans le cache) ;
 - `.nojekyll` (Pages sert les fichiers tels quels).
 
 1. **Créer le dépôt GitHub** (interface web, https://github.com/new : nom conseillé `lagon-market`, public) :
    ```bash
-   cd "/Users/JR/Downloads/untitled folder"
+   cd "/Users/JR/Downloads/lagoon market"
    git add -A
    git commit -m "PWA + CI + handoff
 
@@ -43,6 +43,20 @@ Le prototype est un fichier unique sans build — aucun pipeline nécessaire. Le
 3. **En ligne sous ~1 minute** sur `https://<votre-compte>.github.io/lagon-market/` — installer sur mobile depuis Safari (« Ajouter à l'écran d'accueil ») donne une vraie app plein écran.
 
 > Confidentialité : aucune donnée personnelle n'est transmise — tout reste dans le `localStorage` du navigateur du visiteur.
+
+## Lot 9 — alimenter le catalogue périodiquement (sans toucher au code)
+
+La liste des produits disponibles vit dans [products.json](products.json), un simple fichier JSON à la racine. L'app le recharge automatiquement :
+
+| Moment | Mécanisme |
+|---|---|
+| À l'ouverture de l'app | cache local (`lm-catalog`) affiché instantanément, puis `products.json` rechargé |
+| Toutes les 5 minutes | timer `CAT_TTL` (5 min) |
+| Au retour sur l'app (onglet réactivé) | `visibilitychange` si le cache est périmé |
+
+Chaînage : **products.json (réseau) → cache localStorage → données embarquées** — jamais d'écran vide, même hors-ligne.
+
+**Pour changer les produits (prix, stock, rupture, nouveau produit)** : modifiez `products.json` — y compris **directement sur github.com** (bouton crayon sur le fichier → Edit → Commit), la CI et Pages redéploient en ~1 minute, et l'app se met à jour au prochain cycle. Aucun code, aucun build, aucune clé API. Champs d'un produit : `id` (unique), `n` (nom), `b` (marque), `f` (format), `pr` (prix, nombre), `u` (prix au kg, chaîne), `e` (emoji), `g` (2 dégradés de couleur), `cat`, `sub`, `bd` (badges), `st` (stock ; 0 = rupture), `d` (description), `promo` (facultatif).
 
 ## Ouvrir le prototype
 

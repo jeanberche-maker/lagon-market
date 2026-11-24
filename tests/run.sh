@@ -12,4 +12,5 @@ if [ "$FAILS" -gt 0 ]; then
   echo "✗ $FAILS échec(s) de test (dédupliqués ci-dessus)"
   exit 1
 fi
-echo "✓ $(echo "$OUT" | grep -E '· 0 FAIL' | tail -1 | sed 's/^--- //')"
+UNIQ_PASS=$(echo "$OUT" | grep '^PASS ' | sort -u | wc -l | tr -d ' ')
+echo "✓ TOTAL : ${UNIQ_PASS} tests uniques PASS · 0 FAIL"
