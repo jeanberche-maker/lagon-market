@@ -33,6 +33,27 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  /* Tuiles OpenStreetMap (Lot 11) : cache-first borné à ~80 tuiles */
+  if (url.hostname === 'tile.openstreetmap.org') {
+    e.respondWith(
+      caches.match(e.request).then((hit) => {
+        if (hit) return hit;
+        return fetch(e.request).then((res) => {
+          const copy = res.clone();
+          caches.open('lagon-tiles').then((c) => {
+            c.put(e.request, copy);
+            c.keys().then((keys) => {
+              const over = keys.length - 80;
+              for (let i = 0; i < over; i++) c.delete(keys[i]);
+            });
+          });
+          return res;
+        });
+      })
+    );
+    return;
+  }
+
   /* le reste : cache-first (app shell immuable) */
   e.respondWith(
     caches.match(e.request).then(

@@ -1,10 +1,10 @@
-# Lagon Market — Prototypes Lot 1 → Lot 10
+# Lagon Market — Prototypes Lot 1 → Lot 11
 
-Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** (Lot 9) : produits servis par [products.json](products.json), rafraîchis au démarrage / toutes les 5 min / au retour sur l'app, sans re-déployer, **Espace boutique** (Lot 10) : [admin.html](admin.html), l'écran du commerçant pour peupler le catalogue sans toucher au code.
+Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** (Lot 9), **Espace boutique** (Lot 10), **Carte réelle** (Lot 11) : suivi du livreur et zones de livraison sur OpenStreetMap (Leaflet), avec repli carto stylisée hors-ligne.
 
 ## Qualité : exécution réelle vérifiée
 
-Le script est reconstruit à chaque lot depuis `index.html` (et depuis `admin.html` pour la suite10) et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **179 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau), Espace boutique du Lot 10 (formulaire, validation, stocks, export JSON). Rejouable sans rien installer de plus (macOS) :
+Le script est reconstruit à chaque lot depuis `index.html` (et depuis `admin.html` pour la suite10) et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **193 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau), Espace boutique du Lot 10 (formulaire, validation, stocks, export JSON), carte réelle du Lot 11 (tracé boutique→villa, bornes géo, maths du pin, guards sans Leaflet). Rejouable sans rien installer de plus (macOS) :
 
 ```bash
 bash tests/run.sh
@@ -43,6 +43,16 @@ Le prototype est un fichier unique sans build — aucun pipeline nécessaire. Le
 3. **En ligne sous ~1 minute** sur `https://<votre-compte>.github.io/lagon-market/` — installer sur mobile depuis Safari (« Ajouter à l'écran d'accueil ») donne une vraie app plein écran.
 
 > Confidentialité : aucune donnée personnelle n'est transmise — tout reste dans le `localStorage` du navigateur du visiteur.
+
+## Lot 11 — carte réelle (OpenStreetMap, sans clé API)
+
+Le **Suivi** et les **Zones couvertes** s'affichent sur une vraie carte Leaflet + tuiles OpenStreetMap :
+
+- **Suivi** : épingle 🏪 boutique → villa 🏠, tracé lagon du trajet, livreur 🛵 qui glisse le long du tracé (`interAlong`/`posToT`, mêmes 22 % → 88 % que le pin stylisé), badge ETA conservé au-dessus de la carte, livreur devient ✅ à la livraison.
+- **Zones** : polygones indicatifs — lagon plein = couvert, ambre pointillé = à venir, popup au tap ; cadrage auto sur les 6 zones.
+- **Repli garanti** : sans réseau/CDN (ou hors-ligne), la carte stylisée d'origine sert de canevas — jamais d'écran vide ; `mountRealMap`/`mountZonesMap` sont inoffensifs sans Leaflet et se remontent proprement à chaque re-rendu du DOM.
+- **PWA** : tuiles OSM en cache-first borné (~80 tuiles, cache `lagon-tiles`) — la carte s'ouvre vite en 2ᵉ session.
+- QC : **suite11** (14 tests) — tracé, bornes géo de Saint-Martin, maths du pin (clamp, monotonic, milieux), guards sans `L`, overlay présents.
 
 ## Lot 10 — peupler le catalogue côté commerçant (Espace boutique)
 

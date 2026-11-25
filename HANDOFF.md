@@ -1,6 +1,6 @@
 # HANDOFF.md — Passation projet « Lagon Market » (à coller à un assistant IA)
 
-> Document d'handoff : l'état exact du prototype après 10 lots de développement.
+> Document d'handoff : l'état exact du prototype après 11 lots de développement.
 > À fournir tel quel à un assistant (Claude ou autre) pour poursuivre le travail.
 
 ## 1. Le projet en une phrase
@@ -125,9 +125,17 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
    - `sw.js` : `./admin.html` ajouté à l'app shell cachée ;
    - `build.sh` exclut `suite10.js` de son glob (tests admin ⇒ autre harnais, sinon 13 FAIL « Can't find variable » dans le harnais index) ; bash 3.2 macOS : pas de `mapfile`, boucle `for + case` requise.
 
+9. **Lot 11 — carte réelle Leaflet/OpenStreetMap** (`index.html` + `sw.js`) :
+   - CDN jsdelivr Leaflet 1.9.4 (grep du `build.sh` insensible : le `<script src>` externe n'est pas extrait par l'awk du harnais) ;
+   - **Suivi** : overlay `#lmap` (display:none par défaut) au-dessus de la carto stylisée — affiché seulement si `L` est défini et l'init réussit (`mountRealMap`, idempotent : `renderTrack` recrée `#lmap`, le `if(lmapEl!==holder)` remonte la carte sur le nouveau nœud) ; marqueurs 🏪/🏠, polyline lagon, pin 🛵→✅ positionné par `interAlong(TRACK_ROUTE, posToT(trackEta.pos))` (mêmes 22 %/88 % que le lot 3-4) ; badge ETA en `z-index:3` au-dessus de la carte ;
+   - **Zones** : carte `#zmap` (non interactive) + `ZONE_POLYS` (polygones indicatifs, lagon = couvert / ambre pointillé = bientôt), fitBounds auto ;
+   - Guards obligatoires : `typeof L==='undefined'` (JXA, hors-ligne, CDN bloqué) → repli stylisé inchangé ; try/catch autour des inits ;
+   - `sw.js` : tuiles OSM cache-first borné ~80 (`lagon-tiles`) ;
+   - Tests : `tests/suite11.js` — maths (`posToT` clamp 22/88, `interAlong` endpoints/milieu/monotonic/dégénérés), bornes géo de Saint-Martin, présence overlays/CDN/attribution, guards sans `L`, pas de régression ETA.
+
 ## 7. Tests (harnais JavaScriptCore)
 
-179 tests uniques PASS / 0 FAIL (163 index + 16 admin) — deux harnais : `tests/build.sh` (index.html, suites 1→9) et `tests/build-admin.sh` (admin.html, suite10), tous deux exécutés par `run.sh` qui affiche le total dédupliqué. Attention : le stub note désormais que `querySelector('#x')` et `getElementById('x')` renvoient le **même** objet simulé (nécessaire aux tests du formulaire admin).
+193 tests uniques PASS / 0 FAIL (163 index + suites 8-11, incl. 14 pour le Lot 11 carte ; + 16 admin) — deux harnais : `tests/build.sh` (index.html, suites 1→9) et `tests/build-admin.sh` (admin.html, suite10), tous deux exécutés par `run.sh` qui affiche le total dédupliqué. Attention : le stub note désormais que `querySelector('#x')` et `getElementById('x')` renvoient le **même** objet simulé (nécessaire aux tests du formulaire admin).
 
 ```bash
 bash tests/run.sh        # reconstruit le harnais + exécute + exit 1 si FAIL

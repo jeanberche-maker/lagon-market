@@ -20,6 +20,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{
   --lagon:#0FA3A3; --lagon-dark:#0B7E7E; --lagon-soft:#E3F4F4;
@@ -1174,7 +1176,7 @@ const DEFAULT_SLOTS=[
 function trackOrderId(id){const f=orders.find(x=>x.id===id);if(f){lastOrder=f;goTrack();}}
 function advanceTrack(i){const was=trackStep;trackStep=i+1;if(lastOrder)lastOrder.status=i+1;renderTrack();toast('Aperçu : '+TRACK_STEPS[i].toLowerCase());if(i===2&&was<3)pushNotif('🛵','Votre livreur est en route','Il arrive dans environ 35 minutes.')}
 function goAccount(){renderAccount();go('account');}
-function goTrack(){trackStep=(lastOrder?lastOrder.status:trackStep)||1;renderTrack();go('track');}
+function goTrack(){trackStep=(lastOrder?lastOrder.status:trackStep)||1;renderTrack();go('track');if(typeof setTimeout==='function')setTimeout(mountRealMap,80);}
 function goSettings(){renderSettings();go('settings');}
 const TRACK_STEPS=['Confirmée','Préparation','En livraison','Livrée'];
 function saveOrder(){
@@ -1220,9 +1222,10 @@ function renderTrack(){
   $('#track-body').innerHTML=`
     <div class="fade-in">
       <div style="height:210px;margin:4px 16px;border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(135deg,#DCEBE4,#BFD9CE 60%,#9CC3B0)">
+        <div id="lmap" style="position:absolute;inset:0;display:none;z-index:2;background:#DCEBE4"></div>
         <div style="position:absolute;left:0;right:0;top:0;bottom:0;opacity:.5;background-image:repeating-linear-gradient(0deg,transparent 0 26px,rgba(30,43,43,.08) 26px 27px),repeating-linear-gradient(90deg,transparent 0 26px,rgba(30,43,43,.08) 26px 27px)"></div>
         <div style="position:absolute;left:${trackStep>=4?88:trackEta.pos}%;top:40%;transform:translate(-50%,-100%);font-size:44px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25));transition:left .6s">📍</div>
-        <div style="position:absolute;right:12px;bottom:12px;background:#fff;border-radius:12px;padding:8px 12px;box-shadow:var(--shadow);font-size:12px;font-weight:800">${trackStep>=4?'✅ Livré à '+activeAddr.t:trackStep>=3?'🛵 Livreur à '+trackEta.mins+' min':'🛵 Bientôt en route'}</div>
+        <div style="position:absolute;right:12px;bottom:12px;z-index:3;background:#fff;border-radius:12px;padding:8px 12px;box-shadow:var(--shadow);font-size:12px;font-weight:800">${trackStep>=4?'✅ Livré à '+activeAddr.t:trackStep>=3?'🛵 Livreur à '+trackEta.mins+' min':'🛵 Bientôt en route'}</div>
       </div>
       <div class="card" style="margin:12px 16px 0;padding:16px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
@@ -1577,12 +1580,15 @@ const ZONES=[
   {t:'Marigot', s:'Centre-ville et Marina', ok:false, when:'Prochain trimestre'},
   {t:'Philipsburg', s:'Front de mer', ok:false, when:'2026'},
 ];
-function goZones(){lastScreen=document.querySelector('.screen.active').id.slice(2);renderZones();go('zones');}
+function goZones(){lastScreen=document.querySelector('.screen.active').id.slice(2);renderZones();go('zones');if(typeof setTimeout==='function')setTimeout(mountZonesMap,80);}
 function exitZones(){go(lastScreen&&lastScreen!=='zones'?lastScreen:'home');}
 function renderZones(){
   $('#zones-body').innerHTML=`
     <div class="fade-in">
       <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:8px 16px 0">Lagon Market livre la baie d'Orient et se développe île par île. Votre adresse actuelle : <b>${activeAddr.t}</b>.</p>
+      <div style="margin:12px 16px 0;border-radius:20px;overflow:hidden;position:relative;height:190px;border:1px solid var(--line)">
+        <div id="zmap" style="position:absolute;inset:0;background:#DCEBE4"></div>
+      </div>
       <div class="card" style="margin:12px 16px 0;padding:4px 16px">
         ${ZONES.map(z=>`
         <div class="opt" style="align-items:flex-start">
@@ -1672,6 +1678,91 @@ function initCatalog(){
   refreshCatalog(false);
   if(typeof setInterval==='function')setInterval(function(){refreshCatalog(false);},CAT_TTL);
   if(typeof document!=='undefined'&&document.addEventListener)document.addEventListener('visibilitychange',function(){ if(!document.hidden&&catalogStale())refreshCatalog(false); });
+}
+
+/* ===== Lot 11 — carte réelle OSM (Leaflet) avec repli carto stylisée ===== */
+/* Coordonnées approximatives Saint-Martin — Orient Bay. */
+const TRACK_SHOP={lat:18.0736,lng:-63.0430};       /* boutique Lagon Market, Orient Bay */
+const TRACK_HOME={lat:18.0792,lng:-63.0304};       /* Villa Azur (client) */
+const TRACK_ROUTE=[TRACK_SHOP,{lat:18.0752,lng:-63.0385},{lat:18.0780,lng:-63.0340},TRACK_HOME];
+const PIN_MIN=22, PIN_MAX=88;                       /* % de progression du pin (lots 3-4) */
+const ZONE_POLYS={                                  /* polygones indicatifs (démonstration) */
+  'Orient Bay':[[18.0768,-63.0468],[18.0768,-63.0320],[18.0695,-63.0320],[18.0695,-63.0468]],
+  'Cul de Sac':[[18.0902,-63.0530],[18.0902,-63.0420],[18.0818,-63.0420],[18.0818,-63.0530]],
+  'Anse Marcel':[[18.1040,-63.0580],[18.1040,-63.0475],[18.0962,-63.0475],[18.0962,-63.0580]],
+  'Grand-Case':[[18.0760,-63.0930],[18.0760,-63.0800],[18.0668,-63.0800],[18.0668,-63.0930]],
+  'Marigot':[[18.0770,-63.0890],[18.0770,-63.0760],[18.0612,-63.0760],[18.0612,-63.0890]],
+  'Philipsburg':[[18.0340,-63.0580],[18.0340,-63.0440],[18.0220,-63.0440],[18.0220,-63.0580]]
+};
+function posToT(pos){ return Math.max(0,Math.min(1,(pos-PIN_MIN)/(PIN_MAX-PIN_MIN))); }
+function interAlong(pts,t){
+  if(!pts||!pts.length)return null;
+  if(pts.length===1)return pts[0];
+  const v=Math.max(0,Math.min(1,t));
+  const seg=(pts.length-1)*v, i=Math.min(pts.length-2,Math.floor(seg)), f=seg-i;
+  const a=pts[i],b=pts[i+1];
+  return {lat:a.lat+(b.lat-a.lat)*f, lng:a.lng+(b.lng-a.lng)*f};
+}
+let realTrackMap=null, realZonesMap=null, lmapEl=null, zmapEl=null, trackMarkers={}, trackRouteLine=null;
+function lmIcon(emoji){
+  return L.divIcon({className:'lm-pin', html:'<div style="font-size:26px;line-height:44px;text-align:center;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))">'+emoji+'</div>', iconSize:[44,44], iconAnchor:[22,38]});
+}
+function lmTile(map){
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+}
+function mountRealMap(){
+  if(typeof L==='undefined')return;
+  const holder=document.getElementById('lmap');
+  if(!holder)return;
+  try{
+    if(lmapEl!==holder){ /* renderTrack recrée #lmap : remonter la carte sur le bon nœud */
+      if(realTrackMap){realTrackMap.remove();realTrackMap=null;}
+      lmapEl=holder;
+      realTrackMap=L.map('lmap',{zoomControl:false,scrollWheelZoom:false, attributionControl:true});
+      lmTile(realTrackMap);
+      L.marker([TRACK_SHOP.lat,TRACK_SHOP.lng],{icon:lmIcon('🏪')}).addTo(realTrackMap).bindPopup('Lagon Market');
+      L.marker([TRACK_HOME.lat,TRACK_HOME.lng],{icon:lmIcon('🏠')}).addTo(realTrackMap).bindPopup(activeAddr.t||'Adresse de livraison');
+      trackRouteLine=L.polyline(TRACK_ROUTE.map(p=>[p.lat,p.lng]),{color:'#0FA3A3',weight:5,opacity:.85,lineCap:'round'}).addTo(realTrackMap);
+      realTrackMap.fitBounds(trackRouteLine.getBounds().pad(0.35));
+      trackMarkers.pin=L.marker([TRACK_SHOP.lat,TRACK_SHOP.lng],{icon:lmIcon(trackStep>=4?'✅':'🛵')}).addTo(realTrackMap).bindPopup('Votre livreur');
+    }
+    if(!trackMarkers.pin&&realTrackMap)trackMarkers.pin=L.marker([TRACK_SHOP.lat,TRACK_SHOP.lng],{icon:lmIcon('🛵')}).addTo(realTrackMap);
+    holder.style.display='block';
+    if(trackMarkers.pin)trackMarkers.pin.setIcon(lmIcon(trackStep>=4?'✅':'🛵'));
+    moveTrackPin();
+    if(realTrackMap.invalidateSize)setTimeout(function(){try{realTrackMap.invalidateSize();}catch(e){}},120);
+  }catch(e){ holder.style.display='none'; }
+}
+function moveTrackPin(){
+  if(!realTrackMap||!trackMarkers.pin)return;
+  try{
+    const t=posToT(trackStep>=4?PIN_MAX:trackEta.pos);
+    const p=interAlong(TRACK_ROUTE,t);
+    trackMarkers.pin.setLatLng([p.lat,p.lng]);
+  }catch(e){}
+}
+function mountZonesMap(){
+  if(typeof L==='undefined')return;
+  const holder=document.getElementById('zmap');
+  if(!holder)return;
+  try{
+    if(zmapEl!==holder){ /* renderZones recrée #zmap : remonter la carte */
+      if(realZonesMap){realZonesMap.remove();realZonesMap=null;}
+      zmapEl=holder;
+      realZonesMap=L.map('zmap',{zoomControl:false,scrollWheelZoom:false,dragging:false,touchZoom:false,doubleClickZoom:false, attributionControl:true});
+      lmTile(realZonesMap);
+      const group=[];
+      ZONES.forEach(function(z){
+        const poly=ZONE_POLYS[z.t];
+        if(!poly)return;
+        const shape=L.polygon(poly,{color:z.ok?'#0FA3A3':'#E8A13D',weight:2,fillColor:z.ok?'#0FA3A3':'#E8A13D',fillOpacity:z.ok?.22:.12,dashArray:z.ok?null:'6 6'}).addTo(realZonesMap);
+        shape.bindPopup(z.t+(z.ok?' — couvert':' — bientôt : '+(z.when||'')));
+        group.push(shape);
+      });
+      if(group.length&&realZonesMap.fitBounds)realZonesMap.fitBounds(L.featureGroup(group).getBounds().pad(0.15));
+    }
+    if(realZonesMap.invalidateSize)setTimeout(function(){try{realZonesMap.invalidateSize();}catch(e){}},120);
+  }catch(e){}
 }
 
 /* ================= DÉMARRAGE ================= */
