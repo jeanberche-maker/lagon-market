@@ -1,6 +1,6 @@
 # HANDOFF.md — Passation projet « Lagon Market » (à coller à un assistant IA)
 
-> Document d'handoff : l'état exact du prototype après 9 lots de développement.
+> Document d'handoff : l'état exact du prototype après 10 lots de développement.
 > À fournir tel quel à un assistant (Claude ou autre) pour poursuivre le travail.
 
 ## 1. Le projet en une phrase
@@ -117,9 +117,17 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
    - `sw.js` v2 : **network-first pour `products.json`** (le catalogue ne reste jamais figé en cache), cache-first inchangé pour l'app shell ;
    - Tests : `tests/suite9.js` (19 tests) ; `run.sh` affiche désormais `✓ TOTAL : N tests uniques PASS · 0 FAIL` (compte dédupliqué — les vieux résumés de suites étaient trompeurs : le vrai total est 163, pas 76/94).
 
+8. **Lot 10 — Espace boutique** (`admin.html` + `tests/suite10.js` + `tests/build-admin.sh`) :
+   - écran commerçant autonome, même design system ; lié depuis le Paramétrage de `index.html` (« 🏪 Espace boutique » → `window.open('admin.html')`) ;
+   - **ne pas mettre `const $=`** dans admin.html : le harnais réserve `$` (convention `qs`) ;
+   - fonctions : `slugify` (ids anti-accents), `parsePrice` (virgule OU point), `parseStock` (**chiffres seuls** — parseInt seul accepterait `3,5`), `validateCatalog` (rejette : non-liste, liste vide interdite côté serveur seulement, produit sans `id`/`n`/`pr`/`st`, id en double), `collectForm`/`fillForm`/`syncSubs` (formulaire ↔ état), `addOrUpdate` (insert OU update selon `editId`), `bumpStock` (plancher 0), `togglePromo`, `delProduct`, `renderList` (filtre + compteurs), `exportJSON` (Blob natif avec repli copier), `onImport` (FileReader) ;
+   - brouillon local `lm-admin-catalog` : les mutations du commerçant persistent sur le poste ; au chargement, le `products.json` du serveur n'écrase **pas** un brouillon non vide ;
+   - `sw.js` : `./admin.html` ajouté à l'app shell cachée ;
+   - `build.sh` exclut `suite10.js` de son glob (tests admin ⇒ autre harnais, sinon 13 FAIL « Can't find variable » dans le harnais index) ; bash 3.2 macOS : pas de `mapfile`, boucle `for + case` requise.
+
 ## 7. Tests (harnais JavaScriptCore)
 
-163 tests uniques PASS / 0 FAIL (suite9 = Lot 9 catalogue vivant : 19 tests parse/merge/fraîcheur/cache) — reconstruits à chaque lot depuis le fichier live, `run.sh` affiche un total global dédupliqué :
+179 tests uniques PASS / 0 FAIL (163 index + 16 admin) — deux harnais : `tests/build.sh` (index.html, suites 1→9) et `tests/build-admin.sh` (admin.html, suite10), tous deux exécutés par `run.sh` qui affiche le total dédupliqué. Attention : le stub note désormais que `querySelector('#x')` et `getElementById('x')` renvoient le **même** objet simulé (nécessaire aux tests du formulaire admin).
 
 ```bash
 bash tests/run.sh        # reconstruit le harnais + exécute + exit 1 si FAIL

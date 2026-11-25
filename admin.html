@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Espace boutique — Lagon Market</title>
+<meta name="description" content="Gestion du catalogue produits Lagon Market : ajouter, éditer, ajuster les stocks, exporter products.json.">
+<meta name="theme-color" content="#0B7E7E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Boutique Lagon">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<style>
+:root{
+  --lagon:#0FA3A3; --lagon-dark:#0B7E7E; --lagon-soft:#E3F4F4;
+  --corail:#FF6F61; --corail-soft:#FFEDEB;
+  --ambre:#E8A13D; --ambre-soft:#FCF3E3;
+  --vert:#2E9E5B;
+  --ink:#1E2B2B; --ink-2:#5B6B6B; --ink-3:#93A0A0;
+  --bg:#FAF7F2; --card:#FFFFFF; --line:#EDE7DE;
+  --radius:16px; --shadow:0 2px 10px rgba(30,43,43,.06);
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Manrope', -apple-system, 'Segoe UI', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{min-height:100%;overscroll-behavior:none}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);padding:calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
+input,textarea,select{-webkit-user-select:text;user-select:text}
+h1,h2,.serif{font-family:var(--serif)}
+button{font-family:var(--sans);border:none;background:none;cursor:pointer;color:inherit}
+a{color:var(--lagon-dark);font-weight:700}
+h1{font-size:24px;color:var(--lagon-dark)}
+.sub{font-size:13px;color:var(--ink-2);margin-top:2px}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow);padding:16px;margin-top:14px}
+h2{font-size:17px;margin-bottom:10px}
+label{display:block;font-size:11.5px;font-weight:800;color:var(--ink-2);margin:10px 0 4px;letter-spacing:.2px}
+input[type=text],input[type=number],input[type=url],textarea,select{width:100%;min-height:46px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;font-family:var(--sans);background:#fff;color:var(--ink)}
+textarea{min-height:64px;resize:vertical}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:700;font-size:13.5px;color:var(--ink-2)}
+.chk input{width:20px;height:20px;accent-color:var(--lagon);flex:none}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;font-weight:800;font-size:15px;width:100%;margin-top:14px}
+.btn-primary{background:var(--lagon);color:#fff;box-shadow:0 6px 16px rgba(15,163,163,.35)}
+.btn-primary:active{background:var(--lagon-dark)}
+.btn-secondary{background:var(--lagon-soft);color:var(--lagon-dark)}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn.small{min-height:40px;width:auto;padding:0 14px;margin-top:0;font-size:13.5px}
+.prow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);text-align:left}
+.prow:last-child{border-bottom:none}
+.prow .em{font-size:26px;flex:none}
+.prow .n{font-weight:800;font-size:14px}
+.prow .meta{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.prow .pr{font-weight:800;color:var(--lagon-dark);font-size:14px;flex:none}
+.prow .rupt{color:#C4483B}
+.stk{display:flex;align-items:center;gap:0;background:var(--lagon-soft);border-radius:10px;flex:none}
+.stk button{width:34px;height:34px;color:var(--lagon-dark);font-size:16px;font-weight:800}
+.stk .q{min-width:26px;text-align:center;font-weight:800;font-size:13px;color:var(--lagon-dark)}
+.act{width:38px;height:38px;border-radius:11px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex:none;font-size:15px}
+.act:active{opacity:.6}
+.empty{padding:30px 10px;text-align:center;color:var(--ink-2);font-size:14px}
+.count{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:8px;font-size:10.5px;font-weight:800;background:var(--lagon-soft);color:var(--lagon-dark)}
+.tag.warn{background:var(--corail-soft);color:#C4483B}
+.tag.prom{background:var(--ambre-soft);color:#A86A12}
+details{margin-top:14px;font-size:13.5px;color:var(--ink-2)}
+details summary{font-weight:800;color:var(--lagon-dark);cursor:pointer;min-height:44px;display:flex;align-items:center}
+details ol{padding-left:20px;line-height:1.7}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-size:13.5px;font-weight:700;opacity:0;transition:all .3s;z-index:99;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>Espace boutique</h1>
+<p class="sub">Le catalogue que voient les clients de l'app Lagon Market. Ajustez vos produits ici, exportez le fichier, déposez-le sur GitHub — en ligne en ~1 minute.</p>
+<div class="count" id="count"></div>
+
+<div class="card">
+  <h2 id="form-title">Ajouter un produit</h2>
+  <div class="row">
+    <div><label for="f-n">Nom du produit *</label><input type="text" id="f-n" placeholder="Ex. Mangue Judy"></div>
+    <div><label for="f-e">Emoji</label><input type="text" id="f-e" placeholder="🥭" maxlength="4"></div>
+  </div>
+  <div class="row">
+    <div><label for="f-b">Marque / producteur</label><input type="text" id="f-b" placeholder="Verger du Sud"></div>
+    <div><label for="f-f">Format</label><input type="text" id="f-f" placeholder="pièce ~450 g"></div>
+  </div>
+  <div class="row">
+    <div><label for="f-pr">Prix (€) *</label><input type="text" id="f-pr" inputmode="decimal" placeholder="3,20"></div>
+    <div><label for="f-u">Prix au kg (facultatif)</label><input type="text" id="f-u" inputmode="decimal" placeholder="7,10 €/kg"></div>
+  </div>
+  <div class="row">
+    <div><label for="f-cat">Rayon *</label><select id="f-cat" onchange="syncSubs()"></select></div>
+    <div><label for="f-sub">Sous-rayon</label><select id="f-sub"></select></div>
+  </div>
+  <label>Badges</label>
+  <div class="grid2">
+    <label class="chk" style="margin:0"><input type="checkbox" id="f-frais">Frais du jour</label>
+    <label class="chk" style="margin:0"><input type="checkbox" id="f-bio">Bio</label>
+    <label class="chk" style="margin:0"><input type="checkbox" id="f-imp">Importé</label>
+    <label class="chk" style="margin:0"><input type="checkbox" id="f-sg">Sans gluten</label>
+    <label class="chk" style="margin:0"><input type="checkbox" id="f-nv">Nouveau</label>
+    <label class="chk" style="margin:0"><input type="checkbox" id="f-promo">🏷 En promotion</label>
+  </div>
+  <label for="f-st">Stock (0 = rupture, « Me prévenir » chez le client) *</label>
+  <input type="text" id="f-st" inputmode="numeric" placeholder="12">
+  <label for="f-d">Description (facultatif)</label>
+  <textarea id="f-d" placeholder="Deux phrases qui donnent envie…"></textarea>
+  <button class="btn btn-primary" id="f-submit" onclick="addOrUpdate()">＋ Ajouter au catalogue</button>
+  <button class="btn btn-ghost" id="f-cancel" style="display:none" onclick="cancelEdit()">Annuler la modification</button>
+</div>
+
+<div class="card">
+  <h2>Catalogue en cours</h2>
+  <input type="text" id="f-q" placeholder="🔍 Filtrer…" oninput="renderList()">
+  <div id="list"></div>
+</div>
+
+<div class="card" style="background:var(--lagon-soft);border-color:var(--lagon)">
+  <h2 style="color:var(--lagon-dark)">Publier sur l'app</h2>
+  <p style="font-size:13.5px;color:var(--ink-2)">1. Téléchargez le fichier · 2. Déposez-le sur GitHub · 3. Les clients sont à jour au prochain cycle (≤ 5 min).</p>
+  <button class="btn btn-primary" onclick="exportJSON()">⬇︎ Télécharger products.json</button>
+  <button class="btn btn-ghost" onclick="copyJSON()">Copier le JSON</button>
+  <button class="btn btn-secondary" onclick="importFile()">📂 Importer un products.json</button>
+  <input type="file" id="f-file" accept=".json,application/json" style="display:none" onchange="onImport(event)">
+  <details>
+    <summary>📖 Déposer le fichier sur GitHub (pas à pas)</summary>
+    <ol>
+      <li>Ouvrez <a href="https://github.com/jeanberche-maker/lagon-market/upload/main" target="_blank" rel="noopener">github.com → Add file → Upload files</a> (compte jeanberche-maker).</li>
+      <li>Glissez le fichier <b>products.json</b> téléchargé.</li>
+      <li>Cliquez <b>Commit changes</b> — la publication en ligne est automatique (~1 min).</li>
+    </ol>
+    <p style="margin-top:6px">Vos changements en attente restent enregistrés sur ce téléphone (bouton « Voir le brouillon » ci-dessous si besoin).</p>
+    <button class="btn btn-ghost" onclick="showDraft()" style="margin-top:10px">Voir le brouillon local</button>
+  </details>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const qs=s=>document.querySelector(s);
+const CATS=[
+  {id:'fruits',t:'Fruits & Légumes',e:'🥦',g:['#EDF5E0','#B7CE86']},
+  {id:'boulangerie',t:'Boulangerie',e:'🥖',g:['#FDF1DC','#F0D290']},
+  {id:'cremerie',t:'Crèmerie',e:'🧀',g:['#FBF3E2','#E7C97F']},
+  {id:'mer',t:'Poissonnerie',e:'🐟',g:['#E3F2F6','#8FC3D4']},
+  {id:'boucherie',t:'Boucherie',e:'🥩',g:['#FBE7DE','#F2A98A']},
+  {id:'boissons',t:'Cave & Boissons',e:'🍷',g:['#FBE4EC','#F0A3BE']},
+  {id:'epicerie',t:'Épicerie',e:'🧂',g:['#F2EBDD','#D2B986']},
+  {id:'surgeles',t:'Surgelés',e:'❄️',g:['#E8F1F7','#AFC6E0']}
+];
+const SUBS={fruits:['Exotiques','Légumes','Agrumes','Fruits rouges'],boulangerie:['Pains','Viennoiseries'],cremerie:['Fromages','Produits laitiers'],mer:['Poissons','Fruits de mer'],boucherie:['Bœuf','Volailles','Charcuterie'],boissons:['Vin','Boissons'],epicerie:['Boissons','Farines'],surgeles:['Plats','Glaces']};
+const BADGES={frais:'Frais du jour',bio:'Bio',import:'Importé',sg:'Sans gluten',nouveau:'Nouveau'};
+let CATALOG=[],editId=null;
+
+/* ---- utilitaires ---- */
+function slugify(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function eur(n){return Number(n).toFixed(2).replace('.',',')+' €';}
+function parsePrice(raw){const v=parseFloat(String(raw||'').replace(',','.'));return isNaN(v)||v<0?null:v;}
+function parseStock(raw){const s=String(raw||'').trim();if(!/^\d+$/.test(s))return null;const v=parseInt(s,10);return isNaN(v)||v<0?null:v;}
+let toastT=null;
+function toast(msg){const t=qs('#toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2600);}
+
+/* ---- validation ---- */
+function validateCatalog(list){
+  if(!Array.isArray(list))throw new Error('le catalogue doit être une liste');
+  const seen={};
+  list.forEach(function(p){
+    if(!p||!p.id||!p.n)throw new Error('produit sans identifiant ou nom');
+    if(typeof p.pr!=='number'||p.pr<0)throw new Error('prix manquant : '+p.n);
+    if(typeof p.st!=='number')throw new Error('stock manquant : '+p.n);
+    if(seen[p.id])throw new Error('identifiant en double : '+p.id);
+    seen[p.id]=1;
+  });
+  return list;
+}
+
+/* ---- formulaire ---- */
+function collectForm(){
+  const n=qs('#f-n').value.trim();
+  const pr=parsePrice(qs('#f-pr').value);
+  const st=parseStock(qs('#f-st').value);
+  if(!n)throw new Error('le nom du produit est obligatoire');
+  if(pr===null)throw new Error('prix invalide (ex. 3,20)');
+  if(st===null)throw new Error('stock invalide (0 = rupture)');
+  const cat=qs('#f-cat').value||'epicerie';
+  const g=(CATS.find(function(c){return c.id===cat;})||CATS[0]).g;
+  const bd=[];
+  if(qs('#f-frais').checked)bd.push('Frais du jour');
+  if(qs('#f-bio').checked)bd.push('Bio');
+  if(qs('#f-imp').checked)bd.push('Importé');
+  if(qs('#f-sg').checked)bd.push('Sans gluten');
+  if(qs('#f-nv').checked)bd.push('Nouveau');
+  const p={id:editId||slugify(n)||('p'+CATALOG.length), n:n, b:qs('#f-b').value.trim(), f:qs('#f-f').value.trim(),
+    pr:pr, u:qs('#f-u').value.trim(), e:qs('#f-e').value.trim()||'🛒', g:g, cat:cat, sub:qs('#f-sub').value||'',
+    bd:bd, st:st, d:qs('#f-d').value.trim()};
+  if(qs('#f-promo').checked)p.promo=true;
+  return p;
+}
+function fillForm(p){
+  qs('#f-n').value=p.n||'';qs('#f-f').value=p.f||'';qs('#f-b').value=p.b||'';
+  qs('#f-pr').value=typeof p.pr==='number'?String(p.pr).replace('.',','):'';
+  qs('#f-u').value=p.u||'';qs('#f-e').value=p.e||'';qs('#f-st').value=typeof p.st==='number'?String(p.st):'';
+  qs('#f-d').value=p.d||'';
+  syncCat(p.cat||'epicerie');
+  try{qs('#f-sub').value=p.sub||'';}catch(e){}
+  const has=function(b){return (p.bd||[]).indexOf(b)>=0;};
+  qs('#f-frais').checked=has('Frais du jour');qs('#f-bio').checked=has('Bio');qs('#f-imp').checked=has('Importé');
+  qs('#f-sg').checked=has('Sans gluten');qs('#f-nv').checked=has('Nouveau');qs('#f-promo').checked=!!p.promo;
+}
+function syncCat(cat){qs('#f-cat').value=cat;syncSubs();}
+function syncSubs(){
+  const sel=qs('#f-sub'),cur=sel.value;
+  sel.innerHTML=(SUBS[qs('#f-cat').value]||['']).map(function(s){return '<option value="'+s+'">'+s+'</option>';}).join('');
+  try{if(cur)sel.value=cur;}catch(e){}
+}
+
+/* ---- mutations ---- */
+function addOrUpdate(){
+  let p;
+  try{p=collectForm();}catch(e){toast(e.message.replace('Error: ',''));return;}
+  const i=CATALOG.findIndex(function(x){return x.id===p.id;});
+  if(i>=0)CATALOG[i]=p;else CATALOG.push(p);
+  try{localStorage.setItem('lm-admin-catalog',JSON.stringify(CATALOG));}catch(e){}
+  cancelEdit();renderList();
+  toast(i>=0?('« '+p.n+' » mis à jour'):('« '+p.n+' » ajouté — pensez à publier'));
+}
+function persist(){try{localStorage.setItem('lm-admin-catalog',JSON.stringify(CATALOG));}catch(e){}}
+function cancelEdit(){editId=null;['f-n','f-b','f-f','f-pr','f-u','f-e','f-st','f-d'].forEach(function(id){qs('#'+id).value='';});
+  ['#f-frais','#f-bio','#f-imp','#f-sg','#f-nv','#f-promo'].forEach(function(s){qs(s).checked=false;});
+  syncCat('fruits');
+  qs('#form-title').textContent='Ajouter un produit';
+  qs('#f-submit').textContent='＋ Ajouter au catalogue';
+  qs('#f-cancel').style.display='none';
+}
+function editProduct(id){
+  const p=CATALOG.find(function(x){return x.id===id;});
+  if(!p)return;
+  editId=id;fillForm(p);
+  qs('#form-title').textContent='Modifier « '+p.n+' »';
+  qs('#f-submit').textContent='✓ Enregistrer les modifications';
+  qs('#f-cancel').style.display='';
+  if(qs('#f-n').scrollIntoView)try{qs('#f-n').scrollIntoView({behavior:'smooth'});}catch(e){}
+}
+function delProduct(id){
+  const p=CATALOG.find(function(x){return x.id===id;});
+  CATALOG=CATALOG.filter(function(x){return x.id!==id;});
+  persist();renderList();
+  toast('« '+(p&&p.n||id)+' » retiré — publiez pour appliquer');
+}
+function bumpStock(id,d){
+  const p=CATALOG.find(function(x){return x.id===id;});
+  if(!p)return;
+  p.st=Math.max(0,(p.st||0)+d);
+  persist();renderList();
+  if(p.st===0)toast('« '+p.n+' » passe en rupture');
+}
+function togglePromo(id){
+  const p=CATALOG.find(function(x){return x.id===id;});
+  if(!p)return;
+  if(p.promo)delete p.promo;else p.promo=true;
+  persist();renderList();
+}
+
+/* ---- rendu ---- */
+function renderList(){
+  const q=(qs('#f-q')&&qs('#f-q').value||'').toLowerCase();
+  const wrap=qs('#list');
+  const l=CATALOG.filter(function(p){
+    return !q||(p.n+' '+(p.b||'')+' '+(p.cat||'')).toLowerCase().indexOf(q)>=0;
+  });
+  if(!l.length){
+    wrap.innerHTML='<div class="empty">'+(CATALOG.length?'Aucun produit ne correspond au filtre.':'Catalogue vide — ajoutez votre premier produit avec le formulaire ci-dessus.')+'</div>';
+  }else{
+    wrap.innerHTML=l.map(function(p){
+      return '<div class="prow"><span class="em">'+(p.e||'🛒')+'</span>'+
+        '<div style="flex:1;min-width:0"><div class="n">'+p.n+'</div>'+((p.b||p.f)?'<div class="meta">'+[p.b,p.f].filter(Boolean).join(' · ')+'</div>':'')+
+        '<div class="meta">'+(p.promo?'<span class="tag prom">Promo</span> ':'')+(p.st===0?'<span class="tag warn">Rupture</span>':'<span class="tag">x'+p.st+'</span>')+'</div></div>'+
+        '<div class="stk"><button onclick="bumpStock(\''+p.id+'\',-1)" aria-label="Moins">−</button><span class="q">'+p.st+'</span><button onclick="bumpStock(\''+p.id+'\',1)" aria-label="Plus">+</button></div>'+
+        '<span class="pr'+(p.st===0?' rupt':'')+'">'+eur(p.pr)+'</span>'+
+        '<button class="act" onclick="editProduct(\''+p.id+'\')" aria-label="Modifier">✏️</button>'+
+        '<button class="act" onclick="togglePromo(\''+p.id+'\')" aria-label="Promotion">🏷</button>'+
+        '<button class="act" onclick="delProduct(\''+p.id+'\')" aria-label="Supprimer">🗑</button></div>';
+    }).join('');
+  }
+  const rupt=CATALOG.filter(function(p){return p.st===0;}).length;
+  qs('#count').innerHTML='<span class="tag">'+CATALOG.length+' produits</span>'+(rupt?'<span class="tag warn">'+rupt+' en rupture</span>':'<span class="tag">0 rupture</span>');
+}
+
+/* ---- export / import ---- */
+function exportJSON(){
+  const data=JSON.stringify(CATALOG,null,1);
+  if(typeof Blob!=='undefined'&&typeof URL!=='undefined'&&URL.createObjectURL){
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+    a.download='products.json';
+    if(document.body.appendChild)document.body.appendChild(a);
+    a.click&&a.click();
+    if(a.remove)a.remove();
+    toast('products.json téléchargé — déposez-le sur GitHub');
+  }else{
+    copyJSON();
+  }
+}
+function copyJSON(){
+  const data=JSON.stringify(CATALOG,null,1);
+  if(navigator&&navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(data).then(function(){toast('JSON copié — collez-le dans products.json sur GitHub');},function(){promptCopy(data);});
+  }else if(typeof prompt!=='undefined'){promptCopy(data);}
+  else toast('Export impossible ici — utilisez « Télécharger »');
+}
+function promptCopy(data){if(typeof prompt!=='undefined'){prompt('Copiez le JSON (Ctrl/Cmd+C)',data);}}
+function importFile(){const f=qs('#f-file');if(f&&f.click)f.click();}
+function onImport(ev){
+  const file=ev&&ev.target&&ev.target.files&&ev.target.files[0];
+  if(!file||!FileReader){toast('Import indisponible ici');return;}
+  const r=new FileReader();
+  r.onload=function(){
+    try{CATALOG=validateCatalog(JSON.parse(r.result));persist(null);cancelEdit();renderList();toast('Catalogue importé : '+CATALOG.length+' produits');}
+    catch(e){toast('Fichier invalide : '+String(e.message).replace('Error: ',''));}
+  };
+  r.readAsText(file);
+}
+function showDraft(){
+  const raw=localStorage.getItem('lm-admin-catalog');
+  if(!raw){toast('Aucun brouillon local');return;}
+  toast('Brouillon : '+JSON.parse(raw).length+' produits en attente de publication');
+}
+
+/* ---- démarrage ---- */
+(function boot(){
+  const cs=qs('#f-cat');
+  cs.innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+c.t+'</option>';}).join('');
+  syncSubs();
+  let start=(function(){try{return JSON.parse(localStorage.getItem('lm-admin-catalog')||'null');}catch(e){return null;}})()||[];
+  if(typeof fetch==='function'){
+    fetch('products.json',{cache:'no-store'}).then(function(r){return r.ok?r.text():null;}).then(function(t){
+      if(!t)return;
+      try{
+        const serveur=validateCatalog(JSON.parse(t));
+        if(!start.length){ CATALOG=serveur; persist(); renderList(); toast('Catalogue en ligne chargé : '+CATALOG.length+' produits'); }
+      }catch(e){toast('products.json du serveur invalide — brouillon local conservé');}
+    }).catch(function(){});
+  }
+  CATALOG=start;renderList();
+})();
+</script>
+</body>
+</html>

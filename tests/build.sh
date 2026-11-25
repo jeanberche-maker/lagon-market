@@ -14,5 +14,11 @@ python3 - "$DIR/../index.html" > "$HTML" <<'PY'
 import json,sys
 sys.stdout.write('var RAW_HTML='+json.dumps(open(sys.argv[1],encoding='utf-8').read())+';\n')
 PY
-cat "$DIR/stub.js" "$HTML" "$APP" "$DIR"/suite*.js > "$OUT"
+# Les suites index = tous les suite*.js SAUF suite10 (tests de l'admin, autre harnais).
+# (bash 3.2 de macOS : pas de mapfile — boucle portable, quoted)
+cat "$DIR/stub.js" "$HTML" "$APP" > "$OUT"
+for f in "$DIR"/suite*.js; do
+  case "$f" in *suite10.js*) continue ;; esac
+  cat "$f" >> "$OUT"
+done
 echo "$OUT"

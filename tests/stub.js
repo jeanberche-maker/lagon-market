@@ -22,7 +22,7 @@ function el(){
 }
 var _els={},_qs={};
 var document={
-  querySelector:(s)=>(_qs[s]=_qs[s]||el()),
+  querySelector:(s)=>(_qs[s]=_qs[s]||(s[0]==='#'?document.getElementById(s.slice(1)):el())),
   querySelectorAll:()=>[],
   getElementById:(id)=>(_els[id]=_els[id]||el()),
   createElement:()=>el(),

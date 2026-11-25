@@ -1,10 +1,10 @@
-# Lagon Market — Prototypes Lot 1 → Lot 9
+# Lagon Market — Prototypes Lot 1 → Lot 10
 
-Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** : produits servis par [products.json](products.json), rafraîchis au démarrage / toutes les 5 min / au retour sur l'app, sans re-déployer (Lot 9).
+Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** (Lot 9) : produits servis par [products.json](products.json), rafraîchis au démarrage / toutes les 5 min / au retour sur l'app, sans re-déployer, **Espace boutique** (Lot 10) : [admin.html](admin.html), l'écran du commerçant pour peupler le catalogue sans toucher au code.
 
 ## Qualité : exécution réelle vérifiée
 
-Le script est reconstruit à chaque lot depuis `index.html` et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **163 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau). Rejouable sans rien installer de plus (macOS) :
+Le script est reconstruit à chaque lot depuis `index.html` (et depuis `admin.html` pour la suite10) et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **179 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau), Espace boutique du Lot 10 (formulaire, validation, stocks, export JSON). Rejouable sans rien installer de plus (macOS) :
 
 ```bash
 bash tests/run.sh
@@ -43,6 +43,17 @@ Le prototype est un fichier unique sans build — aucun pipeline nécessaire. Le
 3. **En ligne sous ~1 minute** sur `https://<votre-compte>.github.io/lagon-market/` — installer sur mobile depuis Safari (« Ajouter à l'écran d'accueil ») donne une vraie app plein écran.
 
 > Confidentialité : aucune donnée personnelle n'est transmise — tout reste dans le `localStorage` du navigateur du visiteur.
+
+## Lot 10 — peupler le catalogue côté commerçant (Espace boutique)
+
+[admin.html](admin.html) est l'écran du responsable de boutique — accessible aussi depuis l'app (Paramétrage → « 🏪 Espace boutique ») ou directement sur **https://jeanberche-maker.github.io/lagon-market/admin.html** :
+
+- **Formulaire produit** : nom, marque, format, prix (virgule ou point), prix au kg, rayon + sous-rayon (listes synchronisées), badges (Frais du jour, Bio, Importé, Sans gluten, Nouveau), promotion, stock (0 = rupture), description — identifiant auto-derivé du nom (`slugify`), doublons refusés.
+- **Liste du catalogue** : filtre instantané, stock **+/−** au doigt avec plancher à 0 (rupture signalée), bascule promo, édition, suppression ; compteurs « X produits · Y en rupture ».
+- **Publication sans code** : **⬇︎ Télécharger products.json** (blob natif) → déposer le fichier sur GitHub (*Add file → Upload files → Commits*) → app des clients à jour au prochain cycle (≤ 5 min). Alternatives : **Copier le JSON** ou **📂 Importer** un fichier existant (FileReader).
+- **Brouillon local** : les modifications restent enregistrées sur le poste (`lm-admin-catalog`) et ne sont pas écrasées par le products.json du serveur au chargement ; export = publication.
+
+QC : suite10 exécutée dans le même moteur (**16 tests**) via [tests/build-admin.sh](tests/build-admin.sh), intégrée à `tests/run.sh` et à la CI — total consolidé affiché par `run.sh`.
 
 ## Lot 9 — alimenter le catalogue périodiquement (sans toucher au code)
 

@@ -1270,6 +1270,7 @@ function renderSettings(){
         <button class="btn btn-primary" onclick="saveSettings()">Enregistrer le paramétrage</button>
         <button class="btn btn-ghost" onclick="resetConfig()">Restaurer les valeurs du brief</button>
         <button class="btn btn-ghost" onclick="obStep=0;renderOnboard();document.getElementById('onboard').style.display='flex'">🎬 Revoir l'introduction</button>
+        <button class="btn btn-secondary" onclick="if(typeof window!=='undefined'&&window.open)window.open('admin.html','_blank')">🏪 Espace boutique — gérer les produits</button>
       </div>
     </div>`;
 }
