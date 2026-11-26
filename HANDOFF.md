@@ -133,9 +133,18 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
    - `sw.js` : tuiles OSM cache-first borné ~80 (`lagon-tiles`) ;
    - Tests : `tests/suite11.js` — maths (`posToT` clamp 22/88, `interAlong` endpoints/milieu/monotonic/dégénérés), bornes géo de Saint-Martin, présence overlays/CDN/attribution, guards sans `L`, pas de régression ETA.
 
+10. **Lot 12 — photos réelles des produits** (`index.html`, `products.json`, `admin.html`, `sw.js`) :
+   - Source : Wikimedia Commons (licences libres CC0/CC BY/CC BY-SA/PD), CDN `upload/thumb.wikimedia.org`, aucune clé API ;
+   - `products.json` : champs `ph` (URL https) + `cr` (crédit « File:… (licence) ») sur les 19 produits ; mêmes champs dupliqués dans les données embarquées `P` de `index.html` (cohérence testée) ;
+   - Rendu : helper `pimg(p,cls)` (photo `<img loading="lazy" referrerpolicy="no-referrer">` en `object-fit:cover`, `.ph img` CSS) + repli `pvis(p)` (dégradé + emoji) ; `imgFail` (cartes) et `bigImgFail` (fiche, via `data-fe`) restaurisent l'emoji si l'image ne charge pas — jamais d'image cassée ; ⚠ l'ancien helper `ph(p)` a été renommé `pvis(p)` (collision avec le champ `p.ph`) ;
+   - Fiche : photo en héro plein + crédit discret « Photo : … » sous l'image ;
+   - `admin.html` : champ « Photo (URL https) » (`f-ph`) — http refusé, vide = repli emoji ; `fillForm`/`cancelEdit` gèrent `f-ph` ; liste : photo en fond de vignette (emoji masqué par `font-size:0`, apostrophes d'URL → `%27`) ;
+   - `sw.js` inchangé pour les photos (hors app shell) ; offline → repli emoji ;
+   - Tests : `tests/suite12.js` (17) — champs présents/uniques, synchronisation JSON ↔ embarqué, rendus pcard/fiche, replis via objets factices, CSS ; suite10 étendue (+6 : champ photo).
+
 ## 7. Tests (harnais JavaScriptCore)
 
-193 tests uniques PASS / 0 FAIL (163 index + suites 8-11, incl. 14 pour le Lot 11 carte ; + 16 admin) — deux harnais : `tests/build.sh` (index.html, suites 1→9) et `tests/build-admin.sh` (admin.html, suite10), tous deux exécutés par `run.sh` qui affiche le total dédupliqué. Attention : le stub note désormais que `querySelector('#x')` et `getElementById('x')` renvoient le **même** objet simulé (nécessaire aux tests du formulaire admin).
+216 tests uniques PASS / 0 FAIL (suites 1→9 + 11 + 12 pour index.html ; 22 admin via suite10) — deux harnais : `tests/build.sh` (index.html, expose aussi `RAW_PRODS` = products.json) et `tests/build-admin.sh` (admin.html, suite10), tous deux exécutés par `run.sh` qui affiche le total dédupliqué. Attention : le stub note désormais que `querySelector('#x')` et `getElementById('x')` renvoient le **même** objet simulé (nécessaire aux tests du formulaire admin).
 
 ```bash
 bash tests/run.sh        # reconstruit le harnais + exécute + exit 1 si FAIL
@@ -146,7 +155,7 @@ Après chaque évolution, étendre une suite dans `tests/suite*.js` (stub DOM + 
 
 ## 8. Ce qui reste aisé à ajouter (pistes)
 
-- Vraies photos + lazy loading (remplacer gradients `p.g` par `<img>`).
+- ~~Vraies photos + lazy loading~~ **fait (Lot 12)** — restant : propres photos des commerçants (remplacer les URL Commons par leurs clichés via l'Espace boutique).
 - Paniers avec quantités éditables / wishlist → commande, notifications pushes réelles (service worker).
 - Suivi : vraie carte (Leaflet/MapLibre) — le lot actuel est une carte stylisée.
 - i18n EN/NL (clientèle Saint-Martin), mode sombre.

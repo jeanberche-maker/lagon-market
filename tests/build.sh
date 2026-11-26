@@ -14,9 +14,15 @@ python3 - "$DIR/../index.html" > "$HTML" <<'PY'
 import json,sys
 sys.stdout.write('var RAW_HTML='+json.dumps(open(sys.argv[1],encoding='utf-8').read())+';\n')
 PY
+# Le products.json brut est exposé au harnais (tests photos du Lot 12).
+PRODS="/tmp/lagon-prods.js"
+python3 - "$DIR/../products.json" > "$PRODS" <<'PY'
+import json,sys
+sys.stdout.write('var RAW_PRODS='+json.dumps(json.load(open(sys.argv[1],encoding='utf-8')))+';\n')
+PY
 # Les suites index = tous les suite*.js SAUF suite10 (tests de l'admin, autre harnais).
 # (bash 3.2 de macOS : pas de mapfile — boucle portable, quoted)
-cat "$DIR/stub.js" "$HTML" "$APP" > "$OUT"
+cat "$DIR/stub.js" "$HTML" "$PRODS" "$APP" > "$OUT"
 for f in "$DIR"/suite*.js; do
   case "$f" in *suite10.js*) continue ;; esac
   cat "$f" >> "$OUT"

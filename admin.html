@@ -90,6 +90,7 @@ details ol{padding-left:20px;line-height:1.7}
     <div><label for="f-pr">Prix (€) *</label><input type="text" id="f-pr" inputmode="decimal" placeholder="3,20"></div>
     <div><label for="f-u">Prix au kg (facultatif)</label><input type="text" id="f-u" inputmode="decimal" placeholder="7,10 €/kg"></div>
   </div>
+  <div><label for="f-ph">Photo (URL https, facultatif)</label><input type="url" id="f-ph" placeholder="https://…jpg (sinon emoji + dégradé)"></div>
   <div class="row">
     <div><label for="f-cat">Rayon *</label><select id="f-cat" onchange="syncSubs()"></select></div>
     <div><label for="f-sub">Sous-rayon</label><select id="f-sub"></select></div>
@@ -197,13 +198,19 @@ function collectForm(){
     pr:pr, u:qs('#f-u').value.trim(), e:qs('#f-e').value.trim()||'🛒', g:g, cat:cat, sub:qs('#f-sub').value||'',
     bd:bd, st:st, d:qs('#f-d').value.trim()};
   if(qs('#f-promo').checked)p.promo=true;
+  /* Photo (Lot 12) : URL https nettoyée ; vide = pas de photo (repli emoji) */
+  var phv=(qs('#f-ph').value||'').trim();
+  if(phv){
+    if(!/^https:\/\//i.test(phv))throw new Error('l\'URL de la photo doit commencer par https://');
+    p.ph=phv;
+  }
   return p;
 }
 function fillForm(p){
   qs('#f-n').value=p.n||'';qs('#f-f').value=p.f||'';qs('#f-b').value=p.b||'';
   qs('#f-pr').value=typeof p.pr==='number'?String(p.pr).replace('.',','):'';
   qs('#f-u').value=p.u||'';qs('#f-e').value=p.e||'';qs('#f-st').value=typeof p.st==='number'?String(p.st):'';
-  qs('#f-d').value=p.d||'';
+  qs('#f-d').value=p.d||'';qs('#f-ph').value=p.ph||'';
   syncCat(p.cat||'epicerie');
   try{qs('#f-sub').value=p.sub||'';}catch(e){}
   const has=function(b){return (p.bd||[]).indexOf(b)>=0;};
@@ -228,7 +235,7 @@ function addOrUpdate(){
   toast(i>=0?('« '+p.n+' » mis à jour'):('« '+p.n+' » ajouté — pensez à publier'));
 }
 function persist(){try{localStorage.setItem('lm-admin-catalog',JSON.stringify(CATALOG));}catch(e){}}
-function cancelEdit(){editId=null;['f-n','f-b','f-f','f-pr','f-u','f-e','f-st','f-d'].forEach(function(id){qs('#'+id).value='';});
+function cancelEdit(){editId=null;['f-n','f-b','f-f','f-pr','f-u','f-e','f-st','f-d','f-ph'].forEach(function(id){qs('#'+id).value='';});
   ['#f-frais','#f-bio','#f-imp','#f-sg','#f-nv','#f-promo'].forEach(function(s){qs(s).checked=false;});
   syncCat('fruits');
   qs('#form-title').textContent='Ajouter un produit';
@@ -275,7 +282,7 @@ function renderList(){
     wrap.innerHTML='<div class="empty">'+(CATALOG.length?'Aucun produit ne correspond au filtre.':'Catalogue vide — ajoutez votre premier produit avec le formulaire ci-dessus.')+'</div>';
   }else{
     wrap.innerHTML=l.map(function(p){
-      return '<div class="prow"><span class="em">'+(p.e||'🛒')+'</span>'+
+      return '<div class="prow"><span class="em"'+(p.ph?' style="background-image:url(\''+p.ph.replace(/'/g,'%27')+'\');background-size:cover;background-position:center;font-size:0"':'')+'>'+(p.e||'🛒')+'</span>'+
         '<div style="flex:1;min-width:0"><div class="n">'+p.n+'</div>'+((p.b||p.f)?'<div class="meta">'+[p.b,p.f].filter(Boolean).join(' · ')+'</div>':'')+
         '<div class="meta">'+(p.promo?'<span class="tag prom">Promo</span> ':'')+(p.st===0?'<span class="tag warn">Rupture</span>':'<span class="tag">x'+p.st+'</span>')+'</div></div>'+
         '<div class="stk"><button onclick="bumpStock(\''+p.id+'\',-1)" aria-label="Moins">−</button><span class="q">'+p.st+'</span><button onclick="bumpStock(\''+p.id+'\',1)" aria-label="Plus">+</button></div>'+

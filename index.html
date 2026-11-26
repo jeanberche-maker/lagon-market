@@ -102,6 +102,7 @@ a{text-decoration:none;color:inherit}
 .pcard{width:164px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;position:relative;text-align:left;cursor:pointer}
 .pcard.rupture .ph{filter:grayscale(1) opacity(.45)}
 .pcard .ph{height:120px;display:flex;align-items:center;justify-content:center;font-size:46px;position:relative}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .pcard .tags{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;z-index:2}
 .pcard .in{padding:10px 12px 12px}
 .pcard .n{font-weight:800;font-size:13.5px;line-height:1.25}
@@ -505,25 +506,25 @@ input,textarea{-webkit-user-select:text;user-select:text}
 <script>
 /* ================= DONNÉES ================= */
 let P = [
-  {id:'ananas', n:'Ananas Victoria', b:'Verger du Sud', f:'pièce ~1,2 kg', pr:4.5, u:'6,80 €/kg', e:'🍍', g:['#FDF0DC','#F7C86B'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour','Bio'], st:12, d:"Plein soleil de Saint-Martin, sucré et parfumé. Cocktail, jus ou nature au bord de la piscine — la découpe est offerte sur demande."},
-  {id:'corossol', n:'Corossol', b:'Ferme Colombier', f:'pièce ~700 g', pr:6.9, u:'9,40 €/kg', e:'🍈', g:['#E8F6E8','#9FD9A5'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour'], st:5, d:"Chair crémeuse à la saveur acidulée, parfait en sorbet ou en smoothie du matin."},
-  {id:'tomate', n:'Tomates grappe', b:'La Savanne', f:'botte 500 g', pr:3.4, u:'6,80 €/kg', e:'🍅', g:['#FBE4E1','#F0917F'], cat:'fruits', sub:'Légumes', bd:['Frais du jour'], st:24, d:"Cultivées sur l'île, goût de tomate retrouvé. Parfaites en salade ou confites au four."},
-  {id:'avocat', n:'Avocats mi-noir', b:'Verger du Sud', f:'sachet 2 pièces', pr:5.2, u:'', e:'🥑', g:['#EDF5E0','#B7CE86'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour'], st:0, d:"Fondants à souhait : toasts croustillants, salades, guacamole du vendredi."},
-  {id:'citron', n:'Citrons verts', b:'Ferme Colombier', f:'sachet 500 g', pr:2.9, u:'', e:'🍋', g:['#F2F8D8','#CFE07A'], cat:'fruits', sub:'Agrumes', bd:['Frais du jour','Bio'], st:18, d:"Indispensables pour le ti-punch, le poisson grillé et les vinaigrettes."},
-  {id:'mahimahi', n:'Filet de mahi-mahi', b:'Pêche de Marigot', f:'2 filets ~400 g', pr:16.9, u:'42,20 €/kg', e:'🐟', g:['#E3F2F6','#8FC3D4'], cat:'mer', sub:'Poissons', bd:['Frais du jour','Importé'], st:3, d:"Pêche du jour du détaquant du Galion. Chair ferme, idéale au grill ou en ceviche."},
-  {id:'crevettes', n:'Crevettes bouquet', b:'Pêche de Marigot', f:'case 500 g', pr:12.5, u:'25 €/kg', e:'🦐', g:['#FBE7DE','#F2A98A'], cat:'mer', sub:'Fruits de mer', bd:['Frais du jour'], st:9, d:"Cuites à l'eau d'ail, servies très fraîches avec une sauce cocktail maison."},
-  {id:'baguette', n:'Baguette tradition', b:"Boulangerie de l'Ours", f:'250 g', pr:1.6, u:'6,40 €/kg', e:'🥖', g:['#FBF0D9','#ECC276'], cat:'boulangerie', sub:'Pains', bd:['Frais du jour'], st:40, d:"Croustillante, cuite sur pierre deux fois par jour. Commandée avant 18 h, livrée au petit-déjeuner."},
-  {id:'brie', n:'Brie de Meaux AOP', b:'Fromagerie du Lagon', f:'tranche 250 g', pr:5.9, u:'23,60 €/kg', e:'🧀', g:['#FBF3E2','#E7C97F'], cat:'cremerie', sub:'Fromages', bd:['Importé'], st:14, d:"AOP, affiné quatre semaines. Pâte souple, goût franc, parfait en fin de repas."},
-  {id:'beurre', n:'Beurre doux AOP', b:'Fromagerie du Lagon', f:'plaquette 250 g', pr:3.8, u:'', e:'🧈', g:['#FBF3E2','#EFD894'], cat:'cremerie', sub:'Produits laitiers', bd:['Importé'], st:26, d:"Beurre de baratte d'Isigny, doux et crémeux."},
-  {id:'oeufs', n:'Œufs plein air x6', b:'Ferme Colombier', f:'boîte 6', pr:3.6, u:'12 €/kg', e:'🥚', g:['#FDF1DC','#F0D290'], cat:'cremerie', sub:'Produits laitiers', bd:['Bio'], st:22, d:"Poules élevées en plein air à la Ferme Colombier, œufs du jour."},
-  {id:'jambon', n:'Jambon blanc supérieur', b:'Fleury Michon', f:'tranches 4 x 60 g', pr:4.2, u:'', e:'🥓', g:['#FBE7DE','#EFA488'], cat:'boucherie', sub:'Charcuterie', bd:['Importé'], st:30, d:"Tendre et moelleux, sans couenne. Le classique des lunchs de plage."},
-  {id:'entrecote', n:'Entrecôte origine France', b:'Boucherie Grand-Case', f:'tranche ~300 g', pr:11.8, u:'39,30 €/kg', e:'🥩', g:['#FBE1DC','#E88A76'], cat:'boucherie', sub:'Bœuf', bd:['Frais du jour'], st:6, d:"Persillée, maturée 15 jours, née, élevée et transformée en France."},
-  {id:'poulet', n:'Poulet fermier', b:'Boucherie Grand-Case', f:'~1,4 kg', pr:9.9, u:'7,10 €/kg', e:'🍗', g:['#FBE7DE','#F0AB8C'], cat:'boucherie', sub:'Volailles', bd:[], st:0, d:"Parfait pour un poulet boucané du dimanche, au feu de bois."},
-  {id:'rose', n:'Rosé de Provence bio', b:'Château Minuty M', f:'bouteille 75 cl', pr:14.9, u:'', e:'🍷', g:['#FBE4EC','#F0A3BE'], cat:'boissons', sub:'Vin', bd:['Bio','Importé'], st:16, d:"Sec, fruité, la référence de l'apéro à Orient Bay. Millésime 2024."},
-  {id:'water', n:'Eau de source', b:'Cristaline', f:'bidon 5 L', pr:2.4, u:'', e:'💧', g:['#E3F2F6','#9CCFE0'], cat:'epicerie', sub:'Boissons', bd:[], st:48, d:"", promo:true},
-  {id:'farine', n:'Farine de riz sans gluten', b:'Schär', f:'paquet 1 kg', pr:4.8, u:'4,80 €/kg', e:'🌾', g:['#FDF1DC','#EED89E'], cat:'epicerie', sub:'Farines', bd:['Sans gluten'], st:11, d:"Pour pancakes, cakes et gâteaux légers.", promo:true},
-  {id:'noix', n:'Mélange de noix bio', b:'Bio Solo', f:'sachet 250 g', pr:5.4, u:'21,60 €/kg', e:'🥜', g:['#F2EBDD','#D2B986'], cat:'epicerie', sub:'Farines', bd:['Bio','Sans gluten'], st:0, d:"Noix de cajou, amandes et noisettes grillées à sec."},
-  {id:'mangue', n:'Mangue Judy', b:'Verger du Sud', f:'pièce ~450 g', pr:3.2, u:'7,10 €/kg', e:'🥭', g:['#FDF0DC','#F5BE6B'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour','Nouveau'], st:15, d:"Sucrée, peu fibreuse, à la chair fondante — la préférée de l'île."},
+  {id:'ananas', n:'Ananas Victoria', b:'Verger du Sud', f:'pièce ~1,2 kg', pr:4.5, u:'6,80 €/kg', e:'🍍', g:['#FDF0DC','#F7C86B'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour','Bio'], st:12, d:"Plein soleil de Saint-Martin, sucré et parfumé. Cocktail, jus ou nature au bord de la piscine — la découpe est offerte sur demande.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/%E0%B4%95%E0%B5%88%E0%B4%A4%E0%B4%9A%E0%B5%8D%E0%B4%9A%E0%B4%95%E0%B5%8D%E0%B4%95.jpg/960px-%E0%B4%95%E0%B5%88%E0%B4%A4%E0%B4%9A%E0%B5%8D%E0%B4%9A%E0%B4%95%E0%B5%8D%E0%B4%95.jpg', cr:'File:കൈതച്ചക്ക.jpg'},
+  {id:'corossol', n:'Corossol', b:'Ferme Colombier', f:'pièce ~700 g', pr:6.9, u:'9,40 €/kg', e:'🍈', g:['#E8F6E8','#9FD9A5'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour'], st:5, d:"Chair crémeuse à la saveur acidulée, parfait en sorbet ou en smoothie du matin.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Soursop%2C_Annona_muricata.jpg/960px-Soursop%2C_Annona_muricata.jpg', cr:'File:Soursop, Annona muricata.jpg'},
+  {id:'tomate', n:'Tomates grappe', b:'La Savanne', f:'botte 500 g', pr:3.4, u:'6,80 €/kg', e:'🍅', g:['#FBE4E1','#F0917F'], cat:'fruits', sub:'Légumes', bd:['Frais du jour'], st:24, d:"Cultivées sur l'île, goût de tomate retrouvé. Parfaites en salade ou confites au four.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Grape_tomato_cluster_partially_ripened.JPG/960px-Grape_tomato_cluster_partially_ripened.JPG', cr:'File:Grape tomato cluster partially ripened.JPG'},
+  {id:'avocat', n:'Avocats mi-noir', b:'Verger du Sud', f:'sachet 2 pièces', pr:5.2, u:'', e:'🥑', g:['#EDF5E0','#B7CE86'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour'], st:0, d:"Fondants à souhait : toasts croustillants, salades, guacamole du vendredi.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Avocado_with_cross_section_edit.jpg/960px-Avocado_with_cross_section_edit.jpg', cr:'File:Avocado with cross section edit.jpg'},
+  {id:'citron', n:'Citrons verts', b:'Ferme Colombier', f:'sachet 500 g', pr:2.9, u:'', e:'🍋', g:['#F2F8D8','#CFE07A'], cat:'fruits', sub:'Agrumes', bd:['Frais du jour','Bio'], st:18, d:"Indispensables pour le ti-punch, le poisson grillé et les vinaigrettes.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Lime_-_whole_and_halved.jpg/960px-Lime_-_whole_and_halved.jpg', cr:'File:Lime - whole and halved.jpg'},
+  {id:'mahimahi', n:'Filet de mahi-mahi', b:'Pêche de Marigot', f:'2 filets ~400 g', pr:16.9, u:'42,20 €/kg', e:'🐟', g:['#E3F2F6','#8FC3D4'], cat:'mer', sub:'Poissons', bd:['Frais du jour','Importé'], st:3, d:"Pêche du jour du détaquant du Galion. Chair ferme, idéale au grill ou en ceviche.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/MahiMahi-bull.jpg/960px-MahiMahi-bull.jpg', cr:'File:MahiMahi-bull.jpg (Public domain)'},
+  {id:'crevettes', n:'Crevettes bouquet', b:'Pêche de Marigot', f:'case 500 g', pr:12.5, u:'25 €/kg', e:'🦐', g:['#FBE7DE','#F2A98A'], cat:'mer', sub:'Fruits de mer', bd:['Frais du jour'], st:9, d:"Cuites à l'eau d'ail, servies très fraîches avec une sauce cocktail maison.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Frozen_cooked_shrimp_%2820240124%29.jpg/960px-Frozen_cooked_shrimp_%2820240124%29.jpg', cr:'File:Frozen cooked shrimp (20240124).jpg'},
+  {id:'baguette', n:'Baguette tradition', b:"Boulangerie de l'Ours", f:'250 g', pr:1.6, u:'6,40 €/kg', e:'🥖', g:['#FBF0D9','#ECC276'], cat:'boulangerie', sub:'Pains', bd:['Frais du jour'], st:40, d:"Croustillante, cuite sur pierre deux fois par jour. Commandée avant 18 h, livrée au petit-déjeuner.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Brie_de_Meaux_and_french_baguette.jpg/960px-Brie_de_Meaux_and_french_baguette.jpg', cr:'File:Brie de Meaux and french baguette.jpg (CC BY-SA 4.0)'},
+  {id:'brie', n:'Brie de Meaux AOP', b:'Fromagerie du Lagon', f:'tranche 250 g', pr:5.9, u:'23,60 €/kg', e:'🧀', g:['#FBF3E2','#E7C97F'], cat:'cremerie', sub:'Fromages', bd:['Importé'], st:14, d:"AOP, affiné quatre semaines. Pâte souple, goût franc, parfait en fin de repas.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Brie_de_Meaux_bo%C3%AEte_19.03.2012.jpg/960px-Brie_de_Meaux_bo%C3%AEte_19.03.2012.jpg', cr:'File:Brie de Meaux boîte 19.03.2012.jpg (CC BY-SA 3.0)'},
+  {id:'beurre', n:'Beurre doux AOP', b:'Fromagerie du Lagon', f:'plaquette 250 g', pr:3.8, u:'', e:'🧈', g:['#FBF3E2','#EFD894'], cat:'cremerie', sub:'Produits laitiers', bd:['Importé'], st:26, d:"Beurre de baratte d'Isigny, doux et crémeux.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/Block_of_butter_in_butter_dish.jpg/960px-Block_of_butter_in_butter_dish.jpg', cr:'File:Block of butter in butter dish.jpg'},
+  {id:'oeufs', n:'Œufs plein air x6', b:'Ferme Colombier', f:'boîte 6', pr:3.6, u:'12 €/kg', e:'🥚', g:['#FDF1DC','#F0D290'], cat:'cremerie', sub:'Produits laitiers', bd:['Bio'], st:22, d:"Poules élevées en plein air à la Ferme Colombier, œufs du jour.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/Egg_cartons_with_chicken_eggs_03.jpg/960px-Egg_cartons_with_chicken_eggs_03.jpg', cr:'File:Egg cartons with chicken eggs 03.jpg'},
+  {id:'jambon', n:'Jambon blanc supérieur', b:'Fleury Michon', f:'tranches 4 x 60 g', pr:4.2, u:'', e:'🥓', g:['#FBE7DE','#EFA488'], cat:'boucherie', sub:'Charcuterie', bd:['Importé'], st:30, d:"Tendre et moelleux, sans couenne. Le classique des lunchs de plage.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Sliced_cooked_ham.jpg/960px-Sliced_cooked_ham.jpg', cr:'File:Sliced cooked ham.jpg'},
+  {id:'entrecote', n:'Entrecôte origine France', b:'Boucherie Grand-Case', f:'tranche ~300 g', pr:11.8, u:'39,30 €/kg', e:'🥩', g:['#FBE1DC','#E88A76'], cat:'boucherie', sub:'Bœuf', bd:['Frais du jour'], st:6, d:"Persillée, maturée 15 jours, née, élevée et transformée en France.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Grillfleisch_Rindersteak_Ribeye_%2826152657274%29.jpg/960px-Grillfleisch_Rindersteak_Ribeye_%2826152657274%29.jpg', cr:'File:Grillfleisch Rindersteak Ribeye (26152657274).jpg'},
+  {id:'poulet', n:'Poulet fermier', b:'Boucherie Grand-Case', f:'~1,4 kg', pr:9.9, u:'7,10 €/kg', e:'🍗', g:['#FBE7DE','#F0AB8C'], cat:'boucherie', sub:'Volailles', bd:[], st:0, d:"Parfait pour un poulet boucané du dimanche, au feu de bois.", ph:'https://upload.wikimedia.org/wikipedia/commons/a/a5/Roast_chicken.jpg', cr:'File:Roast chicken.jpg (Commons)'},
+  {id:'rose', n:'Rosé de Provence bio', b:'Château Minuty M', f:'bouteille 75 cl', pr:14.9, u:'', e:'🍷', g:['#FBE4EC','#F0A3BE'], cat:'boissons', sub:'Vin', bd:['Bio','Importé'], st:16, d:"Sec, fruité, la référence de l'apéro à Orient Bay. Millésime 2024.", ph:'https://upload.wikimedia.org/wikipedia/commons/5/51/Ros%C3%A9_Champagne.jpg', cr:'File:Rosé Champagne.jpg (CC BY 2.0)'},
+  {id:'water', n:'Eau de source', b:'Cristaline', f:'bidon 5 L', pr:2.4, u:'', e:'💧', g:['#E3F2F6','#9CCFE0'], cat:'epicerie', sub:'Boissons', bd:[], st:48, d:"", promo:true, ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Bottle_of_Water.jpg/960px-Bottle_of_Water.jpg', cr:'File:Bottle of Water.jpg (CC0)'},
+  {id:'farine', n:'Farine de riz sans gluten', b:'Schär', f:'paquet 1 kg', pr:4.8, u:'4,80 €/kg', e:'🌾', g:['#FDF1DC','#EED89E'], cat:'epicerie', sub:'Farines', bd:['Sans gluten'], st:11, d:"Pour pancakes, cakes et gâteaux légers.", promo:true, ph:'https://upload.wikimedia.org/wikipedia/commons/1/19/Two_kinds_of_rice_flour.jpg', cr:'File:Two kinds of rice flour.jpg'},
+  {id:'noix', n:'Mélange de noix bio', b:'Bio Solo', f:'sachet 250 g', pr:5.4, u:'21,60 €/kg', e:'🥜', g:['#F2EBDD','#D2B986'], cat:'epicerie', sub:'Farines', bd:['Bio','Sans gluten'], st:0, d:"Noix de cajou, amandes et noisettes grillées à sec.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Liat_Portal_for_Foodie_Disorder_-_Mixed_nuts_and_dried_fruit.jpg/960px-Liat_Portal_for_Foodie_Disorder_-_Mixed_nuts_and_dried_fruit.jpg', cr:'File:Liat Portal for Foodie Disorder - Mixed nuts and dried fruit.jpg'},
+  {id:'mangue', n:'Mangue Judy', b:'Verger du Sud', f:'pièce ~450 g', pr:3.2, u:'7,10 €/kg', e:'🥭', g:['#FDF0DC','#F5BE6B'], cat:'fruits', sub:'Exotiques', bd:['Frais du jour','Nouveau'], st:15, d:"Sucrée, peu fibreuse, à la chair fondante — la préférée de l'île.", ph:'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Mangos_-_single_and_halved.jpg/960px-Mangos_-_single_and_halved.jpg', cr:'File:Mangos - single and halved.jpg'},
 ];
 const BASKETS = [
   {id:'apero', t:'Apéro', s:'Rosé, antipasti, noix', pr:34, e:'🥂', g:['#FBE4EC','#F0A3BE'], it:['rose','brie','crevettes','citron']},
@@ -608,7 +609,23 @@ function toast(msg, act){
 function cartCount(){return Object.values(cart).reduce((a,b)=>a+b,0);}
 function refreshBadges(){const n=String(cartCount());['cart-badge','cart-badge2','cart-badge3','cart-badge4','cart-badge5','cart-badge6','cart-badge7'].forEach(i=>{const el=document.getElementById(i);if(el)el.textContent=n;});}
 function badgesHtml(p){return (p.bd||[]).map(b=>{const c={'Frais du jour':'frais','Bio':'bio','Importé':'import','Sans gluten':'sg','Nouveau':'sg'}[b]||'frais';return `<span class="tag ${c}">${b}</span>`}).join('');}
-function ph(p){return `<div class="ph" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">${p.e}</div>`;}
+function pvis(p){return `<div class="ph" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">${p.e}</div>`;}
+/* Photo réelle si dispo (Lot 12), repli dégradé+emoji sinon ; onerror → repli */
+function pimg(p,cls){
+  if(!p.ph) return pvis(p);
+  return `<div class="ph ${cls||''}"><img src="${p.ph}" alt="${esc(p.n)}" loading="lazy" referrerpolicy="no-referrer" onerror="imgFail(this,'${p.id}')"></div>`;
+}
+function imgFail(img,id){
+  const p=prod(id);
+  if(p && img.parentNode) img.parentNode.outerHTML=pvis(p);
+}
+/* Fiche produit : repli emoji si la photo ne charge pas */
+function bigImgFail(img){
+  const d=document.createElement('div');
+  d.style.cssText='font-size:110px;transform:translateX(-10px)';
+  d.textContent=img.dataset.fe||'🛒';
+  img.replaceWith(d);
+}
 function esc(s){return String(s).replace(/'/g,"\\'");}
 function stockLimit(p){toast('Stock maximum atteint : ' + p.st + ' exemplaires');}
 
@@ -708,7 +725,7 @@ function pcard(p){
   const ru=p.st===0;
   return `<div class="pcard ${ru?'rupture':''}" onclick="openProduct('${p.id}')">
     <button class="fav${isFav(p.id)?' on':''}" data-fid="${p.id}" onclick="event.stopPropagation();tFav('${p.id}')" aria-label="Favori">${isFav(p.id)?'♥':'♡'}</button>
-    ${ph(p)}<div class="tags">${ru?'<span class="tag import">Rupture</span>':''}${badgesHtml(p)}</div>
+    ${pimg(p)}<div class="tags">${ru?'<span class="tag import">Rupture</span>':''}${badgesHtml(p)}</div>
     <div class="in"><div class="n">${p.n}</div><div class="f">${p.f}</div>
     <div class="row">
       <div><div class="p">${eur(p.pr)}</div>${p.u?`<div class="u">${p.u}</div>`:''}</div>
@@ -887,11 +904,13 @@ function renderProduct(id){
   const ru=(p.st===0)||(demo.product==='rupture'&&p.id===openPid);
   body.innerHTML=`
     <div class="big" style="background:linear-gradient(160deg,${p.g[0]},${p.g[1]})">
-      <div style="font-size:110px;transform:translateX(-10px)">${p.e}</div>
+      ${p.ph?`<img src="${p.ph}" alt="${esc(p.n)}" data-fe="${p.e}" loading="lazy" referrerpolicy="no-referrer" onerror="bigImgFail(this)" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`
+        :`<div style="font-size:110px;transform:translateX(-10px)">${p.e}</div>`}
       <button class="icon-btn" style="position:absolute;top:16px;left:16px;border:none" onclick="go('${lastScreen}')" aria-label="Retour">←</button>
       <button class="fav${isFav(id)?' on':''}" style="top:16px;right:16px" data-fid="${id}" onclick="tFav('${id}')" aria-label="Favori">${isFav(id)?'♥':'♡'}</button>
       <div class="dotsw">${[0,1,2].map(i=>`<span class="dot ${i===pSlide?'on':''}" onclick="pSlide=${i};document.querySelectorAll('#s-product .dot').forEach((d,j)=>d.classList.toggle('on',j===${i}))"></span>`).join('')}</div>
     </div>
+    ${p.ph?`<div style="font-size:10.5px;color:var(--ink-3);margin:6px 20px 0;opacity:.8">Photo : ${p.cr}</div>`:''}
     <div class="fade-in" style="padding:18px 20px 8px">
       <div class="badges" style="margin-bottom:10px">${ru?'<span class="tag import">Rupture</span>':''}${badgesHtml(p)}</div>
       <h1 style="font-size:24px;line-height:1.15">${p.n}</h1>

@@ -57,5 +57,41 @@ T10('exportJSON : produire du JSON valide', function(){ var s=JSON.stringify(CAT
 /* ==== pas de régression ==== */
 T10('renderList : rendu sans erreur + compteurs', function(){ renderList(); if(String(qs('#count').innerHTML).indexOf('produits')<0) throw new Error('compteur KO'); });
 
+/* ==== Lot 12 — champ Photo (URL) ==== */
+T10('collectForm : photo https acceptée et stockée', function(){ CATALOG=[];editId=null;
+  sv('f-n','Papaye Test');sv('f-pr','4,00');sv('f-st','5');
+  sv('f-ph','https://upload.wikimedia.org/wikipedia/commons/a/a5/Roast_chicken.jpg');
+  addOrUpdate();
+  if(CATALOG.length!==1) throw new Error('non ajouté');
+  if(CATALOG[0].ph!=='https://upload.wikimedia.org/wikipedia/commons/a/a5/Roast_chicken.jpg') throw new Error(CATALOG[0].ph);
+});
+T10('collectForm : http (non-https) refusé', function(){ CATALOG=[];editId=null;
+  sv('f-n','Papaye Test 2');sv('f-pr','4,00');sv('f-st','5');sv('f-ph','http://exemple.com/photo.jpg');
+  addOrUpdate(); /* addOrUpdate capture l'erreur -> toast, pas d'ajout */
+  if(CATALOG.length!==0) throw new Error('ajouté quand même');
+});
+T10('collectForm : photo vide → pas de champ ph', function(){ CATALOG=[];editId=null;
+  sv('f-n','Papaye Test 3');sv('f-pr','4,00');sv('f-st','5');sv('f-ph','');
+  addOrUpdate();
+  if(CATALOG.length!==1||('ph' in CATALOG[0])) throw new Error(JSON.stringify(CATALOG[0]));
+});
+T10('fillForm : ph relue dans le champ f-ph', function(){
+  fillForm({n:'X',pr:1,st:1,ph:'https://exemple.org/x.jpg'});
+  if(qs('#f-ph').value!=='https://exemple.org/x.jpg') throw new Error(qs('#f-ph').value);
+  fillForm({n:'Y',pr:1,st:1});
+  if(qs('#f-ph').value!=='') throw new Error('ph devrait être vidée');
+});
+T10('cancelEdit : champ f-ph réinitialisé', function(){
+  fillForm({n:'Z',pr:1,st:1,ph:'https://exemple.org/z.jpg'});
+  cancelEdit();
+  if(qs('#f-ph').value!=='') throw new Error('f-ph non réinitialisé');
+});
+T10('renderList : photo en fond de la vignette', function(){
+  CATALOG=[{id:'x1',n:'X1',pr:1,st:3,e:'apple',ph:'https://exemple.org/x1.jpg',bd:[]}];
+  renderList();
+  var h=String(qs('#list').innerHTML||'');
+  if(h.indexOf('background-image:url')<0||h.indexOf('x1.jpg')<0) throw new Error('fond photo absent');
+});
+
 results.forEach(r=>console.log(r));
 console.log('--- RÉSUMÉ-L10 : '+results.filter(r=>r.indexOf('PASS')===0).length+' PASS · '+results.filter(r=>r.indexOf('FAIL')===0).length+' FAIL');

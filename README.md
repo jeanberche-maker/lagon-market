@@ -1,10 +1,10 @@
 # Lagon Market — Prototypes Lot 1 → Lot 11
 
-Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** (Lot 9), **Espace boutique** (Lot 10), **Carte réelle** (Lot 11) : suivi du livreur et zones de livraison sur OpenStreetMap (Leaflet), avec repli carto stylisée hors-ligne.
+Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** (Lot 9), **Espace boutique** (Lot 10), **Carte réelle** (Lot 11) : suivi du livreur et zones de livraison sur OpenStreetMap (Leaflet), avec repli carto stylisée hors-ligne. **Photos réelles** (Lot 12) : les 19 produits s'affichent avec une vraie photo (Wikimedia Commons, licence libre, créditée) et replient sur le dégradé + emoji en cas d'erreur réseau.
 
 ## Qualité : exécution réelle vérifiée
 
-Le script est reconstruit à chaque lot depuis `index.html` (et depuis `admin.html` pour la suite10) et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **193 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau), Espace boutique du Lot 10 (formulaire, validation, stocks, export JSON), carte réelle du Lot 11 (tracé boutique→villa, bornes géo, maths du pin, guards sans Leaflet). Rejouable sans rien installer de plus (macOS) :
+Le script est reconstruit à chaque lot depuis `index.html` (et depuis `admin.html` pour la suite10) et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **216 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau), Espace boutique du Lot 10 (formulaire, validation, stocks, export JSON), carte réelle du Lot 11 (tracé boutique→villa, bornes géo, maths du pin, guards sans Leaflet). Rejouable sans rien installer de plus (macOS) :
 
 ```bash
 bash tests/run.sh
@@ -58,12 +58,23 @@ Le **Suivi** et les **Zones couvertes** s'affichent sur une vraie carte Leaflet 
 
 [admin.html](admin.html) est l'écran du responsable de boutique — accessible aussi depuis l'app (Paramétrage → « 🏪 Espace boutique ») ou directement sur **https://jeanberche-maker.github.io/lagon-market/admin.html** :
 
-- **Formulaire produit** : nom, marque, format, prix (virgule ou point), prix au kg, rayon + sous-rayon (listes synchronisées), badges (Frais du jour, Bio, Importé, Sans gluten, Nouveau), promotion, stock (0 = rupture), description — identifiant auto-derivé du nom (`slugify`), doublons refusés.
-- **Liste du catalogue** : filtre instantané, stock **+/−** au doigt avec plancher à 0 (rupture signalée), bascule promo, édition, suppression ; compteurs « X produits · Y en rupture ».
+- **Formulaire produit** : nom, marque, format, prix (virgule ou point), prix au kg, **photo (URL https, facultative — sinon emoji + dégradé)**, rayon + sous-rayon (listes synchronisées), badges (Frais du jour, Bio, Importé, Sans gluten, Nouveau), promotion, stock (0 = rupture), description — identifiant auto-derivé du nom (`slugify`), doublons refusés.
+- **Liste du catalogue** : filtre instantané, vignette **photo en fond** quand `ph` est renseigné, stock **+/−** au doigt avec plancher à 0 (rupture signalée), bascule promo, édition, suppression ; compteurs « X produits · Y en rupture ».
 - **Publication sans code** : **⬇︎ Télécharger products.json** (blob natif) → déposer le fichier sur GitHub (*Add file → Upload files → Commits*) → app des clients à jour au prochain cycle (≤ 5 min). Alternatives : **Copier le JSON** ou **📂 Importer** un fichier existant (FileReader).
 - **Brouillon local** : les modifications restent enregistrées sur le poste (`lm-admin-catalog`) et ne sont pas écrasées par le products.json du serveur au chargement ; export = publication.
 
-QC : suite10 exécutée dans le même moteur (**16 tests**) via [tests/build-admin.sh](tests/build-admin.sh), intégrée à `tests/run.sh` et à la CI — total consolidé affiché par `run.sh`.
+QC : suite10 exécutée dans le même moteur (**22 tests**) via [tests/build-admin.sh](tests/build-admin.sh), intégrée à `tests/run.sh` et à la CI — total consolidé affiché par `run.sh`.
+
+## Lot 12 — photos réelles des produits (Wikimedia Commons, sans clé API)
+
+Les 19 produits embarquent une vraie photo au lieu de l'emoji seul :
+
+- **Source** : [Wikimedia Commons](https://commons.wikimedia.org) — fichiers sous licence libre (CC0 / CC BY / CC BY-SA / domaine public), servis par le CDN `wikimedia.org` en 640–960 px ; aucune clé API, aucun droit à négocier.
+- **Données** : `products.json` porte deux champs par produit — `ph` (URL de la photo) et `cr` (crédit). Les données embarquées de `index.html` portent les mêmes (cohérence testée).
+- **Rendu** : cartes (`pcard`) et fiche produit affichent `<img loading="lazy" referrerpolicy="no-referrer">` en `object-fit:cover` ; la fiche ajoute un crédit discret « Photo : … » sous l'image.
+- **Repli garanti** : photo absente ou en erreur réseau → retour automatique au dégradé + emoji d'origine (`imgFail`/`bigImgFail`), jamais d'image cassée. En rupture, la photo est estompée comme avant.
+- **Espace boutique** : le formulaire a un champ « Photo (URL https) » (http refusé, vide = repli emoji) ; la liste affiche la photo en fond de vignette.
+- QC : **suite12** (17 tests) — champs `ph`/`cr` présents et uniques, synchronisation products.json ↔ données embarquées, rendus cartes/fiche, replis d'erreur (objets factices), CSS `object-fit`.
 
 ## Lot 9 — alimenter le catalogue périodiquement (sans toucher au code)
 
@@ -77,7 +88,7 @@ La liste des produits disponibles vit dans [products.json](products.json), un si
 
 Chaînage : **products.json (réseau) → cache localStorage → données embarquées** — jamais d'écran vide, même hors-ligne.
 
-**Pour changer les produits (prix, stock, rupture, nouveau produit)** : modifiez `products.json` — y compris **directement sur github.com** (bouton crayon sur le fichier → Edit → Commit), la CI et Pages redéploient en ~1 minute, et l'app se met à jour au prochain cycle. Aucun code, aucun build, aucune clé API. Champs d'un produit : `id` (unique), `n` (nom), `b` (marque), `f` (format), `pr` (prix, nombre), `u` (prix au kg, chaîne), `e` (emoji), `g` (2 dégradés de couleur), `cat`, `sub`, `bd` (badges), `st` (stock ; 0 = rupture), `d` (description), `promo` (facultatif).
+**Pour changer les produits (prix, stock, rupture, nouveau produit)** : modifiez `products.json` — y compris **directement sur github.com** (bouton crayon sur le fichier → Edit → Commit), la CI et Pages redéploient en ~1 minute, et l'app se met à jour au prochain cycle. Aucun code, aucun build, aucune clé API. Champs d'un produit : `id` (unique), `n` (nom), `b` (marque), `f` (format), `pr` (prix, nombre), `u` (prix au kg, chaîne), `e` (emoji de repli), `g` (2 dégradés de couleur), `cat`, `sub`, `bd` (badges), `st` (stock ; 0 = rupture), `d` (description), `promo` (facultatif), `ph` (URL https d'une photo, facultatif), `cr` (crédit photo, affiché sur la fiche).
 
 ## Ouvrir le prototype
 
