@@ -1,10 +1,10 @@
 # Lagon Market — Prototypes Lot 1 → Lot 11
 
-Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** (Lot 9), **Espace boutique** (Lot 10), **Carte réelle** (Lot 11) : suivi du livreur et zones de livraison sur OpenStreetMap (Leaflet), avec repli carto stylisée hors-ligne. **Photos réelles** (Lot 12) : les 19 produits s'affichent avec une vraie photo (Wikimedia Commons, licence libre, créditée) et replient sur le dégradé + emoji en cas d'erreur réseau.
+Prototype cliquable : **Accueil**, **Catalogue**, **Fiche produit** (Lot 1), **Panier**, **Livraison**, **Paiement** (Lot 2), **Suivi**, **Compte**, **Paramétrage** (Lot 3), **Profil**, **Assistance**, **Suivi temps réel** (Lot 4), **Avis produits**, **Codes promo**, **Notifications** (Lot 5), **Favoris**, **Réordonnance**, **Bandeau push** (Lot 6), **Recherche + suggestions**, **Zones couvertes**, **Onboarding** (Lot 7), **UX mobile** (Lot 8), **Catalogue vivant** (Lot 9), **Espace boutique** (Lot 10), **Carte réelle** (Lot 11) : suivi du livreur et zones de livraison sur OpenStreetMap (Leaflet), avec repli carto stylisée hors-ligne. **Photos réelles** (Lot 12) : les 19 produits s'affichent avec une vraie photo (Wikimedia Commons, licence libre, créditée) et replient sur le dégradé + emoji en cas d'erreur réseau. **Bilingue FR/EN** (Lot 13) : toute l'interface se traduit en anglais via le réglage Paramétrage → « Langue · Language » (persistant), sans build ni recharge.
 
 ## Qualité : exécution réelle vérifiée
 
-Le script est reconstruit à chaque lot depuis `index.html` (et depuis `admin.html` pour la suite10) et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **216 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau), Espace boutique du Lot 10 (formulaire, validation, stocks, export JSON), carte réelle du Lot 11 (tracé boutique→villa, bornes géo, maths du pin, guards sans Leaflet). Rejouable sans rien installer de plus (macOS) :
+Le script est reconstruit à chaque lot depuis `index.html` (et depuis `admin.html` pour la suite10) et exécuté dans le moteur JavaScriptCore intégré à macOS (`osascript -l JavaScript`) avec un DOM simulé (Proxy) : **255 tests uniques PASS, 0 FAIL** — rendus d'écran, filtres et tris, recherche avec suggestions (insensible aux accents), plafonds de stock, totaux du panier avec codes promo, flux complet fiche → panier → livraison → paiement → suivi, paramétrage persistant, avis, notifications, favoris, réordonnance, bandeau push, zones et onboarding, UX mobile du Lot 8, catalogue vivant du Lot 9 (parse/validation, merge, fraîcheur TTL, cache corrompu, rejets réseau), Espace boutique du Lot 10 (formulaire, validation, stocks, export JSON), carte réelle du Lot 11 (tracé boutique→villa, bornes géo, maths du pin, guards sans Leaflet). Rejouable sans rien installer de plus (macOS) :
 
 ```bash
 bash tests/run.sh
@@ -75,6 +75,16 @@ Les 19 produits embarquent une vraie photo au lieu de l'emoji seul :
 - **Repli garanti** : photo absente ou en erreur réseau → retour automatique au dégradé + emoji d'origine (`imgFail`/`bigImgFail`), jamais d'image cassée. En rupture, la photo est estompée comme avant.
 - **Espace boutique** : le formulaire a un champ « Photo (URL https) » (http refusé, vide = repli emoji) ; la liste affiche la photo en fond de vignette.
 - QC : **suite12** (17 tests) — champs `ph`/`cr` présents et uniques, synchronisation products.json ↔ données embarquées, rendus cartes/fiche, replis d'erreur (objets factices), CSS `object-fit`.
+
+## Lot 13 — bilingue FR/EN (sans build, sans recharge)
+
+Un sélecteur **Paramétrage → « Langue · Language »** (🇫🇷 Français / 🇬🇧 English) bascule toute l'interface :
+
+- **Mécanisme** : le français est la langue source. `EN_DICT` traduit les textes exacts (chrome, sections, boutons, toasts, noms/formats/descriptions des 19 produits, catégories, sous-rayons, paniers, créneaux, moyens de paiement, zones, FAQ, promos, onboarding) ; `EN_PAT` traduit les phrases interpolées (stock, compteurs, ETA, « Encore X € pour la livraison offerte », « Ajouter au panier · 4,50 € »…) ; les nœuds composés « A · B · C » sont traduits segment par segment.
+- **Sans toucher aux templates** : un `MutationObserver` traduit les nœuds ajoutés au fil des rendus (écrans, feuilles, toasts) ; les attributs `placeholder`/`aria-label`/`title` sont couverts. En JavaScriptCore (harnais de tests), l'observateur est simplement absent — les helpers `t`/`trText` restent testés directement.
+- **Persistance** : la langue est stockée dans `lm-config` (à côté des frais/seuil/WhatsApp) ; l'app rouvre dans la langue choisie, `<html lang>` suit.
+- **Produits** : priorité à la variante du commerçant (`n_en`/`d_en`, éditables dans l'Espace boutique) sinon dictionnaire intégré, sinon français — jamais de texte manquant.
+- QC : **suite13** (36 tests) — cœur de traduction, 15+ patterns, composites, couverture complète du dictionnaire (produits, badges, catégories, créneaux, FAQ, promos…), replis FR, rendu EN réel, persistance et préservation des autres réglages.
 
 ## Lot 9 — alimenter le catalogue périodiquement (sans toucher au code)
 

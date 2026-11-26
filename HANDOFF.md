@@ -142,9 +142,17 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
    - `sw.js` inchangé pour les photos (hors app shell) ; offline → repli emoji ;
    - Tests : `tests/suite12.js` (17) — champs présents/uniques, synchronisation JSON ↔ embarqué, rendus pcard/fiche, replis via objets factices, CSS ; suite10 étendue (+6 : champ photo).
 
+11. **Lot 13 — i18n FR/EN** (`index.html`, `admin.html`) :
+   - FR = langue source ; bloc i18n inséré après l'état : `EN_DICT` (textes exacts, ~200 entrées : chrome, produits noms/formats/descriptions, catégories, sous-rayons, paniers, créneaux, moyens de paiement, zones, FAQ, promos, onboarding, toasts) + `EN_PAT` (phrases interpolées ; `$n` = 1ᵉʳ groupe, sous-traduction des fragments connus) + composite « · » traduit par segments ;
+   - `trText`/`trExact`/`trPat` purs (testables) ; `trTree` marche le DOM (textes + placeholder/aria-label/title) ; `MutationObserver` (gardé `typeof!=='undefined'` — absent en JXA) traduit les nœuds ajoutés ; démarrage : `if(LANG==='en')trTree(document.body)` ;
+   - `LANG` persisté dans `lm-config` (`loadConfig` ne l'écrase pas — lecture directe au chargement) ; `setLang(l)` re-traduit + re-rend Paramétrage ; sélecteur 🇫🇷/🇬🇧 dans Paramétrage (« Langue · Language ») ;
+   - Helpers produit `pn(p)/pf(p)/pd(p)` : priorité `p.n_en`/`p.d_en` (champs boutique) → dictionnaire → FR ; branchés dans pcard (n, f, alt), openBasket, fiche (h1, format, `pdesc` pour le tronquage « Lire la suite »), panier, remplacements, suggestions, avis ; `matchesQuery` cherche aussi le nom EN ;
+   - `admin.html` : champs facultatifs « Nom (EN) » (`f-nen`) et « Description (EN) » (`f-den`) — stockés seulement s'ils sont renseignés ;
+   - ⚠ pièges : ne PAS renommer le helper `ph(p)`→c'est `pvis` depuis le Lot 12 ; les traductions identiques (BBQ, Apple Pay) sont acceptées ; test `'250 g'` format sans mot FR toléré.
+
 ## 7. Tests (harnais JavaScriptCore)
 
-216 tests uniques PASS / 0 FAIL (suites 1→9 + 11 + 12 pour index.html ; 22 admin via suite10) — deux harnais : `tests/build.sh` (index.html, expose aussi `RAW_PRODS` = products.json) et `tests/build-admin.sh` (admin.html, suite10), tous deux exécutés par `run.sh` qui affiche le total dédupliqué. Attention : le stub note désormais que `querySelector('#x')` et `getElementById('x')` renvoient le **même** objet simulé (nécessaire aux tests du formulaire admin).
+255 tests uniques PASS / 0 FAIL (suites 1→9 + 11 + 12 + 13 pour index.html ; 25 admin via suite10) — deux harnais : `tests/build.sh` (index.html, expose aussi `RAW_PRODS` = products.json) et `tests/build-admin.sh` (admin.html, suite10), tous deux exécutés par `run.sh` qui affiche le total dédupliqué. Attention : le stub note désormais que `querySelector('#x')` et `getElementById('x')` renvoient le **même** objet simulé (nécessaire aux tests du formulaire admin).
 
 ```bash
 bash tests/run.sh        # reconstruit le harnais + exécute + exit 1 si FAIL
@@ -158,7 +166,7 @@ Après chaque évolution, étendre une suite dans `tests/suite*.js` (stub DOM + 
 - ~~Vraies photos + lazy loading~~ **fait (Lot 12)** — restant : propres photos des commerçants (remplacer les URL Commons par leurs clichés via l'Espace boutique).
 - Paniers avec quantités éditables / wishlist → commande, notifications pushes réelles (service worker).
 - Suivi : vraie carte (Leaflet/MapLibre) — le lot actuel est une carte stylisée.
-- i18n EN/NL (clientèle Saint-Martin), mode sombre.
+- ~~i18n EN/NL~~ **EN fait (Lot 13)** — restant : NL (clientèle néerlandophone de Saint-Martin), en suivant le même schéma dict+patterns.
 - Paiement : Pages « nouvelles carte » (stripe elements simulés).
 - Épinglage manuel des remplacements (`pinnedReplacement`).
 

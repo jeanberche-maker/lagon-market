@@ -108,6 +108,10 @@ details ol{padding-left:20px;line-height:1.7}
   <input type="text" id="f-st" inputmode="numeric" placeholder="12">
   <label for="f-d">Description (facultatif)</label>
   <textarea id="f-d" placeholder="Deux phrases qui donnent envie…"></textarea>
+  <label for="f-nen">Nom (EN, facultatif — affiché si l'app est en anglais)</label>
+  <input type="text" id="f-nen" placeholder="Ex. Judy mango">
+  <label for="f-den">Description (EN, facultatif)</label>
+  <textarea id="f-den" placeholder="Two enticing sentences…"></textarea>
   <button class="btn btn-primary" id="f-submit" onclick="addOrUpdate()">＋ Ajouter au catalogue</button>
   <button class="btn btn-ghost" id="f-cancel" style="display:none" onclick="cancelEdit()">Annuler la modification</button>
 </div>
@@ -197,6 +201,10 @@ function collectForm(){
   const p={id:editId||slugify(n)||('p'+CATALOG.length), n:n, b:qs('#f-b').value.trim(), f:qs('#f-f').value.trim(),
     pr:pr, u:qs('#f-u').value.trim(), e:qs('#f-e').value.trim()||'🛒', g:g, cat:cat, sub:qs('#f-sub').value||'',
     bd:bd, st:st, d:qs('#f-d').value.trim()};
+  /* Lot 13 : variantes EN facultatives */
+  var nen=qs('#f-nen').value.trim(), den=qs('#f-den').value.trim();
+  if(nen)p.n_en=nen;
+  if(den)p.d_en=den;
   if(qs('#f-promo').checked)p.promo=true;
   /* Photo (Lot 12) : URL https nettoyée ; vide = pas de photo (repli emoji) */
   var phv=(qs('#f-ph').value||'').trim();
@@ -211,6 +219,7 @@ function fillForm(p){
   qs('#f-pr').value=typeof p.pr==='number'?String(p.pr).replace('.',','):'';
   qs('#f-u').value=p.u||'';qs('#f-e').value=p.e||'';qs('#f-st').value=typeof p.st==='number'?String(p.st):'';
   qs('#f-d').value=p.d||'';qs('#f-ph').value=p.ph||'';
+  qs('#f-nen').value=p.n_en||'';qs('#f-den').value=p.d_en||'';
   syncCat(p.cat||'epicerie');
   try{qs('#f-sub').value=p.sub||'';}catch(e){}
   const has=function(b){return (p.bd||[]).indexOf(b)>=0;};
@@ -235,7 +244,7 @@ function addOrUpdate(){
   toast(i>=0?('« '+p.n+' » mis à jour'):('« '+p.n+' » ajouté — pensez à publier'));
 }
 function persist(){try{localStorage.setItem('lm-admin-catalog',JSON.stringify(CATALOG));}catch(e){}}
-function cancelEdit(){editId=null;['f-n','f-b','f-f','f-pr','f-u','f-e','f-st','f-d','f-ph'].forEach(function(id){qs('#'+id).value='';});
+function cancelEdit(){editId=null;['f-n','f-b','f-f','f-pr','f-u','f-e','f-st','f-d','f-ph','f-nen','f-den'].forEach(function(id){qs('#'+id).value='';});
   ['#f-frais','#f-bio','#f-imp','#f-sg','#f-nv','#f-promo'].forEach(function(s){qs(s).checked=false;});
   syncCat('fruits');
   qs('#form-title').textContent='Ajouter un produit';

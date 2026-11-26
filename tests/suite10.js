@@ -93,5 +93,25 @@ T10('renderList : photo en fond de la vignette', function(){
   if(h.indexOf('background-image:url')<0||h.indexOf('x1.jpg')<0) throw new Error('fond photo absent');
 });
 
+/* ==== Lot 13 — variantes EN (n_en / d_en) ==== */
+T10('collectForm : n_en et d_en stockés quand renseignés', function(){ CATALOG=[];editId=null;
+  sv('f-n','Papaye Test EN');sv('f-pr','4,00');sv('f-st','5');
+  sv('f-nen','Test papaya');sv('f-den','Picked this morning.');
+  addOrUpdate();
+  if(CATALOG.length!==1) throw new Error('non ajouté');
+  if(CATALOG[0].n_en!=='Test papaya'||CATALOG[0].d_en!=='Picked this morning.') throw new Error(JSON.stringify(CATALOG[0]));
+});
+T10('collectForm : champs EN vides → pas de n_en/d_en', function(){ CATALOG=[];editId=null;
+  sv('f-n','Papaye Test FR');sv('f-pr','4,00');sv('f-st','5');
+  addOrUpdate();
+  if(CATALOG.length!==1||('n_en' in CATALOG[0])||('d_en' in CATALOG[0])) throw new Error(JSON.stringify(CATALOG[0]));
+});
+T10('fillForm + cancelEdit : champs EN relus/vidés', function(){
+  fillForm({n:'A',pr:1,st:1,n_en:'A fruit',d_en:'Nice.'});
+  if(qs('#f-nen').value!=='A fruit'||qs('#f-den').value!=='Nice.') throw new Error('lecture KO');
+  cancelEdit();
+  if(qs('#f-nen').value!==''||qs('#f-den').value!=='') throw new Error('reset KO');
+});
+
 results.forEach(r=>console.log(r));
 console.log('--- RÉSUMÉ-L10 : '+results.filter(r=>r.indexOf('PASS')===0).length+' PASS · '+results.filter(r=>r.indexOf('FAIL')===0).length+' FAIL');
