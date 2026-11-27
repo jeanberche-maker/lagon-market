@@ -1486,17 +1486,28 @@ function payNow(){
   if(!slotsOk()){openSheet('sheet-addr');return;}
   const st=cartTotal()+fees()-discount().amt;
   const entries=Object.entries(cart).filter(([,q])=>q>0);
-  lastOrder={id:'#'+(1030+orders.length), n:entries.length, total:st, slot:SLOTS[slot].t, addr:activeAddr.t, when:'Aujourd’hui', status:1, promo:promoCode||'', items:entries.map(([id,q])=>({id:id,q:q}))};
-  orders.unshift(lastOrder);
-  saveOrder();
-  const doneId=lastOrder.id, doneSlot=SLOTS[slot].t;
-  promoCode='';
-  homePushDismissed=false;
-  renderPay(true);
-  setTimeout(()=>pushNotif('🧾','Commande '+doneId+' confirmée','Nous la préparons — livraison '+doneSlot),1200);
-  setTimeout(()=>pushNotif('🛵','Livreur assigné','Votre livreur part dans quelques minutes.'),4200);
-  Object.keys(cart).forEach(k=>delete cart[k]);
-  refreshBadges();rerenderAllCardActions();
+  const order={id:'#'+(1030+orders.length), n:entries.length, total:st, slot:SLOTS[slot].t, addr:activeAddr.t, when:'Aujourd’hui', status:1, promo:promoCode||'', items:entries.map(([id,q])=>({id:id,q:q}))};
+  const finish=function(){
+    lastOrder=order;orders.unshift(order);
+    saveOrder();
+    const doneId=order.id, doneSlot=order.slot;
+    promoCode='';
+    homePushDismissed=false;
+    renderPay(true);
+    setTimeout(()=>pushNotif('🧾','Commande '+doneId+' confirmée','Nous la préparons — livraison '+doneSlot),1200);
+    setTimeout(()=>pushNotif('🛵','Livreur assigné','Votre livreur part dans quelques minutes.'),4200);
+    Object.keys(cart).forEach(k=>delete cart[k]);
+    refreshBadges();rerenderAllCardActions();
+  };
+  if(!apiReady()){finish();return;}
+  /* backend configuré : on ne confirme qu'après accord du serveur */
+  toast('Envoi de la commande…');
+  apiSubmitOrder(order).then(function(r){
+    if(!r||!r.ok)throw new Error('HTTP '+String((r&&r.status)||'?'));
+    finish();
+  }).catch(function(){
+    toast('Commande non transmise — vérifiez la connexion puis réessayez');
+  });
 }
 function slotsOk(){return activeAddr.ok;}
 function backHome(){renderCart();go('home');}
@@ -1608,6 +1619,18 @@ function renderSettings(){
         <button class="chip ${LANG==='fr'?'on':''}" style="min-height:44px;flex:1;justify-content:center" onclick="setLang('fr')">🇫🇷 Français</button>
         <button class="chip ${LANG==='en'?'on':''}" style="min-height:44px;flex:1;justify-content:center" onclick="setLang('en')">🇬🇧 English</button>
       </div>
+      <div class="sec-h" style="padding:16px 16px 8px"><h2 style="font-size:17px">Backend (optionnel)</h2><span class="tag frais">${apiReady()?'connecté':'local'}</span></div>
+      <div class="card" style="margin:0 16px;padding:12px 16px">
+        <p style="font-size:12px;color:var(--ink-2);line-height:1.5;margin:0 0 10px">Renseignez l'URL et la clé anon de votre projet Supabase (Settings → API). Sans ces valeurs, l'app fonctionne à 100 % en local (products.json).</p>
+        <div class="opt"><div style="flex:1"><div>URL du projet</div><div class="sub">ex. https://xxxx.supabase.co</div></div></div>
+        <input id="set-api-url" class="search" style="width:100%;margin:0 0 10px;padding:8px 12px;min-height:44px" placeholder="https://xxxx.supabase.co" value="${API.url||''}">
+        <div class="opt"><div style="flex:1"><div>Clé anon (public)</div><div class="sub">clé « anon public », pas la clé service_role</div></div></div>
+        <input id="set-api-key" class="search" type="password" style="width:100%;margin:0 0 12px;padding:8px 12px;min-height:44px" placeholder="eyJhbGciOi…">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="chip" style="min-height:44px;flex:1;justify-content:center;color:var(--lagon-dark)" onclick="testBackend()">🔌 Tester la connexion</button>
+          <button class="chip" style="min-height:44px;flex:1;justify-content:center;color:var(--corail)" onclick="clearBackend()">✕ Déconnecter</button>
+        </div>
+      </div>
       <div class="sec-h" style="padding:16px 16px 8px"><h2 style="font-size:17px">Créneaux de livraison</h2><span class="tag frais">editable</span></div>
       <div class="card" style="margin:0 16px;padding:4px 16px">
         ${SLOTS.map((s,i)=>`<div class="opt"><div style="flex:1"><div>${s.t}</div>${s.s?`<div class="sub">${s.s}</div>`:''}</div>
@@ -1630,7 +1653,9 @@ function saveSettings(){
   DELIV_FEE=num('set-fee',DELIV_FEE);FREE_FROM=num('set-free',FREE_FROM);
   const wa=document.getElementById('set-wa')?document.getElementById('set-wa').value.replace(/[^\d]/g,''):WA_NUM;
   if(wa.length>=6)WA_NUM=wa;
-  try{localStorage.setItem('lm-config',JSON.stringify({fee:DELIV_FEE,free:FREE_FROM,wa:WA_NUM,slots:SLOTS}));}catch(e){}
+  const u=document.getElementById('set-api-url'),k=document.getElementById('set-api-key');
+  if(u)API.url=u.value.trim();if(k)API.key=k.value.trim();
+  try{localStorage.setItem('lm-config',JSON.stringify({fee:DELIV_FEE,free:FREE_FROM,wa:WA_NUM,slots:SLOTS,lang:LANG,api:{url:API.url,key:API.key}}));}catch(e){}
   toast('Paramètres enregistrés · livraison '+eur(DELIV_FEE)+' — offerte dès '+eur(FREE_FROM));
   renderSettings();
 }
@@ -1642,7 +1667,10 @@ function resetConfig(){
 }
 function loadConfig(){
   let c;try{c=JSON.parse(localStorage.getItem('lm-config'));}catch(e){}
-  if(c){if(typeof c.fee==='number')DELIV_FEE=c.fee;if(typeof c.free==='number')FREE_FROM=c.free;if(c.wa)WA_NUM=c.wa;if(c.slots&&c.slots.length){SLOTS.length=0;c.slots.forEach(s=>SLOTS.push(s));}}
+  if(c){if(typeof c.fee==='number')DELIV_FEE=c.fee;if(typeof c.free==='number')FREE_FROM=c.free;if(c.wa)WA_NUM=c.wa;if(c.slots&&c.slots.length){SLOTS.length=0;c.slots.forEach(s=>SLOTS.push(s));}
+  if(c.lang==='en'||c.lang==='fr')LANG=c.lang;
+  if(c.api&&typeof c.api.url==='string'&&/^https:\/\//.test(c.api.url))API.url=c.api.url;
+  if(c.api&&typeof c.api.key==='string')API.key=c.api.key;}
   let conf;try{conf=JSON.parse(localStorage.getItem('lm-orders'));}catch(e){}
   if(conf&&conf.length){orders=conf;lastOrder=orders.find(o=>o.status<4)||null;}
   let pf;try{pf=JSON.parse(localStorage.getItem('lm-profile'));}catch(e){}
@@ -1987,6 +2015,65 @@ function obFinish(){
   toast('Bienvenue à bord 👋');
 }
 
+/* ===== Lot 15 — backend optionnel (Supabase REST, sans SDK) =====
+   Sans configuration : l'app reste 100 % locale (products.json + localStorage).
+   Avec URL + clé anon (Paramétrage → Backend) : produits lus dans la table
+   `products`, commandes écrites dans `orders`, Espace boutique publié en upsert. */
+let API={url:'',key:''};
+try{ const _ac=JSON.parse(localStorage.getItem('lm-config')||'null'); if(_ac&&_ac.api){ API={url:String(_ac.api.url||'').trim().replace(/\/+$/,''),key:String(_ac.api.key||'').trim()}; } }catch(e){}
+function apiReady(){ return !!(API.url&&API.key); }
+let apiFetcher=(typeof fetch==='function')?function(u,o){ return fetch(u,o); }:null;
+function apiFetch(path,opts){
+  if(typeof apiFetcher!=='function')return Promise.reject(new Error('fetch indisponible'));
+  opts=opts||{};
+  opts.headers=Object.assign({'apikey':API.key,'Authorization':'Bearer '+API.key,'Content-Type':'application/json','Prefer':'return=representation'},opts.headers||{});
+  return apiFetcher(API.url+'/rest/v1/'+path,opts);
+}
+function rowToProduct(r){
+  return {id:String(r.id||''), n:r.n||'', n_en:r.n_en||'', b:r.b||'', f:r.f||'', f_en:r.f_en||'',
+    pr:Number(r.pr)||0, u:r.u||'', e:r.e||'🛒',
+    g:(Array.isArray(r.g)&&r.g.length)?r.g.slice(0,2):['#E3F4F4','#9CCFE0'],
+    cat:r.cat||'epicerie', sub:r.sub||'',
+    bd:Array.isArray(r.bd)?r.bd:[],
+    st:(typeof r.st==='number'&&r.st>=0)?r.st:0, d:r.d||'', d_en:r.d_en||'',
+    ph:r.ph||'', cr:r.cr||'', promo:!!r.promo};
+}
+function apiProducts(){
+  return apiFetch('products?select=*').then(function(r){
+    if(!r||!r.ok)throw new Error('HTTP '+String((r&&r.status)||'?'));
+    return r.json();
+  }).then(function(rows){
+    if(!Array.isArray(rows)||!rows.length)throw new Error('catalogue backend vide');
+    return rows.map(rowToProduct);
+  });
+}
+function apiSubmitOrder(order){
+  const row={customer:order.addr, slot:order.slot, total:order.total,
+    items:order.items, note:typeof note==='string'?note:'', promo:order.promo||'', status:1};
+  return apiFetch('orders',{method:'POST',body:JSON.stringify(row)});
+}
+function appToRow(p){
+  return {id:p.id, n:p.n, n_en:p.n_en||null, b:p.b||'', f:p.f||'', f_en:p.f_en||null,
+    pr:p.pr, u:p.u||'', e:p.e||'🛒', g:p.g||[], cat:p.cat||'epicerie', sub:p.sub||'',
+    bd:p.bd||[], st:p.st, d:p.d||'', d_en:p.d_en||null, ph:p.ph||null, cr:p.cr||null, promo:!!p.promo};
+}
+function apiUpsertProduct(p){
+  return apiFetch('products?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(appToRow(p))});
+}
+function clearBackend(){API.url='';API.key='';try{const c=JSON.parse(localStorage.getItem('lm-config'))||{};delete c.api;localStorage.setItem('lm-config',JSON.stringify(c));}catch(e){}
+  document.getElementById('set-api-url').value='';document.getElementById('set-api-key').value='';
+  renderSettings();refreshCatalog(true);toast('Backend déconnecté — retour au catalogue local');}
+function testBackend(){
+  const uf=document.getElementById('set-api-url'),kf=document.getElementById('set-api-key');
+  if(uf&&uf.value.trim())API.url=uf.value.trim().replace(/\/+$/,'');
+  if(kf&&kf.value.trim())API.key=kf.value.trim();
+  if(!apiReady()){toast('Renseignez l\'URL et la clé anon d\'abord');return;}
+  toast('Test du backend…');
+  apiFetch('products?select=id').then(function(r){
+    toast(r&&r.ok?'Backend connecté ✓':'Backend injoignable (HTTP '+String((r&&r.status)||'?')+')');
+  }).catch(function(){ toast('Backend injoignable — vérifiez URL et clé'); });
+}
+
 /* ===== Lot 9 — catalogue vivant : products.json (remote → cache → embarqué) ===== */
 const CAT_URL='products.json', CAT_TTL=5*60*1000;
 let catalogFetcher=(typeof fetch==='function')?function(u){return fetch(u,{cache:'no-store'});}:null;
@@ -2006,6 +2093,16 @@ function mergeCatalog(list){
 }
 function catalogStale(){ try{ return Date.now()-(+localStorage.getItem('lm-catalog-ts')||0)>CAT_TTL; }catch(e){ return true; } }
 function refreshCatalog(force){
+  if(apiReady()){
+    return apiProducts().then(function(list){
+      const same=mergeCatalog(list);
+      if(!same)toast('Catalogue mis à jour ('+list.length+' produits)');
+      return true;
+    }).catch(function(){ return refreshCatalogJson(force); }); /* backend injoignable : repli products.json */
+  }
+  return refreshCatalogJson(force);
+}
+function refreshCatalogJson(force){
   if(typeof catalogFetcher!=='function')return Promise.resolve(false);
   if(!force&&!catalogStale())return Promise.resolve(false);
   return catalogFetcher(CAT_URL+'?maj='+Date.now()).then(function(r){

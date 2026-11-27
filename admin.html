@@ -141,6 +141,20 @@ details ol{padding-left:20px;line-height:1.7}
   </details>
 </div>
 
+<div class="card" style="background:#FFF;border-color:var(--lagon)">
+  <h2 style="color:var(--lagon-dark)">Backend Supabase <span id="bk-tag" style="font-size:11.5px;font-weight:800;color:var(--ink-3)"></span></h2>
+  <p style="font-size:13px;color:var(--ink-2);line-height:1.5">Optionnel — publie directement dans la base en ligne : plus besoin de déposer products.json sur GitHub. Renseignez l'URL et la clé anon de votre projet (Supabase → Settings → API).</p>
+  <label for="bk-url">URL du projet</label>
+  <input type="url" id="bk-url" placeholder="https://xxxx.supabase.co" autocomplete="off">
+  <label for="bk-key">Clé anon (public — jamais la clé service_role)</label>
+  <input type="password" id="bk-key" placeholder="eyJhbGciOi…" autocomplete="off">
+  <button class="btn btn-secondary" onclick="bkSave()">Enregistrer la configuration</button>
+  <button class="btn btn-ghost" onclick="bkTest()">🔌 Tester la connexion</button>
+  <button class="btn btn-primary" onclick="bkPublish()">🚀 Publier le catalogue vers le backend</button>
+  <button class="btn btn-ghost" onclick="bkLoad()">⬇︎ Charger le catalogue du backend</button>
+  <button class="btn btn-ghost" style="color:#C4483B" onclick="bkClear()">Déconnecter le backend</button>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -345,22 +359,87 @@ function showDraft(){
   toast('Brouillon : '+JSON.parse(raw).length+' produits en attente de publication');
 }
 
+/* ---- backend Supabase (optionnel, REST sans SDK) ---- */
+let BK={url:'',key:''};
+(function(){try{const c=JSON.parse(localStorage.getItem('lm-config')||'null');if(c&&c.api){BK.url=String(c.api.url||'').trim().replace(/\/+$/,'');BK.key=String(c.api.key||'').trim();}}catch(e){}})();
+function bkReady(){return !!(BK.url&&BK.key);}
+function bkFetch(path,opts){
+  opts=opts||{};
+  opts.headers=Object.assign({'apikey':BK.key,'Authorization':'Bearer '+BK.key,'Content-Type':'application/json','Prefer':'return=representation'},opts.headers||{});
+  return fetch(BK.url+'/rest/v1/'+path,opts);
+}
+function bkToRow(p){return {id:p.id,n:p.n,n_en:p.n_en||null,b:p.b||'',f:p.f||'',f_en:p.f_en||null,pr:p.pr,u:p.u||'',e:p.e||'🛒',g:p.g||[],cat:p.cat||'epicerie',sub:p.sub||'',bd:p.bd||[],st:p.st,d:p.d||'',d_en:p.d_en||null,ph:p.ph||null,cr:p.cr||null,promo:!!p.promo};}
+function bkPersist(){try{const c=JSON.parse(localStorage.getItem('lm-config')||'{}');c.api={url:BK.url,key:BK.key};localStorage.setItem('lm-config',JSON.stringify(c));}catch(e){}}
+function bkSyncUI(){qs('#bk-url').value=BK.url;qs('#bk-key').value=BK.key;qs('#bk-tag').textContent=bkReady()?'· connecté':'· non configuré';}
+function bkSave(){
+  const nu=qs('#bk-url').value.trim().replace(/\/+$/,''),nk=qs('#bk-key').value.trim();
+  if(nu&&!/^https:\/\//.test(nu)){toast('L\'URL doit commencer par https://');return;}
+  BK.url=nu;BK.key=nk;
+  bkPersist();bkSyncUI();
+  toast(bkReady()?'Configuration backend enregistrée':'Configuration effacée');
+}
+function bkTest(){
+  BK.url=qs('#bk-url').value.trim().replace(/\/+$/,'');BK.key=qs('#bk-key').value.trim();
+  if(!bkReady()){toast('Renseignez l\'URL et la clé anon d\'abord');return;}
+  toast('Test du backend…');
+  bkFetch('products?select=id').then(function(r){
+    toast(r&&r.ok?'Backend connecté ✓ ('+BK.url.replace('https://','').slice(0,24)+'…)':'Backend injoignable (HTTP '+String((r&&r.status)||'?')+')');
+  }).catch(function(){toast('Backend injoignable — vérifiez URL et clé');});
+}
+function bkPublish(){
+  BK.url=qs('#bk-url').value.trim().replace(/\/+$/,'');BK.key=qs('#bk-key').value.trim();
+  if(!bkReady()){toast('Renseignez l\'URL et la clé anon d\'abord');return;}
+  if(!CATALOG.length){toast('Catalogue vide — rien à publier');return;}
+  try{validateCatalog(CATALOG);}catch(e){toast('Catalogue invalide : '+String(e.message).replace('Error: ',''));return;}
+  toast('Publication de '+CATALOG.length+' produits…');
+  bkFetch('products?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(CATALOG.map(bkToRow))})
+    .then(function(r){
+      if(r&&r.ok){bkPersist();bkSyncUI();toast('Publié ✓ '+CATALOG.length+' produits dans le backend');}
+      else{toast('Échec de publication (HTTP '+String((r&&r.status)||'?')+') — vérifiez la clé et le schéma');}
+    }).catch(function(){toast('Backend injoignable — publication annulée');});
+}
+function bkLoad(){
+  BK.url=qs('#bk-url').value.trim().replace(/\/+$/,'');BK.key=qs('#bk-key').value.trim();
+  if(!bkReady()){toast('Renseignez l\'URL et la clé anon d\'abord');return;}
+  toast('Chargement du backend…');
+  bkFetch('products?select=*').then(function(r){
+    if(!r||!r.ok)throw new Error('HTTP '+String((r&&r.status)||'?'));
+    return r.json();
+  }).then(function(rows){
+    if(!Array.isArray(rows)||!rows.length){toast('Backend : catalogue vide');return;}
+    CATALOG=validateCatalog(rows.map(bkToRow));persist();cancelEdit();renderList();
+    toast('Chargé ✓ '+CATALOG.length+' produits du backend');
+  }).catch(function(e){toast('Chargement impossible : '+String(e.message).replace('Error: ',''));});
+}
+function bkClear(){
+  BK.url='';BK.key='';
+  try{const c=JSON.parse(localStorage.getItem('lm-config')||'{}');delete c.api;localStorage.setItem('lm-config',JSON.stringify(c));}catch(e){}
+  bkSyncUI();toast('Backend déconnecté — publication par products.json');
+}
+
 /* ---- démarrage ---- */
 (function boot(){
   const cs=qs('#f-cat');
   cs.innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+c.t+'</option>';}).join('');
   syncSubs();
   let start=(function(){try{return JSON.parse(localStorage.getItem('lm-admin-catalog')||'null');}catch(e){return null;}})()||[];
-  if(typeof fetch==='function'){
-    fetch('products.json',{cache:'no-store'}).then(function(r){return r.ok?r.text():null;}).then(function(t){
-      if(!t)return;
-      try{
-        const serveur=validateCatalog(JSON.parse(t));
-        if(!start.length){ CATALOG=serveur; persist(); renderList(); toast('Catalogue en ligne chargé : '+CATALOG.length+' produits'); }
-      }catch(e){toast('products.json du serveur invalide — brouillon local conservé');}
+  bkSyncUI();
+  CATALOG=start;renderList();
+  if(typeof fetch!=='function')return;
+  if(bkReady()){
+    bkFetch('products?select=*').then(function(r){return r.ok?r.json():null;}).then(function(rows){
+      if(!Array.isArray(rows)||!rows.length)return;
+      const serveur=validateCatalog(rows.map(bkToRow));
+      if(!start.length){ CATALOG=serveur; persist(); renderList(); toast('Catalogue du backend chargé : '+CATALOG.length+' produits'); }
     }).catch(function(){});
   }
-  CATALOG=start;renderList();
+  fetch('products.json',{cache:'no-store'}).then(function(r){return r.ok?r.text():null;}).then(function(t){
+    if(!t)return;
+    try{
+      const serveur=validateCatalog(JSON.parse(t));
+      if(!start.length){ CATALOG=serveur; persist(); renderList(); toast('Catalogue en ligne chargé : '+CATALOG.length+' produits'); }
+    }catch(e){toast('products.json du serveur invalide — brouillon local conservé');}
+  }).catch(function(){});
 })();
 </script>
 </body>

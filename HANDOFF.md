@@ -142,6 +142,8 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
    - `sw.js` inchangé pour les photos (hors app shell) ; offline → repli emoji ;
    - Tests : `tests/suite12.js` (17) — champs présents/uniques, synchronisation JSON ↔ embarqué, rendus pcard/fiche, replis via objets factices, CSS ; suite10 étendue (+6 : champ photo).
 
+12. **Lot 15 — backend optionnel Supabase REST** (`index.html`, `admin.html`, `supabase-schema.sql`) : bloc API sans SDK (`API`/`apiReady`/`apiFetch`, `apiProducts`, `apiSubmitOrder`, `apiUpsertProduct`, `rowToProduct`/`appToRow`) ; Paramétrage → carte Backend (URL + clé anon + test + déconnexion) ; `refreshCatalog` dispatcher (API prioritaire, repli products.json) ; `payNow` ne confirme qu'après accord serveur ; Espace boutique → publication groupée (upsert `?on_conflict=id`) + chargement backend ; schéma SQL + RLS permissives (prototype) ; suites 15 (14 tests) et admin15 (9 tests).
+
 11. **Lot 13 — i18n FR/EN** (`index.html`, `admin.html`) :
    - FR = langue source ; bloc i18n inséré après l'état : `EN_DICT` (textes exacts, ~200 entrées : chrome, produits noms/formats/descriptions, catégories, sous-rayons, paniers, créneaux, moyens de paiement, zones, FAQ, promos, onboarding, toasts) + `EN_PAT` (phrases interpolées ; `$n` = 1ᵉʳ groupe, sous-traduction des fragments connus) + composite « · » traduit par segments ;
    - `trText`/`trExact`/`trPat` purs (testables) ; `trTree` marche le DOM (textes + placeholder/aria-label/title) ; `MutationObserver` (gardé `typeof!=='undefined'` — absent en JXA) traduit les nœuds ajoutés ; démarrage : `if(LANG==='en')trTree(document.body)` ;

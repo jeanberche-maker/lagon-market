@@ -86,6 +86,30 @@ Un sélecteur **Paramétrage → « Langue · Language »** (🇫🇷 Français 
 - **Produits** : priorité à la variante du commerçant (`n_en`/`d_en`, éditables dans l'Espace boutique) sinon dictionnaire intégré, sinon français — jamais de texte manquant.
 - QC : **suite13** (36 tests) — cœur de traduction, 15+ patterns, composites, couverture complète du dictionnaire (produits, badges, catégories, créneaux, FAQ, promos…), replis FR, rendu EN réel, persistance et préservation des autres réglages.
 
+## Lot 15 — backend optionnel (Supabase REST, sans SDK)
+
+L'app gagne une vraie base en ligne **sans rien perdre du mode local** : tant qu'aucun backend n'est configuré, tout fonctionne comme avant (products.json + localStorage). Dès que l'URL et la clé anon d'un projet Supabase sont saisies, le catalogue et les commandes passent par la base.
+
+**Mise en route (10 minutes, gratuit)** :
+
+1. Créez un projet sur [supabase.com](https://supabase.com) (plan gratuit suffisant).
+2. **SQL Editor → New query** : collez le contenu de [supabase-schema.sql](supabase-schema.sql) → **Run** (tables `products` et `orders` + règles d'accès).
+3. **Settings → API** : copiez l'**URL du projet** et la clé **anon public** (jamais `service_role`).
+4. Collez-les dans **l'app → Paramétrage → Backend (optionnel)** (ou dans **l'Espace boutique → Backend Supabase**) → « Tester la connexion ».
+5. Dans l'Espace boutique : « 🚀 Publier le catalogue vers le backend » envoie tout le catalogue courant en un seul upsert. L'app lit alors ces produits au prochain cycle.
+
+**Ce que ça change** :
+
+| Flux | Sans backend | Avec backend |
+|---|---|---|
+| Catalogue | products.json (GitHub) | table `products` (repli auto sur products.json si le backend est injoignable) |
+| Commandes | localStorage uniquement | POST dans la table `orders` — la confirmation ne s'affiche qu'après accord du serveur |
+| Publication produits | télécharger products.json → GitHub | un bouton (upsert groupé), ou les deux |
+
+⚠️ **Prototype** : les règles RLS du schéma sont volontairement permissives (clé anon = lecture produits + écriture commandes + publication catalogue). Avant une vraie exploitation, ajoutez Supabase Auth et restreignez les écritures.
+
+QC : **suite15** (14 tests) — mappings `rowToProduct`/`appToRow`, en-têtes API, dispatcher `refreshCatalog` (API prioritaire, repli JSON vérifié), `payNow` sans backend / avec accord serveur / avec échec réseau, `testBackend`, restauration de config ; **admin15** (9 tests) — publication groupée, chargement backend, URL non https refusée, déconnexion.
+
 ## Lot 9 — alimenter le catalogue périodiquement (sans toucher au code)
 
 La liste des produits disponibles vit dans [products.json](products.json), un simple fichier JSON à la racine. L'app le recharge automatiquement :
