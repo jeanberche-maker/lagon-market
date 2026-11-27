@@ -1,7 +1,7 @@
 /* Lagon Market — service worker (offline friendly, catalogue toujours frais)
    Règle spéciale Lot 9 : products.json est network-first — la donnée produits
    ne peut pas rester figée dans le cache ; le cache n'est qu'un secours hors-ligne. */
-const CACHE = 'lagon-v2';
+const CACHE = 'lagon-v4';
 const ASSETS = ['./', './index.html', './admin.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -49,6 +49,23 @@ self.addEventListener('fetch', (e) => {
           });
           return res;
         });
+      })
+    );
+    return;
+  }
+
+  /* Pages HTML (index/admin) : stale-while-revalidate — réponse instantanée du
+     cache, mise à jour silencieuse en arrière-plan (l'app se met à jour seule). */
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('.html')) {
+    e.respondWith(
+      caches.match(e.request).then((hit) => {
+        const net = fetch(e.request)
+          .then((res) => {
+            caches.open(CACHE).then((c) => c.put(e.request, res.clone()));
+            return res;
+          })
+          .catch(() => hit);
+        return hit || net;
       })
     );
     return;
