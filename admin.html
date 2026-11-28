@@ -93,6 +93,18 @@ details ol{padding-left:20px;line-height:1.7}
 </div>
 
 
+<div class="card" style="border-color:var(--ambre)">
+  <h2>🧾 Import facture / devis <span id="imp-tag" style="font-size:11.5px;font-weight:800;color:var(--ink-3)"></span></h2>
+  <p style="font-size:13px;color:var(--ink-2);line-height:1.5">Scannez la facture ou le devis (Live Text de l'iPhone : appareil photo → texte, ou n'importe quel OCR), collez le texte ci-dessous. L'analyse propose un produit par ligne au format products.json — vous approuvez <b>un par un</b> : ✓ approuver, ✕ rejeter, tout est éditable avant validation.</p>
+  <textarea id="imp-raw" placeholder="Ex. :&#10;2 KG TOMATES GRAPPE 7,90&#10;BRIE AOP 200 G 3,95 €&#10;1 BAGUETTE TRADITION 1,20&#10;MAHI MAHI FILET KG 18,50"></textarea>
+  <button class="btn btn-primary" onclick="document.getElementById('imp-photo').click()">📸 Photographier la facture</button>
+  <input type="file" id="imp-photo" accept="image/*" capture="environment" style="display:none" onchange="impPhoto(event)">
+  <button class="btn btn-secondary" onclick="impAnalyze()">🔍 Analyser le texte</button>
+  <div id="imp-ocr" style="display:none;font-size:12.5px;color:var(--ink-2);margin-top:8px"></div>
+  <button class="btn btn-ghost" id="imp-clear" style="display:none;color:#C4483B" onclick="impReset()">Tout rejeter</button>
+  <div id="imp-queue"></div>
+</div>
+
 <div class="card">
   <h2 id="form-title">Ajouter un produit</h2>
   <div class="row">
@@ -170,18 +182,6 @@ details ol{padding-left:20px;line-height:1.7}
   <button class="btn btn-primary" onclick="bkPublish()">🚀 Publier le catalogue vers le backend</button>
   <button class="btn btn-ghost" onclick="bkLoad()">⬇︎ Charger le catalogue du backend</button>
   <button class="btn btn-ghost" style="color:#C4483B" onclick="bkClear()">Déconnecter le backend</button>
-</div>
-
-<div class="card" style="border-color:var(--ambre)">
-  <h2>🧾 Import facture / devis <span id="imp-tag" style="font-size:11.5px;font-weight:800;color:var(--ink-3)"></span></h2>
-  <p style="font-size:13px;color:var(--ink-2);line-height:1.5">Scannez la facture ou le devis (Live Text de l'iPhone : appareil photo → texte, ou n'importe quel OCR), collez le texte ci-dessous. L'analyse propose un produit par ligne au format products.json — vous approuvez <b>un par un</b> : ✓ approuver, ✕ rejeter, tout est éditable avant validation.</p>
-  <textarea id="imp-raw" placeholder="Ex. :&#10;2 KG TOMATES GRAPPE 7,90&#10;BRIE AOP 200 G 3,95 €&#10;1 BAGUETTE TRADITION 1,20&#10;MAHI MAHI FILET KG 18,50"></textarea>
-  <button class="btn btn-primary" onclick="document.getElementById('imp-photo').click()">📸 Photographier la facture</button>
-  <input type="file" id="imp-photo" accept="image/*" capture="environment" style="display:none" onchange="impPhoto(event)">
-  <button class="btn btn-secondary" onclick="impAnalyze()">🔍 Analyser le texte</button>
-  <div id="imp-ocr" style="display:none;font-size:12.5px;color:var(--ink-2);margin-top:8px"></div>
-  <button class="btn btn-ghost" id="imp-clear" style="display:none;color:#C4483B" onclick="impReset()">Tout rejeter</button>
-  <div id="imp-queue"></div>
 </div>
 
 <div id="toast"></div>
