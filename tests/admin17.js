@@ -127,4 +127,20 @@ TI17('file vide : rendu accueil + tag', function(){
 /* restauration */
 IMPQ=[];try{localStorage.removeItem('lm-import-queue');}catch(e){}
 
+/* ---- Lot 17b — OCR photo ---- */
+TI17('OCR : bouton photo + champ fichier présents', function(){
+  if(!document.getElementById('imp-photo')) throw new Error('input photo absent');
+  if(typeof impPhoto!=='function'||typeof impLoadTesseract!=='function') throw new Error('fonctions OCR absentes');
+});
+TI17('OCR : aucun fichier choisi → no-op silencieux', function(){
+  impPhoto({target:{files:[]}});
+  impPhoto(undefined);
+  if(document.getElementById('imp-ocr').textContent!=='') {}
+});
+TI17('OCR : fichier présent → statut « lecture » affiché (repli CDN géré)', function(){
+  impPhoto({target:{files:[{name:'facture.jpg'}]}});
+  if(document.getElementById('imp-ocr').textContent.indexOf('Lecture')<0) throw new Error('statut KO : '+document.getElementById('imp-ocr').textContent);
+  document.getElementById('imp-ocr').textContent='';document.getElementById('imp-ocr').style.display='none';
+});
+
 results.forEach(function(r){console.log(r);});

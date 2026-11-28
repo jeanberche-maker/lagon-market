@@ -160,7 +160,10 @@ details ol{padding-left:20px;line-height:1.7}
   <h2>🧾 Import facture / devis <span id="imp-tag" style="font-size:11.5px;font-weight:800;color:var(--ink-3)"></span></h2>
   <p style="font-size:13px;color:var(--ink-2);line-height:1.5">Scannez la facture ou le devis (Live Text de l'iPhone : appareil photo → texte, ou n'importe quel OCR), collez le texte ci-dessous. L'analyse propose un produit par ligne au format products.json — vous approuvez <b>un par un</b> : ✓ approuver, ✕ rejeter, tout est éditable avant validation.</p>
   <textarea id="imp-raw" placeholder="Ex. :&#10;2 KG TOMATES GRAPPE 7,90&#10;BRIE AOP 200 G 3,95 €&#10;1 BAGUETTE TRADITION 1,20&#10;MAHI MAHI FILET KG 18,50"></textarea>
+  <button class="btn btn-primary" onclick="document.getElementById('imp-photo').click()">📸 Photographier la facture</button>
+  <input type="file" id="imp-photo" accept="image/*" capture="environment" style="display:none" onchange="impPhoto(event)">
   <button class="btn btn-secondary" onclick="impAnalyze()">🔍 Analyser le texte</button>
+  <div id="imp-ocr" style="display:none;font-size:12.5px;color:var(--ink-2);margin-top:8px"></div>
   <button class="btn btn-ghost" id="imp-clear" style="display:none;color:#C4483B" onclick="impReset()">Tout rejeter</button>
   <div id="imp-queue"></div>
 </div>
@@ -602,6 +605,34 @@ function impApprove(){
   toast(ix>=0?('Mis à jour : '+p.n):('Approuvé : '+p.n+' — '+(IMPQ.length?('prochain produit ('+IMPQ.length+' restant)'):'file terminée ✓')));
 }
 function impReject(){ if(!IMPQ.length)return; const n=IMPQ[0].n; IMPQ.shift(); impSaveQ(); impRender(); toast('Rejeté : '+n+(IMPQ.length?(' — prochain produit ('+IMPQ.length+' restant)'):' — file terminée')); }
+
+/* ---- Lot 17b — OCR photo de facture (Tesseract.js via CDN, chargé à la demande) ---- */
+function impLoadTesseract(){
+  if(typeof Tesseract!=='undefined')return Promise.resolve(true);
+  return new Promise(function(res){
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload=function(){res(true);};
+    s.onerror=function(){res(false);};
+    (document.head||document.body).appendChild(s);
+  });
+}
+function impPhoto(ev){
+  const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];
+  if(!f)return;
+  const st=qs('#imp-ocr');
+  st.style.display='';st.textContent='⏳ Lecture du document (OCR)… quelques secondes, ne fermez pas la page';
+  impLoadTesseract().then(function(ok){
+    if(!ok){st.textContent='';toast('OCR indisponible (hors-ligne ?) — collez le texte manuellement');return;}
+    return Tesseract.recognize(f,'fra+eng').then(function(r){
+      const txt=String(r&&r.data&&r.data.text||'').trim();
+      st.textContent='';
+      if(!txt){toast('Aucun texte reconnu — photo plus nette, ou collez le texte manuellement');return;}
+      qs('#imp-raw').value=txt;
+      toast('Texte extrait ✓ — vérifiez-le puis « 🔍 Analyser le texte »');
+    });
+  }).catch(function(){ st.textContent=''; toast('OCR en échec — collez le texte manuellement'); });
+}
 
 /* ---- démarrage ---- */
 (function boot(){

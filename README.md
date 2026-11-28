@@ -90,10 +90,10 @@ Un sélecteur **Paramétrage → « Langue · Language »** (🇫🇷 Français 
 
 Peupler le catalogue depuis les documents papier du fournisseur, avec **validation humaine de chaque produit** :
 
-**Scan → coller → analyser → approuver un par un → publier**
+**Scan → analyser → approuver un par un → publier** (OCR photo intégré)
 
-1. Scannez la facture ou le devis (iPhone : appareil photo → **Live Text** → copier le texte ; ou tout OCR)
-2. **Espace boutique → « 🧾 Import facture / devis »** → collez le texte → **🔍 Analyser le texte**
+1. **Espace boutique → « 🧾 Import facture / devis »** → **📸 Photographier la facture** : l'OCR intégré (Tesseract.js, sans clé API, chargé à la demande) extrait le texte directement — Live Text et le collage manuel restent possibles en alternative
+2. Vérifiez le texte extrait → **🔍 Analyser le texte**
 3. Chaque ligne exploitable devient une **proposition** (nouveau produit ou mise à jour si l'id existe déjà)
 4. Les propositions s'approuvent **une par une** : nom, prix, stock, emoji, catégorie (déduite par mots-clés) et sous-catégorie sont éditables avant validation — ✓ Approuver ou ✕ Rejeter, puis le suivant (« Produit 1 sur N »)
 5. Les approuvés rejoignent « Catalogue en cours » (et la file survit à un rechargement) → publication habituelle : **products.json** ou **🚀 Backend**
@@ -108,7 +108,7 @@ BRIE AOP 200 G 3,95 €
 MAHI MAHI FILET KG 18,50
 ```
 
-QC : **admin17** (15 tests) — extraction/prix/noms/formats/catégories, bruit ignoré, lignes sans prix rejetées, doublons détectés (mise à jour) et dédoublonnés, file persistée, approbation (ajout + avancement), refus prix invalide, rejet, remise à zéro.
+QC : **admin17** (18 tests, dont OCR photo : bouton, no-op sans fichier, statut de lecture) — extraction/prix/noms/formats/catégories, bruit ignoré, lignes sans prix rejetées, doublons détectés (mise à jour) et dédoublonnés, file persistée, approbation (ajout + avancement), refus prix invalide, rejet, remise à zéro.
 
 ## Lot 16 — sécurisation : Supabase Auth, écritures restreintes au marchand
 
