@@ -504,9 +504,9 @@ var IMP_NOISE=/^(facture|devis|bon de commande|total|sous-total|total ht|total t
 var IMP_KINDS=[
   [/tomate|salade|carotte|oignon|poivron|concombre|courgette|aubergine|ananas|mangue|banane|avocat|citron|orange|pomme|poire|raisin|fraise|pastèque|pasteque|melon|fruit|légume|legume|herbe|basilic|menthe|gingembre|coriandre|échalote|echalote/i,'fruits','🥭'],
   [/pain|baguette|croissant|brioche|viennoiserie|boulanger|madeleine|galette/i,'boulangerie','🥖'],
-  [/fromage|lait|beurre|yaourt|crème|creme|mozzarella|brie|camembert|emmental|comté|comte|chèvre|chevre|mozz|raclette/i,'cremerie','🧀'],
+  [/fromage|lait|beurre|yaourt|crème|creme|mozzarella|brie|camembert|emmental|comté|comte|chèvre|chevre|mozz|raclette|parmesan|parmasan|cheese|mascarpone|ricotta|cheddar|gouda|edam/i,'cremerie','🧀'],
   [/poisson|thon|cabillaud|saumon|crevette|gambas|huître|huitre|morue|merlu|mahimahi|mahi|daurade|dorade|seiche|calamar|langouste|oursin|marin/i,'mer','🐟'],
-  [/bœuf|boeuf|veau|poulet|volaille|porc|merguez|charcuterie|jambon|viande|côte de|cote de|filet de b/i,'boucherie','🥩'],
+  [/bœuf|boeuf|veau|poulet|volaille|porc|merguez|charcuterie|jambon|viande|côte de|cote de|filet de b|beef|steak|ribeye|angus|tenderloin|wagyu/i,'boucherie','🥩'],
   [/vin|bière|biere|rhum|whisky|rosé|rose|champagne|cave|bouteille|minérale|minerale|jus|soda|limonade|sirop/i,'boissons','🍷'],
   [/glace|surgelé|surgele|frites|pizza sorbet/i,'surgeles','❄️'],
   [/café|cafe|sel|poivre|farine|sucre|huile|pâtes|pates|riz|conserve|épice|epice|épicerie|biscuit|chocolat|vinaigre|mayonnaise|ketchup|moutarde/i,'epicerie','🧂']
@@ -529,22 +529,30 @@ function impParse(txt){
     const re=/(?:€\s*)?\b(\d{1,4}(?:[.,]\d{2}))\b\s*(?:€|eurs?|euros?)?/gi;
     while((m=re.exec(line)))cands.push({v:parseFloat(m[1].replace(',','.')),i:m.index,end:re.lastIndex});
     const reI=/(?:^|[^\d.,])(\d{1,3})\s*(?:€|eurs?|euros?)/gi; /* entier suivi de €, jamais la décimale d'un prix */
-    while((m=reI.exec(line)))cands.push({v:parseFloat(m[1]),i:m.index,end:reI.lastIndex});
+    while((m=reI.exec(line))){let v=parseFloat(m[1]);if(v>=100)v=v/100;/* OCR perd la virgule : 325€ → 3,25 */
+      cands.push({v:v,i:m.index,end:reI.lastIndex});}
     if(!cands.length)return;
-    let pick=cands[cands.length-1];
-    const endish=cands.filter(function(c){return c.v>0&&/(?:€|eurs?|euros?)?\s*$/.test(line.slice(c.end));});
-    if(endish.length)pick=endish[endish.length-1];
+    cands.sort(function(a,b){return a.i-b.i;}); /* ordre réel dans la ligne */
+    const pos=cands.filter(function(c){return c.v>0;});
+    if(!pos.length)return;
+    const pick=pos[pos.length-1]; /* dernier prix > 0 : la queue n'est que quantité/TVA */
     const pr=pick.v;
     if(!(pr>0))return;
-    let name=(line.slice(0,pick.i)+' '+line.slice(pick.end)).replace(/€|eurs?|euros?/gi,' ').replace(/\s{2,}/g,' ').trim(),f='';
+    let name=line.slice(0,pick.i).replace(/€|eurs?|euros?/gi,' ').replace(/\s{2,}/g,' ').trim(),f='';
+    /* queue : nombres résiduels (quantité 1,00, doublon, TVA 0,00) retirés en boucle */
+    var prevn;
+    do{prevn=name;name=name.replace(/\s+\d+[.,]\d+\s*$/,'').replace(/\s+\d+\s*$/,'');}while(name!==prevn);
+    name=name.replace(/\s*\/\s*$/,'').trim();
     /* format en fin de ligne (200 G, 1,5L…) → champ f, retiré du nom */
     const fm=name.match(/\b(\d+(?:[.,]\d+)?\s*(?:kg|g|gr|grammes?|l|litres?|cl|ml))\b\s*$/i);
     if(fm){ f=fm[1].toLowerCase().replace(/\s+/g,' '); name=name.slice(0,fm.index).trim(); }
-    name=name.replace(/^[xX]?\d+\s+/,'').replace(/\s+[xX]\d+$/,'')
+    name=name.replace(/\s*\/\s*$/,'').trim();
+    name=name.replace(/^[A-Za-z]{0,3}\d{3,8}\s+/,'').replace(/^[xX]?\d+\s+/,'').replace(/\s+[xX]\d+$/,'').replace(/\s+\d+[.,]\d+$/,'')
       .replace(/^(kg|g|gr|grammes?|l|litres?|cl|ml|pi[èe]ces?|barquettes?|bouteilles?|lots?)\s+/i,'')
       .replace(/\s+(kg|g|gr|grammes?|l|litres?|cl|ml|pi[èe]ces?|bouteilles?|barquettes?|lots?)\s*$/i,'')
       .replace(IMP_UNIT,'').replace(/\s{2,}/g,' ').trim();
     if(name.length<2)return;
+    if((name.match(/[a-zà-ÿ]/gi)||[]).length<3)return; /* écarte les fragments OCR (k, 5…) */
     name=name.charAt(0).toUpperCase()+name.slice(1).toLowerCase();
     const g=impGuess(name);
     const id=slugify(name);

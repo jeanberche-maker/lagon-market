@@ -154,6 +154,33 @@ TI17('dates seules et séparateurs OCR ignorés', function(){
   if(props.length!==1||props[0].n!=='Tomates grappe') throw new Error(JSON.stringify(props));
 });
 
+/* ---- Lot 17c — facture réelle Roasty's (OCR) ---- */
+TI17('facture réelle : doublon prix + colonne TVA écartés', function(){
+  const props=impParse('BEEF RIBEYE 1855 BLACK ANGUS CHOICE 1,00 20,25€ 20,25€ 0,00');
+  if(props.length!==1) throw new Error(JSON.stringify(props));
+  if(props[0].pr!==20.25) throw new Error('pr='+props[0].pr);
+  if(props[0].n!=='Beef ribeye 1855 black angus choice') throw new Error(props[0].n);
+  if(props[0].cat!=='boucherie') throw new Error(props[0].cat);
+});
+TI17('facture réelle : 325€ sans virgule corrigé en 3,25, format 1kg', function(){
+  const props=impParse('MOUTARDE DE DIJON 1KG 1,00 325€ 325€ A');
+  if(props.length!==1||props[0].pr!==3.25) throw new Error(JSON.stringify(props));
+  if(props[0].n!=='Moutarde de dijon'||props[0].f!=='1kg') throw new Error(props[0].n+' / '+props[0].f);
+});
+TI17('facture réelle : code erroné 181€ écarté au profit de 12,81 €', function(){
+  const props=impParse('SAUCE SOY 0,5 GAL/SAUCE SOJA 1,89L 1,00 181€ 12,81 € 0.00');
+  if(props.length!==1||props[0].pr!==12.81) throw new Error(JSON.stringify(props));
+  if(props[0].f!=='1,89l') throw new Error('f='+props[0].f);
+});
+TI17('facture réelle : fromages anglais classés crèmerie', function(){
+  const props=impParse('PARMESAN SHAVED 5LBS/PARMESAN COPEAUX 1,00 36,35 € 36,35 € 0.0');
+  if(props.length!==1||props[0].cat!=='cremerie'||props[0].pr!==36.35) throw new Error(JSON.stringify(props));
+});
+TI17('facture réelle : fragment OCR « 120 k ,95€ » rejeté', function(){
+  const props=impParse('120 k ,95€ 5');
+  if(props.length!==0) throw new Error(JSON.stringify(props));
+});
+
 /* ---- Lot 17b — OCR photo ---- */
 TI17('OCR : bouton photo + champ fichier présents', function(){
   if(!document.getElementById('imp-photo')) throw new Error('input photo absent');
