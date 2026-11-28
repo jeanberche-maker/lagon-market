@@ -257,7 +257,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
     <div class="body pad-b-nav" id="home-body"></div>
     <nav class="navbar">
       <button class="nav-it on"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
-      <button class="nav-it" onclick="go('catalog')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it" onclick="openCat('all')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
       <button class="nav-it" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge2">0</span></button>
       <button class="nav-it" onclick="goAccount()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
     </nav>
@@ -294,7 +294,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
     <div id="pbar-wrap"></div>
     <nav class="navbar">
       <button class="nav-it" onclick="go('home')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
-      <button class="nav-it on" onclick="go('catalog')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it on" onclick="openCat('all')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
       <button class="nav-it" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge4">0</span></button>
       <button class="nav-it" onclick="goAccount()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
     </nav>
@@ -313,7 +313,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
     <div class="body pad-b-nav" id="cart-body"></div>
     <nav class="navbar">
       <button class="nav-it" onclick="go('home')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
-      <button class="nav-it" onclick="go('catalog')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it" onclick="openCat('all')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
       <button class="nav-it on" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge6">0</span></button>
       <button class="nav-it" onclick="goAccount()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
     </nav>
@@ -360,7 +360,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
     <div class="body pad-b-nav" id="account-body"></div>
     <nav class="navbar">
       <button class="nav-it" onclick="go('home')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>Accueil</button>
-      <button class="nav-it" onclick="go('catalog')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
+      <button class="nav-it" onclick="openCat('all')"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Catalogue</button>
       <button class="nav-it" onclick="goCart()"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7h12l1.2 12.2a1.5 1.5 0 0 1-1.5 1.8H6.3a1.5 1.5 0 0 1-1.5-1.8L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Panier<span class="nb" id="cart-badge7">0</span></button>
       <button class="nav-it on"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Compte</button>
     </nav>
@@ -1002,7 +1002,7 @@ function renderHome(){
         <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,${c.g[0]},${c.g[1]});display:flex;align-items:center;justify-content:center;font-size:23px;flex:none">${c.e}</div>
         <div style="font-weight:800;font-size:13.5px">${c.t}</div></button>`).join('')}
     </div>
-    <div style="padding:16px"><button class="btn btn-ghost" onclick="go('catalog')">Toutes les catégories</button></div>`;
+    <div style="padding:16px"><button class="btn btn-ghost" onclick="openCat('all')">Toutes les catégories</button></div>`;
   const b=$('#home-body');
   b.innerHTML=`<div class="fade-in">${hh}</div>`;
   initSearch();
@@ -1111,7 +1111,7 @@ function pickAddr(id){
 /* ================= CATALOGUE ================= */
 function openCat(id){searchMode=false;activeCat=id;activeSub='Tout';renderCatalog();go('catalog');}
 function filtered(){
-  let list=activeCat==='search'?P.filter(matchesQuery):P.filter(p=>p.cat===activeCat);
+  let list=activeCat==='search'?P.filter(matchesQuery):(activeCat==='all'?P.slice():P.filter(p=>p.cat===activeCat));
   if(activeSub!=='Tout')list=list.filter(p=>p.sub===activeSub);
   if(filters.bio)list=list.filter(p=>(p.bd||[]).includes('Bio'));
   if(filters.sg)list=list.filter(p=>(p.bd||[]).includes('Sans gluten'));
@@ -1129,7 +1129,9 @@ function renderCatalog(){
   $('#cat-title').textContent=searching?'Recherche : « '+(query||'…')+' »':(cat?cat.t:'Catalogue');
   $('#chips-row').innerHTML=searching
     ?`<button class="chip" onclick="clearSearch()" style="min-height:36px;color:var(--corail)">✕ Effacer la recherche</button>`
-    :(SUBS[activeCat]||['Tout']).map(s=>`<button class="chip ${s===activeSub?'on':''}" onclick="activeSub='${s}';renderCatalog()">${s}</button>`).join('');
+    :(activeCat==='all'
+      ?CATS.map(c=>`<button class="chip" onclick="openCat('${c.id}')" style="min-height:36px">${c.e} ${c.t}</button>`).join('')
+      :(SUBS[activeCat]||['Tout']).map(s=>`<button class="chip ${s===activeSub?'on':''}" onclick="activeSub='${s}';renderCatalog()">${s}</button>`).join(''));
   renderTags();renderSortList();renderFilter();
   if(demo.catalog==='error'){
     $('#cat-err-banner').classList.add('show');
@@ -1196,7 +1198,7 @@ function renderFilter(){
       ${mk('promo','En promotion',filters.promo)}
     </div>
     <div class="fgroup"><h4>Marques</h4><div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${[...new Set(P.filter(p=>activeCat==='search'||p.cat===activeCat).map(p=>p.b))].map(m=>`<button class="sw ${filters.marques.has(m)?'on':''}" onclick="tBrand('${esc(m)}',this)">${m}</button>`).join('')}
+      ${[...new Set(P.filter(p=>activeCat==='search'||activeCat==='all'||p.cat===activeCat).map(p=>p.b))].map(m=>`<button class="sw ${filters.marques.has(m)?'on':''}" onclick="tBrand('${esc(m)}',this)">${m}</button>`).join('')}
     </div></div>`;
   updFilterBtn();
 }

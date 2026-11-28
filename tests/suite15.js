@@ -177,6 +177,28 @@ T15('loadConfig : restaure API depuis lm-config (https uniquement)', function(){
   try{localStorage.removeItem('lm-config');}catch(e){}
 });
 
+/* ==== correctif « Toutes les catégories » (mode all) ==== */
+T15('mode « toutes les catégories » : filtered = tout le catalogue', function(){
+  openCat('fruits');openCat('all');
+  if(activeCat!=='all') throw new Error('activeCat KO : '+activeCat);
+  if(activeSub!=='Tout') throw new Error('activeSub devrait être réinitialisé');
+  if(filtered().length!==P.length) throw new Error('attendu '+P.length+', reçu '+filtered().length);
+  renderCatalog();
+  if(document.getElementById('count-label').textContent!==P.length+' produits') throw new Error('compteur KO : '+document.getElementById('count-label').textContent);
+  if(document.getElementById('cat-title').textContent!=='Catalogue') throw new Error('titre KO : '+document.getElementById('cat-title').textContent);
+  var ch=document.getElementById('chips-row').innerHTML;
+  if(ch.indexOf('Fruits & Légumes')<0||ch.indexOf("openCat('fruits')")<0) throw new Error('chips catégories KO : '+ch);
+});
+T15('une catégorie reste filtrée après le mode all', function(){
+  openCat('all');openCat('mer');
+  var n=P.filter(function(p){return p.cat==='mer';}).length;
+  if(filtered().length!==n||n<1) throw new Error('attendu '+n+' produits mer');
+});
+T15('bouton « Toutes les catégories » et onglet nav -> openCat(all)', function(){
+  if(RAW_HTML.indexOf("onclick=\"openCat('all')\">Toutes les catégories")<0) throw new Error('bouton accueil KO');
+  if((RAW_HTML.match(/openCat\('all'\)/g)||[]).length<5) throw new Error('nav/accueil non patchés');
+});
+
 /* restauration de l'état pour les suites suivantes */
 orders=ordersSave15;lastOrder=lastSave15;saveOrder();
 Object.keys(cart).forEach(function(k){delete cart[k];});promoCode='';
