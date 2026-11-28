@@ -80,7 +80,7 @@ TI17('approbation : ajoute au catalogue, avance dans la file, persiste', functio
   impApprove();
   if(CATALOG.length!==1||CATALOG[0].id!=='tomates-grappe'||CATALOG[0].pr!==7.9||CATALOG[0].st!==10) throw new Error('catalogue : '+JSON.stringify(CATALOG));
   if(IMPQ.length!==impParse(IMP_SAMPLE).length-1) throw new Error('file non décrémentée : '+IMPQ.length);
-  if(IMPQ[0].id!=='brie-aop') throw new Error('tête de file KO : '+IMPQ[0].id);
+  if(IMPQ[0].id!=='baguette-tradition') throw new Error('tête de file KO : '+IMPQ[0].id);
   const savedQ=JSON.parse(localStorage.getItem('lm-import-queue'));
   if(savedQ.length!==IMPQ.length) throw new Error('file non persistée');
   CATALOG=save;IMPQ=[];impSaveQ();
@@ -109,7 +109,7 @@ TI17('rejet : passe au suivant sans toucher au catalogue', function(){
   IMPQ=impParse(IMP_SAMPLE);impRender();
   impReject();
   if(CATALOG.length!==len) throw new Error('catalogue modifié');
-  if(IMPQ[0].id!=='brie-aop') throw new Error('tête de file KO : '+(IMPQ[0]&&IMPQ[0].id));
+  if(IMPQ[0].id!=='baguette-tradition') throw new Error('tête de file KO : '+(IMPQ[0]&&IMPQ[0].id));
   IMPQ=[];impSaveQ();
 });
 TI17('impReset : file vidée et persistée vide', function(){
@@ -126,6 +126,33 @@ TI17('file vide : rendu accueil + tag', function(){
 
 /* restauration */
 IMPQ=[];try{localStorage.removeItem('lm-import-queue');}catch(e){}
+
+/* ---- Lot 17b — classement et interprétation renforcée ---- */
+TI17('classement : propositions triées par catégorie puis nom', function(){
+  const props=impParse(IMP_SAMPLE);
+  const cats=props.map(function(p){return p.cat;});
+  const want=['fruits','boulangerie','cremerie','mer','boissons'];
+  if(JSON.stringify(cats)!==JSON.stringify(want)) throw new Error('ordre : '+cats.join(','));
+});
+TI17('prix avec € avant le montant reconnu', function(){
+  const props=impParse('TOMATES GRAPPE € 7,90');
+  if(props.length!==1||props[0].pr!==7.9) throw new Error(JSON.stringify(props));
+});
+TI17('prix entier avec € reconnu, décimales protégées', function(){
+  const props=impParse('CAFE EN GRAINS 12 €');
+  if(props.length!==1||props[0].pr!==12) throw new Error(JSON.stringify(props));
+  const p2=impParse('BRIE AOP 200 G 3,95 €');
+  if(p2.length!==1||p2[0].pr!==3.95||p2[0].id!=='brie-aop') throw new Error(JSON.stringify(p2));
+});
+TI17('ligne source conservée pour vérification', function(){
+  const props=impParse('2 KG TOMATES GRAPPE 7,90');
+  if(props[0].src!=='2 KG TOMATES GRAPPE 7,90') throw new Error('src KO : '+props[0].src);
+  if(impParse(IMP_SAMPLE)[0].src) {} /* ok */
+});
+TI17('dates seules et séparateurs OCR ignorés', function(){
+  const props=impParse('12/03\n03.2026\nTOMATES | GRAPPE | 7,90');
+  if(props.length!==1||props[0].n!=='Tomates grappe') throw new Error(JSON.stringify(props));
+});
 
 /* ---- Lot 17b — OCR photo ---- */
 TI17('OCR : bouton photo + champ fichier présents', function(){
