@@ -181,6 +181,51 @@ TI17('facture réelle : fragment OCR « 120 k ,95€ » rejeté', function(){
   if(props.length!==0) throw new Error(JSON.stringify(props));
 });
 
+/* ---- Lot 17d — mémoire d'approbation ---- */
+TI17('mémoire : approbation enregistre la ligne source → valeurs validées', function(){
+  IMPLEARN={};try{localStorage.removeItem('lm-imp-learn');}catch(e){}
+  const save=CATALOG;CATALOG=validateCatalog([]);
+  IMPQ=impParse('MOUTARDE DE DIJON 1KG 1,00 325€ 325€ A');impRender();
+  document.getElementById('i-n').value='Moutarde de Dijon';document.getElementById('i-pr').value='3,25';document.getElementById('i-st').value='8';
+  impApprove();
+  const key=impLearnKey('MOUTARDE DE DIJON 1KG 1,00 325€ 325€ A');
+  if(!IMPLEARN[key]) throw new Error('entrée absente : '+JSON.stringify(Object.keys(IMPLEARN)));
+  if(IMPLEARN[key].pr!==3.25||IMPLEARN[key].n!=='Moutarde de Dijon'||IMPLEARN[key].hits!==1) throw new Error(JSON.stringify(IMPLEARN[key]));
+  const saved=JSON.parse(localStorage.getItem('lm-imp-learn'));
+  if(!saved[key]||saved[key].pr!==3.25) throw new Error('non persistée');
+  CATALOG=save;IMPQ=[];impSaveQ();
+});
+TI17('mémoire : même ligne réimportée → pré-remplie et taguée', function(){
+  IMPQ=[];
+  document.getElementById('imp-raw').value='MOUTARDE DE DIJON 1KG 1,00 325€ 325€ A';
+  impAnalyze();
+  if(IMPQ.length!==1) throw new Error('file : '+IMPQ.length);
+  if(IMPQ[0].learned!==true) throw new Error('tag mémoire absent');
+  if(IMPQ[0].n!=='Moutarde de Dijon'||IMPQ[0].pr!==3.25) throw new Error(JSON.stringify(IMPQ[0]));
+  const html=document.getElementById('imp-queue').innerHTML;
+  if(html.indexOf('mémoire')<0) throw new Error('tag non rendu');
+  IMPQ=[];impSaveQ();
+});
+TI17('mémoire : correction marchand prioritaire sur le prix OCR', function(){
+  IMPLEARN={};try{localStorage.removeItem('lm-imp-learn');}catch(e){}
+  const save=CATALOG;CATALOG=validateCatalog([]);
+  IMPQ=impParse('KETCHUP JUG HEINZ 1140Z/ 3,23KG 1,00 10,95€ 40,95 € 0,00');impRender();
+  document.getElementById('i-n').value='Ketchup Heinz';document.getElementById('i-pr').value='10,95';document.getElementById('i-st').value='5';
+  impApprove();
+  IMPQ=[];
+  document.getElementById('imp-raw').value='KETCHUP JUG HEINZ 1140Z/ 3,23KG 1,00 10,95€ 40,95 € 0,00';
+  impAnalyze();
+  if(IMPQ[0].learned!==true||IMPQ[0].pr!==10.95||IMPQ[0].n!=='Ketchup Heinz') throw new Error(JSON.stringify(IMPQ[0]));
+  CATALOG=save;IMPQ=[];impSaveQ();
+});
+TI17('mémoire : impForget efface tout', function(){
+  if(!Object.keys(IMPLEARN).length){IMPLEARN={x:1};}
+  impForget();
+  if(Object.keys(IMPLEARN).length) throw new Error('mémoire non vidée');
+  if(localStorage.getItem('lm-imp-learn')!==JSON.stringify({})) throw new Error('non persistée vide');
+  IMPLEARN={};try{localStorage.removeItem('lm-imp-learn');}catch(e){}
+});
+
 /* ---- Lot 17b — OCR photo ---- */
 TI17('OCR : bouton photo + champ fichier présents', function(){
   if(!document.getElementById('imp-photo')) throw new Error('input photo absent');

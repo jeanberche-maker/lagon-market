@@ -102,6 +102,7 @@ details ol{padding-left:20px;line-height:1.7}
   <button class="btn btn-secondary" onclick="impAnalyze()">🔍 Analyser le texte</button>
   <div id="imp-ocr" style="display:none;font-size:12.5px;color:var(--ink-2);margin-top:8px"></div>
   <button class="btn btn-ghost" id="imp-clear" style="display:none;color:#C4483B" onclick="impReset()">Tout rejeter</button>
+  <button class="btn btn-ghost" id="imp-forget" style="display:none;font-size:12px" onclick="impForget()">🧠 Oublier la mémoire</button>
   <div id="imp-queue"></div>
 </div>
 
@@ -572,10 +573,25 @@ function impParse(txt){
 }
 let IMPQ=[];
 (function(){try{IMPQ=JSON.parse(localStorage.getItem('lm-import-queue')||'[]')||[];}catch(e){}})();
+/* Lot 17d — mémoire d'approbation : ligne source → valeurs validées par le marchand */
+var IMPLEARN={};
+(function(){try{IMPLEARN=JSON.parse(localStorage.getItem('lm-imp-learn')||'{}')||{};}catch(e){}})();
+function impLearnKey(s){return String(s||'').toUpperCase().replace(/[|•·→]/g,' ').replace(/\s+/g,' ').trim();}
+function impLearnSave(){try{localStorage.setItem('lm-imp-learn',JSON.stringify(IMPLEARN));}catch(e){}}
+function impForget(){IMPLEARN={};impLearnSave();impRender();toast('Mémoire d\'approbation effacée');}
+function impApplyLearn(p){
+  if(!p.src)return p;
+  const L=IMPLEARN[impLearnKey(p.src)];
+  if(L&&L.n&&typeof L.pr==='number'&&L.pr>0){
+    p.n=L.n;p.id=slugify(L.n);p.pr=L.pr;p.f=L.f||p.f;p.cat=L.cat||p.cat;p.e=L.e||p.e;p.sub=L.sub||'';p.learned=true;
+    p.dup=CATALOG.some(function(x){return x.id===p.id;});
+  }
+  return p;
+}
 function impSaveQ(){try{localStorage.setItem('lm-import-queue',JSON.stringify(IMPQ));}catch(e){}}
 function impSyncTag(){const t=qs('#imp-tag');if(t)t.textContent=IMPQ.length?('· '+IMPQ.length+' en attente'):'· file vide';}
 function impAnalyze(){
-  const props=impParse(qs('#imp-raw').value);
+  const props=impParse(qs('#imp-raw').value).map(impApplyLearn);
   if(!props.length){toast('Aucune ligne exploitable — vérifiez le texte collé (une ligne par produit, prix en fin de ligne)');return;}
   const fresh=props.filter(function(p){return !IMPQ.some(function(q){return q.id===p.id;});});
   IMPQ=IMPQ.concat(fresh).sort(function(a,b){
@@ -591,15 +607,16 @@ function impRender(){
   const box=qs('#imp-queue');
   if(!IMPQ.length){
     box.innerHTML='<p style="font-size:12.5px;color:var(--ink-3);margin-top:10px">Aucune proposition en attente. Les produits approuvés rejoignent « Catalogue en cours », prêts à être publiés (products.json ou backend).</p>';
-    qs('#imp-clear').style.display='none';impSyncTag();return;
+    qs('#imp-clear').style.display='none';qs('#imp-forget').style.display=Object.keys(IMPLEARN).length?'':'none';impSyncTag();return;
   }
-  qs('#imp-clear').style.display='';
+  qs('#imp-clear').style.display='';qs('#imp-forget').style.display=Object.keys(IMPLEARN).length?'':'none';
   const p=IMPQ[0],cat=CATS.find(function(c){return c.id===p.cat;})||CATS[0];
   box.innerHTML=`
     <div style="margin-top:14px;padding:14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
         <span style="font-size:13px;font-weight:800;color:var(--ink-2)">Produit 1 sur ${IMPQ.length}</span>
         ${p.dup?'<span class="tag frais" style="font-size:11px">existe déjà → mise à jour</span>':'<span class="tag bio" style="font-size:11px">nouveau</span>'}
+        ${p.learned?'<span class="tag bio" style="font-size:11px">✓ déjà approuvé (mémoire)</span>':''}
         ${p.f?`<span class="tag bio" style="font-size:11px">format : ${esc(p.f)}</span>`:''}
       </div>
       ${p.src?`<div class="sub" style="margin-bottom:10px;font-size:11.5px">Ligne reconnue : « ${esc(p.src)} »</div>`:''}
@@ -630,6 +647,8 @@ function impApprove(){
   const p={id:slugify(n),n:n,pr:pr,st:st,e:qs('#i-e').value.trim()||'🛒',cat:qs('#i-cat').value,sub:qs('#i-sub').value||'',bd:[],b:'',f:cur.f||'',u:'',d:'',promo:false};
   const ix=CATALOG.findIndex(function(x){return x.id===p.id;});
   if(ix>=0)CATALOG[ix]=p;else CATALOG.push(p);
+  const lkey=impLearnKey(cur.src);
+  if(lkey){IMPLEARN[lkey]={n:n,pr:pr,f:cur.f||'',cat:p.cat,e:p.e,sub:p.sub||'',hits:((IMPLEARN[lkey]&&IMPLEARN[lkey].hits)||0)+1};impLearnSave();}
   persist();renderList();
   IMPQ.shift();impSaveQ();impRender();
   toast(ix>=0?('Mis à jour : '+p.n):('Approuvé : '+p.n+' — '+(IMPQ.length?('prochain produit ('+IMPQ.length+' restant)'):'file terminée ✓')));
