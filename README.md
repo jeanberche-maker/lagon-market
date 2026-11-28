@@ -86,6 +86,27 @@ Un sélecteur **Paramétrage → « Langue · Language »** (🇫🇷 Français 
 - **Produits** : priorité à la variante du commerçant (`n_en`/`d_en`, éditables dans l'Espace boutique) sinon dictionnaire intégré, sinon français — jamais de texte manquant.
 - QC : **suite13** (36 tests) — cœur de traduction, 15+ patterns, composites, couverture complète du dictionnaire (produits, badges, catégories, créneaux, FAQ, promos…), replis FR, rendu EN réel, persistance et préservation des autres réglages.
 
+## Lot 16 — sécurisation : Supabase Auth, écritures restreintes au marchand
+
+Fin du mode prototype : la clé anon ne peut plus rien écrire dans `products` ni lire les commandes.
+
+| Action | Qui peut |
+|---|---|
+| Lire le catalogue (`products`) | tout le monde (clé anon) — l'app client n'a jamais besoin de compte |
+| Publier / modifier le catalogue | **uniquement le marchand authentifié** (session Supabase Auth de l'Espace boutique) |
+| Créer une commande (`orders`) | les clients, anonymes |
+| Lire les commandes | **uniquement le marchand authentifié** |
+
+**Activation (une fois)** :
+
+1. Dans Supabase, **SQL Editor** : ré-exécutez [supabase-schema.sql](supabase-schema.sql) — il est idempotent et remplace les policies permissives du Lot 15 par les policies restreintes.
+2. Créez le compte marchand : **Authentication → Users → Add user → Create new user** (email + mot de passe, cochez **Auto Confirm User**).
+3. Dans l'**Espace boutique** → carte **Compte marchand** : connectez-vous avec cet email/mot de passe.
+
+Au quotidien : ouvrez l'Espace boutique, connectez-vous (la session persiste et se rafraîchit toute seule — en cas d'expiration, un simple « Se déconnecter / Se connecter » suffit), puis « 🚀 Publier le catalogue vers le backend ».
+
+QC : **admin16** (11 tests) — session persistée, refus de publication sans session, Bearer = jeton marchand vs clé anonyme, lecture publique anonyme, refresh automatique du jeton expiré + retry, échec de refresh → session nettoyée, logout.
+
 ## Lot 15 — backend optionnel (Supabase REST, sans SDK)
 
 L'app gagne une vraie base en ligne **sans rien perdre du mode local** : tant qu'aucun backend n'est configuré, tout fonctionne comme avant (products.json + localStorage). Dès que l'URL et la clé anon d'un projet Supabase sont saisies, le catalogue et les commandes passent par la base.

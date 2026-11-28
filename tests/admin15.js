@@ -12,7 +12,7 @@ function syncP(exec){
     then:function(fn,rf){
       var nx=syncP(function(){});
       var h=function(){
-        if(st==='r'){try{var v2=fn?fn(val):undefined;nx.__res(v2);}catch(e){nx.__rej(e);}}
+        if(st==='r'){try{var v2=fn?fn(val):val;nx.__res(v2);}catch(e){nx.__rej(e);}}
         else if(st==='j'){if(rf){try{var v3=rf(err);nx.__res(v3);}catch(e2){nx.__rej(e2);}}else nx.__rej(err);}
         else nx.__rej(new Error('pending'));
       };
@@ -71,6 +71,7 @@ TA15('bkPublish : catalogue invalide refusé', function(){
 });
 TA15('bkPublish : upsert groupé POST ?on_conflict=id', function(){
   _bkCaps=[];_bkMode='ok';
+  BKSESS={access_token:'t15',refresh_token:'r15',email:'m@x.com'}; /* Lot 16 : session requise */
   CATALOG=validateCatalog([{id:'a',n:'A',pr:1,st:1},{id:'b',n:'B',pr:2,st:0}]);
   bkPublish();
   if(_bkCaps.length!==1) throw new Error('attendu 1 appel, reçu '+_bkCaps.length);
@@ -79,6 +80,7 @@ TA15('bkPublish : upsert groupé POST ?on_conflict=id', function(){
   var body=JSON.parse(c.body);
   if(!Array.isArray(body)||body.length!==2||body[0].id!=='a'||body[1].id!=='b') throw new Error('body KO : '+c.body);
   if(document.getElementById('toast').textContent.indexOf('Publié')<0) throw new Error('toast KO : '+document.getElementById('toast').textContent);
+  BKSESS=null;
 });
 TA15('bkLoad : remplace le catalogue local par celui du backend', function(){
   _bkCaps=[];_bkMode='ok';
@@ -89,11 +91,13 @@ TA15('bkLoad : remplace le catalogue local par celui du backend', function(){
 });
 TA15('bkPublish / bkLoad : backend injoignable signalé', function(){
   _bkCaps=[];_bkMode='fail';
+  BKSESS={access_token:'t15',refresh_token:'r15',email:'m@x.com'};
   CATALOG=validateCatalog([{id:'a',n:'A',pr:1,st:1}]);
   bkPublish();
   if(document.getElementById('toast').textContent.indexOf('injoignable')<0) throw new Error('toast publish KO');
   bkLoad();
   if(document.getElementById('toast').textContent.indexOf('impossible')<0) throw new Error('toast load KO');
+  BKSESS=null;
 });
 TA15('bkClear : configuration retirée', function(){
   document.getElementById('bk-url').value='https://shop.supabase.co';

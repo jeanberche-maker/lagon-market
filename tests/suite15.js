@@ -15,7 +15,7 @@ function syncP(exec){
     then:function(fn,rf){
       var nx=syncP(function(){});
       var h=function(){
-        if(st==='r'){try{var v2=fn?fn(val):undefined;nx.__res(v2);}catch(e){nx.__rej(e);}}
+        if(st==='r'){try{var v2=fn?fn(val):val;nx.__res(v2);}catch(e){nx.__rej(e);}}
         else if(st==='j'){if(rf){try{var v3=rf(err);nx.__res(v3);}catch(e2){nx.__rej(e2);}}else nx.__rej(err);}
         else nx.__rej(new Error('pending'));
       };

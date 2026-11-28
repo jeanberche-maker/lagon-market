@@ -155,6 +155,22 @@ details ol{padding-left:20px;line-height:1.7}
   <button class="btn btn-ghost" style="color:#C4483B" onclick="bkClear()">Déconnecter le backend</button>
 </div>
 
+<div class="card" style="border-color:var(--corail)">
+  <h2>Compte marchand <span id="auth-tag" style="font-size:11.5px;font-weight:800;color:var(--ink-3)"></span></h2>
+  <p style="font-size:13px;color:var(--ink-2);line-height:1.5">Depuis la sécurisation (Lot 16), publier le catalogue exige un compte marchand authentifié. Créez-le dans Supabase → Authentication → Users → « Add user » (email + mot de passe, Auto Confirm coché), puis connectez-vous ici. Les clients, eux, n'ont besoin d'aucun compte.</p>
+  <div id="auth-off">
+    <label for="au-mail">Email marchand</label>
+    <input type="email" id="au-mail" placeholder="vous@exemple.com" autocomplete="username">
+    <label for="au-pass">Mot de passe</label>
+    <input type="password" id="au-pass" placeholder="••••••••" autocomplete="current-password">
+    <button class="btn btn-primary" onclick="bkLogin()">Se connecter</button>
+  </div>
+  <div id="auth-on" style="display:none">
+    <p style="font-size:13.5px;font-weight:800;color:var(--lagon-dark);margin-bottom:10px">✓ Connecté — <span id="auth-who"></span></p>
+    <button class="btn btn-ghost" onclick="bkLogout()">Se déconnecter</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -363,14 +379,57 @@ function showDraft(){
 let BK={url:'',key:''};
 (function(){try{const c=JSON.parse(localStorage.getItem('lm-config')||'null');if(c&&c.api){BK.url=String(c.api.url||'').trim().replace(/\/+$/,'');BK.key=String(c.api.key||'').trim();}}catch(e){}})();
 function bkReady(){return !!(BK.url&&BK.key);}
+let BKSESS=null;
+(function(){try{BKSESS=JSON.parse(localStorage.getItem('lm-admin-auth')||'null');}catch(e){}})();
+function bkAuthed(){return !!(BKSESS&&BKSESS.access_token);}
+function bkSaveSess(){try{if(BKSESS)localStorage.setItem('lm-admin-auth',JSON.stringify(BKSESS));else localStorage.removeItem('lm-admin-auth');}catch(e){}}
 function bkFetch(path,opts){
   opts=opts||{};
-  opts.headers=Object.assign({'apikey':BK.key,'Authorization':'Bearer '+BK.key,'Content-Type':'application/json','Prefer':'return=representation'},opts.headers||{});
+  /* Lot 16 : Authorization = session marchand si connecté, sinon clé anon (lecture publique seulement) */
+  opts.headers=Object.assign({'apikey':BK.key,'Authorization':'Bearer '+(bkAuthed()?BKSESS.access_token:BK.key),'Content-Type':'application/json','Prefer':'return=representation'},opts.headers||{});
   return fetch(BK.url+'/rest/v1/'+path,opts);
+}
+function bkAuthReq(path,body){
+  return fetch(BK.url+path,{method:'POST',headers:{'apikey':BK.key,'Content-Type':'application/json'},body:JSON.stringify(body)});
+}
+function bkLogin(){
+  if(!bkReady()){toast('Configurez le backend d\'abord (URL + clé anon)');return;}
+  const em=qs('#au-mail').value.trim(),pw=qs('#au-pass').value;
+  if(!em||!pw){toast('Renseignez email et mot de passe');return;}
+  toast('Connexion…');
+  bkAuthReq('/auth/v1/token?grant_type=password',{email:em,password:pw}).then(function(r){
+    return r.json().then(function(j){return {ok:r.ok,j:j};});
+  }).then(function(res){
+    if(!res.ok||!res.j.access_token){toast('Connexion refusée : '+String(res.j.msg||res.j.error_description||res.j.error||'HTTP '+(res.j.code||'?')));return;}
+    BKSESS={access_token:res.j.access_token,refresh_token:res.j.refresh_token,email:res.j.user&&res.j.user.email||em};
+    bkSaveSess();bkSyncUI();toast('Connecté ✓ '+BKSESS.email);
+  }).catch(function(){toast('Connexion impossible — vérifiez la connexion réseau');});
+}
+function bkRefresh(){
+  if(!BKSESS||!BKSESS.refresh_token)return Promise.resolve(false);
+  return bkAuthReq('/auth/v1/token?grant_type=refresh_token',{refresh_token:BKSESS.refresh_token}).then(function(r){
+    return r.json().then(function(j){return {ok:r.ok,j:j};});
+  }).then(function(res){
+    if(!res.ok||!res.j.access_token){BKSESS=null;bkSaveSess();bkSyncUI();return false;}
+    BKSESS.access_token=res.j.access_token;if(res.j.refresh_token)BKSESS.refresh_token=res.j.refresh_token;
+    bkSaveSess();return true;
+  }).catch(function(){return false;});
+}
+function bkLogout(){
+  if(bkAuthed()&&typeof fetch==='function'){
+    fetch(BK.url+'/auth/v1/logout',{method:'POST',headers:{'apikey':BK.key,'Authorization':'Bearer '+BKSESS.access_token}}).catch(function(){});
+  }
+  BKSESS=null;bkSaveSess();bkSyncUI();toast('Déconnecté');
+}
+function bkSyncAuth(){
+  qs('#auth-off').style.display=bkAuthed()?'none':'';
+  qs('#auth-on').style.display=bkAuthed()?'':'none';
+  qs('#auth-tag').textContent=bkAuthed()?'· '+BKSESS.email:'· non connecté';
+  if(bkAuthed())qs('#auth-who').textContent=BKSESS.email;
 }
 function bkToRow(p){return {id:p.id,n:p.n,n_en:p.n_en||null,b:p.b||'',f:p.f||'',f_en:p.f_en||null,pr:p.pr,u:p.u||'',e:p.e||'🛒',g:p.g||[],cat:p.cat||'epicerie',sub:p.sub||'',bd:p.bd||[],st:p.st,d:p.d||'',d_en:p.d_en||null,ph:p.ph||null,cr:p.cr||null,promo:!!p.promo};}
 function bkPersist(){try{const c=JSON.parse(localStorage.getItem('lm-config')||'{}');c.api={url:BK.url,key:BK.key};localStorage.setItem('lm-config',JSON.stringify(c));}catch(e){}}
-function bkSyncUI(){qs('#bk-url').value=BK.url;qs('#bk-key').value=BK.key;qs('#bk-tag').textContent=bkReady()?'· connecté':'· non configuré';}
+function bkSyncUI(){qs('#bk-url').value=BK.url;qs('#bk-key').value=BK.key;qs('#bk-tag').textContent=bkReady()?'· connecté':'· non configuré';bkSyncAuth();}
 function bkSave(){
   const nu=qs('#bk-url').value.trim().replace(/\/+$/,''),nk=qs('#bk-key').value.trim();
   if(nu&&!/^https:\/\//.test(nu)){toast('L\'URL doit commencer par https://');return;}
@@ -389,14 +448,24 @@ function bkTest(){
 function bkPublish(){
   BK.url=qs('#bk-url').value.trim().replace(/\/+$/,'');BK.key=qs('#bk-key').value.trim();
   if(!bkReady()){toast('Renseignez l\'URL et la clé anon d\'abord');return;}
+  if(!bkAuthed()){toast('Connectez-vous d\'abord — carte « Compte marchand »');return;}
   if(!CATALOG.length){toast('Catalogue vide — rien à publier');return;}
   try{validateCatalog(CATALOG);}catch(e){toast('Catalogue invalide : '+String(e.message).replace('Error: ',''));return;}
+  const send=function(){return bkFetch('products?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(CATALOG.map(bkToRow))});};
   toast('Publication de '+CATALOG.length+' produits…');
-  bkFetch('products?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(CATALOG.map(bkToRow))})
-    .then(function(r){
-      if(r&&r.ok){bkPersist();bkSyncUI();toast('Publié ✓ '+CATALOG.length+' produits dans le backend');}
-      else{toast('Échec de publication (HTTP '+String((r&&r.status)||'?')+') — vérifiez la clé et le schéma');}
-    }).catch(function(){toast('Backend injoignable — publication annulée');});
+  send().then(function(r){
+    if(r&&r.status===401){ /* session expirée : refresh puis un seul essai de plus */
+      return bkRefresh().then(function(ok){
+        if(!ok){toast('Session expirée — reconnectez-vous (carte Compte marchand)');return null;}
+        return send();
+      });
+    }
+    return r;
+  }).then(function(r){
+    if(!r)return;
+    if(r.ok){bkPersist();bkSyncUI();toast('Publié ✓ '+CATALOG.length+' produits dans le backend');}
+    else{toast('Échec de publication (HTTP '+String((r&&r.status)||'?')+') — vérifiez le schéma et le compte marchand');}
+  }).catch(function(){toast('Backend injoignable — publication annulée');});
 }
 function bkLoad(){
   BK.url=qs('#bk-url').value.trim().replace(/\/+$/,'');BK.key=qs('#bk-key').value.trim();

@@ -142,6 +142,8 @@ Persistance localStorage : `lm-config`, `lm-orders` (8 max), `lm-profile`, `lm-r
    - `sw.js` inchangé pour les photos (hors app shell) ; offline → repli emoji ;
    - Tests : `tests/suite12.js` (17) — champs présents/uniques, synchronisation JSON ↔ embarqué, rendus pcard/fiche, replis via objets factices, CSS ; suite10 étendue (+6 : champ photo).
 
+13. **Lot 16 — sécurisation (Supabase Auth)** (`admin.html`, `supabase-schema.sql` v2) : policies RLS restreintes (produits en écriture et commandes en lecture → `to authenticated` uniquement ; lecture produits + création commandes restent publiques) ; Espace boutique → carte « Compte marchand » (`bkLogin`/`bkLogout`/`bkRefresh`, session persistée `lm-admin-auth`, retry automatique après refresh sur HTTP 401) ; `bkFetch` envoie le jeton marchand si connecté, sinon la clé anon ; suite admin16 (11 tests). Création du compte : Authentication → Users → Add user (Auto Confirm).
+
 12. **Lot 15 — backend optionnel Supabase REST** (`index.html`, `admin.html`, `supabase-schema.sql`) : bloc API sans SDK (`API`/`apiReady`/`apiFetch`, `apiProducts`, `apiSubmitOrder`, `apiUpsertProduct`, `rowToProduct`/`appToRow`) ; Paramétrage → carte Backend (URL + clé anon + test + déconnexion) ; `refreshCatalog` dispatcher (API prioritaire, repli products.json) ; `payNow` ne confirme qu'après accord serveur ; Espace boutique → publication groupée (upsert `?on_conflict=id`) + chargement backend ; schéma SQL + RLS permissives (prototype) ; suites 15 (14 tests) et admin15 (9 tests).
 
 11. **Lot 13 — i18n FR/EN** (`index.html`, `admin.html`) :
