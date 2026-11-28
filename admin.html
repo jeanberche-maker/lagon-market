@@ -76,6 +76,22 @@ details ol{padding-left:20px;line-height:1.7}
 <h1>Espace boutique</h1>
 <p class="sub">Le catalogue que voient les clients de l'app Lagon Market. Ajustez vos produits ici, exportez le fichier, déposez-le sur GitHub — en ligne en ~1 minute.</p>
 <div class="count" id="count"></div>
+<div class="card" style="border-color:var(--corail)">
+  <h2>Compte marchand <span id="auth-tag" style="font-size:11.5px;font-weight:800;color:var(--ink-3)"></span></h2>
+  <p style="font-size:13px;color:var(--ink-2);line-height:1.5">Depuis la sécurisation (Lot 16), publier le catalogue exige un compte marchand authentifié. Créez-le dans Supabase → Authentication → Users → « Add user » (email + mot de passe, Auto Confirm coché), puis connectez-vous ici. Les clients, eux, n'ont besoin d'aucun compte.</p>
+  <div id="auth-off">
+    <label for="au-mail">Email marchand</label>
+    <input type="email" id="au-mail" placeholder="vous@exemple.com" autocomplete="username">
+    <label for="au-pass">Mot de passe</label>
+    <input type="password" id="au-pass" placeholder="••••••••" autocomplete="current-password">
+    <button class="btn btn-primary" onclick="bkLogin()">Se connecter</button>
+  </div>
+  <div id="auth-on" style="display:none">
+    <p style="font-size:13.5px;font-weight:800;color:var(--lagon-dark);margin-bottom:10px">✓ Connecté — <span id="auth-who"></span></p>
+    <button class="btn btn-ghost" onclick="bkLogout()">Se déconnecter</button>
+  </div>
+</div>
+
 
 <div class="card">
   <h2 id="form-title">Ajouter un produit</h2>
@@ -166,22 +182,6 @@ details ol{padding-left:20px;line-height:1.7}
   <div id="imp-ocr" style="display:none;font-size:12.5px;color:var(--ink-2);margin-top:8px"></div>
   <button class="btn btn-ghost" id="imp-clear" style="display:none;color:#C4483B" onclick="impReset()">Tout rejeter</button>
   <div id="imp-queue"></div>
-</div>
-
-<div class="card" style="border-color:var(--corail)">
-  <h2>Compte marchand <span id="auth-tag" style="font-size:11.5px;font-weight:800;color:var(--ink-3)"></span></h2>
-  <p style="font-size:13px;color:var(--ink-2);line-height:1.5">Depuis la sécurisation (Lot 16), publier le catalogue exige un compte marchand authentifié. Créez-le dans Supabase → Authentication → Users → « Add user » (email + mot de passe, Auto Confirm coché), puis connectez-vous ici. Les clients, eux, n'ont besoin d'aucun compte.</p>
-  <div id="auth-off">
-    <label for="au-mail">Email marchand</label>
-    <input type="email" id="au-mail" placeholder="vous@exemple.com" autocomplete="username">
-    <label for="au-pass">Mot de passe</label>
-    <input type="password" id="au-pass" placeholder="••••••••" autocomplete="current-password">
-    <button class="btn btn-primary" onclick="bkLogin()">Se connecter</button>
-  </div>
-  <div id="auth-on" style="display:none">
-    <p style="font-size:13.5px;font-weight:800;color:var(--lagon-dark);margin-bottom:10px">✓ Connecté — <span id="auth-who"></span></p>
-    <button class="btn btn-ghost" onclick="bkLogout()">Se déconnecter</button>
-  </div>
 </div>
 
 <div id="toast"></div>
