@@ -1,7 +1,7 @@
 /* Lagon Market — service worker (offline friendly, catalogue toujours frais)
    Règle spéciale Lot 9 : products.json est network-first — la donnée produits
    ne peut pas rester figée dans le cache ; le cache n'est qu'un secours hors-ligne. */
-const CACHE = 'lagon-v6';
+const CACHE = 'lagon-v7';
 const ASSETS = ['./', './index.html', './admin.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {

@@ -35,6 +35,7 @@ h2{font-size:17px;margin-bottom:10px}
 label{display:block;font-size:11.5px;font-weight:800;color:var(--ink-2);margin:10px 0 4px;letter-spacing:.2px}
 input[type=text],input[type=number],input[type=url],textarea,select{width:100%;min-height:46px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;font-family:var(--sans);background:#fff;color:var(--ink)}
 textarea{min-height:64px;resize:vertical}
+#imp-raw{min-height:110px;font-size:14px;white-space:pre}
 .row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
 .chk{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:700;font-size:13.5px;color:var(--ink-2)}
 .chk input{width:20px;height:20px;accent-color:var(--lagon);flex:none}
@@ -153,6 +154,15 @@ details ol{padding-left:20px;line-height:1.7}
   <button class="btn btn-primary" onclick="bkPublish()">🚀 Publier le catalogue vers le backend</button>
   <button class="btn btn-ghost" onclick="bkLoad()">⬇︎ Charger le catalogue du backend</button>
   <button class="btn btn-ghost" style="color:#C4483B" onclick="bkClear()">Déconnecter le backend</button>
+</div>
+
+<div class="card" style="border-color:var(--ambre)">
+  <h2>🧾 Import facture / devis <span id="imp-tag" style="font-size:11.5px;font-weight:800;color:var(--ink-3)"></span></h2>
+  <p style="font-size:13px;color:var(--ink-2);line-height:1.5">Scannez la facture ou le devis (Live Text de l'iPhone : appareil photo → texte, ou n'importe quel OCR), collez le texte ci-dessous. L'analyse propose un produit par ligne au format products.json — vous approuvez <b>un par un</b> : ✓ approuver, ✕ rejeter, tout est éditable avant validation.</p>
+  <textarea id="imp-raw" placeholder="Ex. :&#10;2 KG TOMATES GRAPPE 7,90&#10;BRIE AOP 200 G 3,95 €&#10;1 BAGUETTE TRADITION 1,20&#10;MAHI MAHI FILET KG 18,50"></textarea>
+  <button class="btn btn-secondary" onclick="impAnalyze()">🔍 Analyser le texte</button>
+  <button class="btn btn-ghost" id="imp-clear" style="display:none;color:#C4483B" onclick="impReset()">Tout rejeter</button>
+  <div id="imp-queue"></div>
 </div>
 
 <div class="card" style="border-color:var(--corail)">
@@ -486,13 +496,120 @@ function bkClear(){
   bkSyncUI();toast('Backend déconnecté — publication par products.json');
 }
 
+/* ---- Lot 17 — import facture/devis : scan → propositions → approbation 1 par 1 ---- */
+var IMP_NOISE=/^(facture|devis|bon de commande|total|sous-total|total ht|total tva|total ttc|net à payer|net a payer|tva|ht|ttc|client|date|page|merci|a bientot|à bientôt|siret|siren|tél|tel|adresse|livraison|mode de reglement|règlement|acompte|remise|quantité|quantite|prix unitaire|désignation|designation|réf|ref)/i;
+var IMP_KINDS=[
+  [/tomate|salade|carotte|oignon|poivron|concombre|courgette|aubergine|ananas|mangue|banane|avocat|citron|orange|pomme|poire|raisin|fraise|pastèque|pasteque|melon|fruit|légume|legume|herbe|basilic|menthe|gingembre|coriandre|échalote|echalote/i,'fruits','🥭'],
+  [/pain|baguette|croissant|brioche|viennoiserie|boulanger|madeleine|galette/i,'boulangerie','🥖'],
+  [/fromage|lait|beurre|yaourt|crème|creme|mozzarella|brie|camembert|emmental|comté|comte|chèvre|chevre|mozz|raclette/i,'cremerie','🧀'],
+  [/poisson|thon|cabillaud|saumon|crevette|gambas|huître|huitre|morue|merlu|mahimahi|mahi|daurade|dorade|seiche|calamar|langouste|oursin|marin/i,'mer','🐟'],
+  [/bœuf|boeuf|veau|poulet|volaille|porc|merguez|charcuterie|jambon|viande|côte de|cote de|filet de b/i,'boucherie','🥩'],
+  [/vin|bière|biere|rhum|whisky|rosé|rose|champagne|cave|bouteille|minérale|minerale|jus|soda|limonade|sirop/i,'boissons','🍷'],
+  [/glace|surgelé|surgele|frites|pizza sorbet/i,'surgeles','❄️'],
+  [/café|cafe|sel|poivre|farine|sucre|huile|pâtes|pates|riz|conserve|épice|epice|épicerie|biscuit|chocolat|vinaigre|mayonnaise|ketchup|moutarde/i,'epicerie','🧂']
+];
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var IMP_UNIT=/\b(kg|kilos?|g|gr|grammes?|l|litres?|cl|ml|pi[èe]ces?|barquettes?|bouteilles?|lots?|units?)\b/i;
+function impGuess(name){
+  for(var i=0;i<IMP_KINDS.length;i++){ if(IMP_KINDS[i][0].test(name))return {cat:IMP_KINDS[i][1],e:IMP_KINDS[i][2]}; }
+  return {cat:'epicerie',e:'🛒'};
+}
+function impParse(txt){
+  const out=[];
+  String(txt||'').split(/[\n;]+/).forEach(function(raw){
+    const line=raw.replace(/\s+/g,' ').trim();
+    if(line.length<4||IMP_NOISE.test(line))return;
+    const pm=line.match(/(\d+[.,]\d{2})\s*(?:€|eur|euro)?\s*$/i);
+    if(!pm)return;
+    const pr=parseFloat(pm[1].replace(',','.'));
+    if(!(pr>0))return;
+    let name=line.slice(0,pm.index).trim(),f='';
+    /* format en fin de ligne (200 G, 1,5L…) → champ f, retiré du nom */
+    const fm=name.match(/\b(\d+(?:[.,]\d+)?\s*(?:kg|g|gr|grammes?|l|litres?|cl|ml))\b\s*$/i);
+    if(fm){ f=fm[1].toLowerCase().replace(/\s+/g,' '); name=name.slice(0,fm.index).trim(); }
+    name=name.replace(/^[xX]?\d+\s+/,'').replace(/\s+[xX]\d+$/,'')
+      .replace(/^(kg|g|gr|grammes?|l|litres?|cl|ml|pi[èe]ces?|barquettes?|bouteilles?|lots?)\s+/i,'')
+      .replace(/\s+(kg|g|gr|grammes?|l|litres?|cl|ml|pi[èe]ces?|bouteilles?|barquettes?|lots?)\s*$/i,'')
+      .replace(IMP_UNIT,'').replace(/\s{2,}/g,' ').trim();
+    if(name.length<2)return;
+    name=name.charAt(0).toUpperCase()+name.slice(1).toLowerCase();
+    const g=impGuess(name);
+    const id=slugify(name);
+    if(!id)return;
+    out.push({id:id,n:name,pr:pr,f:f,st:0,e:g.e,cat:g.cat,sub:'',bd:[],b:'',u:'',d:'',promo:false,
+      dup:CATALOG.some(function(p){return p.id===id;})});
+  });
+  /* dédoublonne la fournée elle-même */
+  const seen={};
+  return out.filter(function(p){ if(seen[p.id])return false; seen[p.id]=1; return true; });
+}
+let IMPQ=[];
+(function(){try{IMPQ=JSON.parse(localStorage.getItem('lm-import-queue')||'[]')||[];}catch(e){}})();
+function impSaveQ(){try{localStorage.setItem('lm-import-queue',JSON.stringify(IMPQ));}catch(e){}}
+function impSyncTag(){const t=qs('#imp-tag');if(t)t.textContent=IMPQ.length?('· '+IMPQ.length+' en attente'):'· file vide';}
+function impAnalyze(){
+  const props=impParse(qs('#imp-raw').value);
+  if(!props.length){toast('Aucune ligne exploitable — vérifiez le texte collé (une ligne par produit, prix en fin de ligne)');return;}
+  const fresh=props.filter(function(p){return !IMPQ.some(function(q){return q.id===p.id;});});
+  IMPQ=IMPQ.concat(fresh);
+  impSaveQ();impRender();qs('#imp-raw').value='';
+  toast(props.length+' ligne(s) analysée(s) · '+fresh.length+' nouvelle(s) proposition(s) — à valider une par une');
+}
+function impReset(){IMPQ=[];impSaveQ();impRender();toast('File d\'approbation vidée');}
+function impRender(){
+  const box=qs('#imp-queue');
+  if(!IMPQ.length){
+    box.innerHTML='<p style="font-size:12.5px;color:var(--ink-3);margin-top:10px">Aucune proposition en attente. Les produits approuvés rejoignent « Catalogue en cours », prêts à être publiés (products.json ou backend).</p>';
+    qs('#imp-clear').style.display='none';impSyncTag();return;
+  }
+  qs('#imp-clear').style.display='';
+  const p=IMPQ[0],cat=CATS.find(function(c){return c.id===p.cat;})||CATS[0];
+  box.innerHTML=`
+    <div style="margin-top:14px;padding:14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:800;color:var(--ink-2)">Produit 1 sur ${IMPQ.length}</span>
+        ${p.dup?'<span class="tag frais" style="font-size:11px">existe déjà → mise à jour</span>':'<span class="tag bio" style="font-size:11px">nouveau</span>'}
+      </div>
+      <label for="i-n">Nom * (reconnu : « ${p.n} »)</label>
+      <input type="text" id="i-n" value="${esc(p.n)}">
+      <div class="row">
+        <div><label for="i-pr">Prix (€) *</label><input type="text" id="i-pr" inputmode="decimal" value="${String(p.pr).replace('.',',')}"></div>
+        <div><label for="i-st">Stock *</label><input type="text" id="i-st" inputmode="numeric" value="${p.st}"></div>
+        <div><label for="i-e">Emoji</label><input type="text" id="i-e" value="${p.e}"></div>
+      </div>
+      <label for="i-cat">Catégorie (déduite : ${cat.t})</label>
+      <select id="i-cat">${CATS.map(function(c){return '<option value="'+c.id+'"'+(c.id===p.cat?' selected':'')+'>'+c.t+'</option>';}).join('')}</select>
+      <label for="i-sub">Sous-catégorie</label>
+      <select id="i-sub"><option value="">—</option>${(SUBS[p.cat]||[]).map(function(s){return '<option>'+s+'</option>';}).join('')}</select>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" style="margin-top:0" onclick="impApprove()">✓ Approuver ce produit</button>
+        <button class="btn btn-ghost" style="margin-top:0;color:#C4483B" onclick="impReject()">✕ Rejeter</button>
+      </div>
+    </div>`;
+  impSyncTag();
+}
+function impApprove(){
+  if(!IMPQ.length)return;
+  const cur=IMPQ[0];
+  const n=qs('#i-n').value.trim(),pr=parsePrice(qs('#i-pr').value),st=parseStock(qs('#i-st').value)||0;
+  if(!n){toast('Le nom est obligatoire');return;}
+  if(pr===null){toast('Prix invalide — corrigez avant d\'approuver');return;}
+  const p={id:slugify(n),n:n,pr:pr,st:st,e:qs('#i-e').value.trim()||'🛒',cat:qs('#i-cat').value,sub:qs('#i-sub').value||'',bd:[],b:'',f:cur.f||'',u:'',d:'',promo:false};
+  const ix=CATALOG.findIndex(function(x){return x.id===p.id;});
+  if(ix>=0)CATALOG[ix]=p;else CATALOG.push(p);
+  persist();renderList();
+  IMPQ.shift();impSaveQ();impRender();
+  toast(ix>=0?('Mis à jour : '+p.n):('Approuvé : '+p.n+' — '+(IMPQ.length?('prochain produit ('+IMPQ.length+' restant)'):'file terminée ✓')));
+}
+function impReject(){ if(!IMPQ.length)return; const n=IMPQ[0].n; IMPQ.shift(); impSaveQ(); impRender(); toast('Rejeté : '+n+(IMPQ.length?(' — prochain produit ('+IMPQ.length+' restant)'):' — file terminée')); }
+
 /* ---- démarrage ---- */
 (function boot(){
   const cs=qs('#f-cat');
   cs.innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+c.t+'</option>';}).join('');
   syncSubs();
   let start=(function(){try{return JSON.parse(localStorage.getItem('lm-admin-catalog')||'null');}catch(e){return null;}})()||[];
-  bkSyncUI();
+  bkSyncUI();impRender();
   CATALOG=start;renderList();
   if(typeof fetch!=='function')return;
   if(bkReady()){

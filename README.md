@@ -86,6 +86,30 @@ Un sélecteur **Paramétrage → « Langue · Language »** (🇫🇷 Français 
 - **Produits** : priorité à la variante du commerçant (`n_en`/`d_en`, éditables dans l'Espace boutique) sinon dictionnaire intégré, sinon français — jamais de texte manquant.
 - QC : **suite13** (36 tests) — cœur de traduction, 15+ patterns, composites, couverture complète du dictionnaire (produits, badges, catégories, créneaux, FAQ, promos…), replis FR, rendu EN réel, persistance et préservation des autres réglages.
 
+## Lot 17 — import facture / devis (scan → approbation 1 par 1)
+
+Peupler le catalogue depuis les documents papier du fournisseur, avec **validation humaine de chaque produit** :
+
+**Scan → coller → analyser → approuver un par un → publier**
+
+1. Scannez la facture ou le devis (iPhone : appareil photo → **Live Text** → copier le texte ; ou tout OCR)
+2. **Espace boutique → « 🧾 Import facture / devis »** → collez le texte → **🔍 Analyser le texte**
+3. Chaque ligne exploitable devient une **proposition** (nouveau produit ou mise à jour si l'id existe déjà)
+4. Les propositions s'approuvent **une par une** : nom, prix, stock, emoji, catégorie (déduite par mots-clés) et sous-catégorie sont éditables avant validation — ✓ Approuver ou ✕ Rejeter, puis le suivant (« Produit 1 sur N »)
+5. Les approuvés rejoignent « Catalogue en cours » (et la file survit à un rechargement) → publication habituelle : **products.json** ou **🚀 Backend**
+
+**Ce que l'analyse comprend** : une ligne par produit, prix en fin de ligne (`7,90`, `3,95 €`), quantité en préfixe (`2`, `x3`), format en suffixe (`200 G`, `1,5L` → rangé dans le champ `f`), lignes de bruit ignorées (Total, TVA, Net à payer, adresse, date…), dédoublonnage au sein de la fournée, catégorie + emoji devinés (fruits, boulangerie, crèmerie, poissonnerie, boucherie, boissons, surgelés, épicerie — repli : épicerie/🛒).
+
+Exemple de texte reconnu :
+```
+2 KG TOMATES GRAPPE 7,90
+BRIE AOP 200 G 3,95 €
+1 BAGUETTE TRADITION 1,20
+MAHI MAHI FILET KG 18,50
+```
+
+QC : **admin17** (15 tests) — extraction/prix/noms/formats/catégories, bruit ignoré, lignes sans prix rejetées, doublons détectés (mise à jour) et dédoublonnés, file persistée, approbation (ajout + avancement), refus prix invalide, rejet, remise à zéro.
+
 ## Lot 16 — sécurisation : Supabase Auth, écritures restreintes au marchand
 
 Fin du mode prototype : la clé anon ne peut plus rien écrire dans `products` ni lire les commandes.
